@@ -1,4 +1,6 @@
 import { camelToKebab, each } from '@semantic-ui/utils';
+
+import { defineAccessors } from '../../component-helpers.js';
 import { WebComponentBase } from './base.js';
 
 /*
@@ -45,26 +47,8 @@ export function createComponent({
     get: () => [...observedAttrs],
   });
 
-  // Property accessors — must be set before customElements.define()
-  each(resolvedProperties, (config, propName) => {
-    if (config.noAccessor) {
-      return;
-    }
-    Object.defineProperty(component.prototype, propName, {
-      get() {
-        return this.properties.get(propName);
-      },
-      set(value) {
-        const old = this.properties.get(propName);
-        this.properties.set(propName, value);
-        if (!config.hasChanged || config.hasChanged(value, old)) {
-          this.requestUpdate();
-        }
-      },
-      configurable: true,
-      enumerable: true,
-    });
-  });
+  // accessors must exist before customElements.define()
+  defineAccessors(component.prototype, resolvedProperties);
 
   return component;
 }

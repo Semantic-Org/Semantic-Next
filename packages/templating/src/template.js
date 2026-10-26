@@ -1241,8 +1241,9 @@ export const Template = class Template {
     });
   }
 
+  // mirrors what a parent passed into the nested template's own store
   updateSubtemplateSettings(dataContext) {
-    if (!this.settings || !this.defaultSettings) {
+    if (!this.isSubtemplate() || !this.settings || !this.defaultSettings) {
       return;
     }
     each(this.defaultSettings, (_, name) => {

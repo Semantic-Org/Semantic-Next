@@ -109,6 +109,33 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
   return properties;
 }
 
+/*
+  Accessors over the element's property store. The factory defines them on a class
+  prototype, mount defines them on a bare element, so a setting reads and writes the
+  same way through either door
+*/
+export function defineAccessors(target, properties) {
+  each(properties, (config, propName) => {
+    if (config.noAccessor) {
+      return;
+    }
+    Object.defineProperty(target, propName, {
+      get() {
+        return this.properties.get(propName);
+      },
+      set(value) {
+        const old = this.properties.get(propName);
+        this.properties.set(propName, value);
+        if (!config.hasChanged || config.hasChanged(value, old)) {
+          this.requestUpdate();
+        }
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  });
+}
+
 export function getPropertySettings({ name, type = String, propertyOnly = false } = {}) {
   // converts type = 'string' -> String
   // this is because component spec cannot serialize prototypes in JSON
