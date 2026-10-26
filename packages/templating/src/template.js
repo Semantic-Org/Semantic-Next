@@ -1378,42 +1378,14 @@ export const Template = class Template {
       return true;
     };
 
-    // a child registered through setParent is also reachable through the dom. it is
-    // pushed once, from the dom, and its own children are still searched from the link
-    const found = new Set();
-
-    // a tag renders into its shadow root, a mounted el into itself
-    const root = template.element?.renderRoot || template.element?.shadowRoot;
-    if (root) {
-      const traverseChildren = (node) => {
-        if (node?.children) {
-          for (const child of node.children) {
-            if (child.component && isMatch(child.component)) {
-              found.add(child.template);
-              result.push({
-                ...child.component,
-                ...child.dataContext,
-              });
-            }
-            // Recursively check nested children including their shadow roots
-            traverseChildren(child);
-            if (child.shadowRoot) {
-              traverseChildren(child.shadowRoot);
-            }
-          }
-        }
-      };
-      traverseChildren(root);
-    }
-
-    // Then check subtemplate children (recursive lookup for nested partials)
+    // subtemplates have no element, only the tree link reaches them
     const visited = new Set();
     function search(childTemplates, templateName) {
       if (childTemplates) {
         childTemplates.forEach((childTemplate) => {
           if (visited.has(childTemplate)) { return; }
           visited.add(childTemplate);
-          if (!found.has(childTemplate) && (!templateName || childTemplate.templateName === templateName)) {
+          if (!templateName || (childTemplate.templateName === templateName)) {
             result.push({
               ...childTemplate.instance,
               ...childTemplate.data,
@@ -1422,6 +1394,33 @@ export const Template = class Template {
           search(childTemplate._childTemplates, templateName);
         });
       }
+    }
+
+    const traverseChildren = (node) => {
+      if (node?.children) {
+        for (const child of node.children) {
+          if (child.component && isMatch(child.component)) {
+            result.push({
+              ...child.component,
+              ...child.dataContext,
+            });
+          }
+          search(child.template?._childTemplates, templateName);
+          traverseChildren(child);
+          if (child.shadowRoot) {
+            traverseChildren(child.shadowRoot);
+          }
+        }
+      }
+    };
+    // a tag renders into its shadow root and is slotted children in its light dom, a
+    // mounted el renders into itself
+    const root = template.element?.renderRoot || template.element?.shadowRoot;
+    if (root) {
+      traverseChildren(root);
+    }
+    if (template.element && template.element !== root) {
+      traverseChildren(template.element);
     }
     // Only search child templates, not the template itself
     search(template._childTemplates, templateName);

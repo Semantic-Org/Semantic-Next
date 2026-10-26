@@ -138,7 +138,7 @@ describe('Template.mount', () => {
         template: '<section class="area"></section>',
       });
 
-    it('registers the host before createComponent runs and finds it from both sides', async () => {
+    it('finds its host from createComponent on and is found by the host', async () => {
       const Host = defineHost();
       const Row = defineRow();
       const host = document.createElement(Host.componentTagName);
@@ -151,7 +151,7 @@ describe('Template.mount', () => {
       expect(row.instance.hostSeenAtCreate).toBe(host.template.templateName);
       expect(row.findParent()?.templateName).toBe(host.template.templateName);
       expect(host.template.findChildren()).toContainEqual(expect.objectContaining({ templateName: row.templateName }));
-      expect(host.template._childTemplates).toContain(row);
+      expect(host.template.findChildren().length).toBe(1);
     });
 
     it("adopts css onto the host's shadow root, not the document", () => {
@@ -170,15 +170,16 @@ describe('Template.mount', () => {
       expect(rowColor(outside)).not.toBe('rgb(4, 5, 6)');
     });
 
-    it('unregisters from the host on unmount', async () => {
+    it('is no longer found by the host after unmount', async () => {
       const Host = defineHost();
       const Row = defineRow();
       const host = document.createElement(Host.componentTagName);
       document.body.append(host);
       await host.rendered;
       const row = Row.mount(host.shadowRoot.querySelector('.area'));
+      expect(host.template.findChildren().length).toBe(1);
       row.unmount();
-      expect(host.template._childTemplates).not.toContain(row);
+      expect(host.template.findChildren().length).toBe(0);
     });
   });
 
@@ -424,6 +425,26 @@ describe('Template.mount', () => {
   });
 
   describe('walks through a mounted child', () => {
+    it('reaches tagged children slotted into a host, not only its shadow tree', async () => {
+      const Slotted = defineComponent({
+        tagName: uniqueTag('mount-slotted'),
+        templateName: 'slottedChild',
+        template: '<i>slotted</i>',
+      });
+      const Host = defineComponent({
+        tagName: uniqueTag('mount-slot-host'),
+        template: '<section><slot></slot></section>',
+      });
+      const host = document.createElement(Host.componentTagName);
+      host.append(document.createElement(Slotted.componentTagName), document.createElement(Slotted.componentTagName));
+      document.body.append(host);
+      await host.rendered;
+      await Promise.all([...host.children].map((child) => child.rendered));
+
+      expect(host.template.findChildren('slottedChild').length).toBe(2);
+      expect(host.template.findChildren().length).toBe(2);
+    });
+
     it('reaches the subtemplates of a mounted child with and without a name', async () => {
       const Host = defineComponent({
         tagName: uniqueTag('mount-walk-host'),

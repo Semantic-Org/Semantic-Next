@@ -11,7 +11,6 @@ import {
   setDefaultSettings,
 } from '../../component-helpers.js';
 import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
-import { registerHost } from './mount.js';
 
 /*
   Standard web component base class — extends HTMLElement directly.
@@ -129,7 +128,6 @@ class WebComponentBase extends HTMLElementBase {
     });
 
     this.template.isHydrating = true;
-    registerHost(this.template, this);
     this.template.initialize();
     this.component = this.template.instance;
     this.dataContext = this.template.getDataContext();

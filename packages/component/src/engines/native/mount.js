@@ -1,5 +1,3 @@
-// direct import avoids circular chunk dependency between component and templating
-import { Template } from '@semantic-ui/templating/template';
 import { adoptStylesheet, createErrors, each, isDevelopment, isServer } from '@semantic-ui/utils';
 
 import {
@@ -16,8 +14,8 @@ const { throwError } = createErrors({ namespace: 'component' });
 /*
   Mounts a template into an element the caller owns. A bare element is set up with what
   a host's constructor gives a custom element, so adding a tag later changes nothing from
-  inside. The nearest sui host is registered before anything runs, and the lifetime stays
-  the caller's through unmount or an AbortSignal.
+  inside. The walks find it through the element like any host, and the lifetime stays the
+  caller's through unmount or an AbortSignal.
 */
 
 export function mount(template, target, { settings = {}, anchor, signal } = {}) {
@@ -75,7 +73,6 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   // returned handle talks the same way
   instance.settings = el.settings;
 
-  registerHost(instance, el);
   if (instance.css) {
     adoptStylesheet(instance.css, renderRoot);
   }
@@ -112,17 +109,6 @@ export function unmount(instance) {
   delete mounted.el.dataContext;
   if (mounted.properties) {
     restoreElement(mounted.el, mounted.properties);
-  }
-}
-
-// registers the nearest sui host above the element before anything runs, so findParent
-// answers from createComponent on. The climb reads the element the way findParent does
-export function registerHost(instance, el) {
-  for (let node = el.parentNode || el.host; node; node = node.parentNode || node.host) {
-    if (node.template instanceof Template && !node.template.isPrototype) {
-      instance.setParent(node.template);
-      return;
-    }
   }
 }
 
