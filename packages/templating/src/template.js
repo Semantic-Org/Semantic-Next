@@ -436,21 +436,17 @@ export const Template = class Template {
     const defaultSettings = this.element?.defaultSettings;
     const componentSpec = this.element?.componentSpec;
     if (settingsVars) {
-      // reading through the proxy creates the signal a binding will subscribe to. a write
-      // that bypassed the accessor, a noAccessor property or a plain assignment, reaches the
-      // signal here, at the next render, the way every write did before accessors pushed
-      const sync = (name) => {
-        const value = this.element.settings[name];
-        const settingSignal = settingsVars.get(name);
-        if (settingSignal.peek() !== value) {
-          settingSignal.set(value);
-        }
-      };
       if (defaultSettings) {
-        each(keys(defaultSettings), sync);
+        each(defaultSettings, (_, name) => {
+          this.element.settings[name]; // ensure shadow signal exists
+        });
       }
+      // Also read spec attributes through the proxy so their Signals
+      // are updated with current property values (e.g. active, size)
       if (componentSpec?.attributes) {
-        each(componentSpec.attributes, sync);
+        each(componentSpec.attributes, (attribute) => {
+          this.element.settings[attribute];
+        });
       }
       settingsVars.forEach((signal, name) => {
         context[name] = signal;

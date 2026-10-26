@@ -399,21 +399,16 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
     // Reading element.settings[name] for each defaultSettings key triggers
     // the settings proxy getter, which lazy-creates Signals in production.
     const reads = [];
-    const settingsVars = new Map([['color', new Signal('blue')]]);
     const fakeElement = {
-      // a read lazy-creates the signal, as the settings proxy does in production
       settings: new Proxy({ color: 'blue', size: 'small' }, {
         get: (target, prop) => {
           if (typeof prop === 'string') {
             reads.push(prop);
-            if (!settingsVars.has(prop)) {
-              settingsVars.set(prop, new Signal(target[prop]));
-            }
           }
           return target[prop];
         },
       }),
-      settingsVars,
+      settingsVars: new Map([['color', new Signal('blue')]]),
       defaultSettings: { color: 'blue', size: 'small' },
     };
     const template = new Template({
@@ -426,20 +421,16 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
 
   it('touches each componentSpec.attributes key to drive spec-attribute Signals', () => {
     const reads = [];
-    const settingsVars = new Map([['color', new Signal('blue')]]);
     const fakeElement = {
       settings: new Proxy({ color: 'blue', active: false, size: 'm' }, {
         get: (target, prop) => {
           if (typeof prop === 'string') {
             reads.push(prop);
-            if (!settingsVars.has(prop)) {
-              settingsVars.set(prop, new Signal(target[prop]));
-            }
           }
           return target[prop];
         },
       }),
-      settingsVars,
+      settingsVars: new Map([['color', new Signal('blue')]]),
       defaultSettings: { color: 'blue' },
       componentSpec: {
         attributes: ['active', 'size'],

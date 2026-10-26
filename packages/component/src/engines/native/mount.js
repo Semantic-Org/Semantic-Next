@@ -136,6 +136,8 @@ export function unmount(instance) {
     return;
   }
   instance.mounted = null;
+  // the handle's settings were the element's, and the element is about to be restored
+  instance.settings = undefined;
   // fire destroyed before clearing the DOM so listeners can still read the rendered nodes
   instance.onDestroyed();
   mounted.renderRoot.replaceChildren();

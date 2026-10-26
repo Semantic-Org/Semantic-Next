@@ -63,16 +63,9 @@ class LitWebComponentBase extends LitElement {
     super.connectedCallback();
   }
 
-  willUpdate(changedProperties) {
+  willUpdate() {
     if (isServer) {
       this.triggerAttributeChange();
-    }
-    // lit owns the accessors, so a write is reported through the settings face here, the
-    // first moment lit tells us. an equal value round-trips through lit's setter as a no-op
-    if (this.settings) {
-      changedProperties.forEach((oldValue, name) => {
-        this.settings[name] = this[name];
-      });
     }
     if (!this.template) {
       const prototypeTemplate = this.constructor.template;
@@ -87,7 +80,7 @@ class LitWebComponentBase extends LitElement {
       this.component = this.template.instance;
       this.dataContext = this.template.getDataContext();
     }
-    super.willUpdate(changedProperties);
+    super.willUpdate();
   }
 
   updated() {

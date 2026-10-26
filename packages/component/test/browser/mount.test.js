@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { flush, reaction } from '@semantic-ui/reactivity';
+import { reaction } from '@semantic-ui/reactivity';
 import { Renderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -238,7 +238,7 @@ describe('Template.mount', () => {
       expect(tag.shadowRoot.textContent).toContain('b');
     });
 
-    it('reaches a reaction on settings at write time, before any render', () => {
+    it('reaches a reaction on settings by the render a property write schedules', async () => {
       const seen = [];
       const Row = defineComponent({
         template: '<p>{label}</p>',
@@ -255,7 +255,7 @@ describe('Template.mount', () => {
       Row.mount(el);
       expect(seen).toEqual(['start']);
       el.label = 'written';
-      flush();
+      await tick();
       expect(seen).toEqual(['start', 'written']);
     });
 
@@ -385,7 +385,7 @@ describe('Template.mount', () => {
       document.body.append(el);
       const row = Row.mount(el, { settings: { label: 'gone' } });
       row.unmount();
-      expect(row.settings.label).toBeUndefined();
+      expect(row.settings).toBeUndefined();
     });
 
     it('leaves adopted css in place for siblings', () => {
