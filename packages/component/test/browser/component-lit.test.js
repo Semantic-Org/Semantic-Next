@@ -82,7 +82,7 @@ describe('Component (Lit-specific)', () => {
       instance.getData = vi.fn().mockReturnValue({ text: 'Initial text' });
 
       expect(instance.template).toBeUndefined();
-      instance.willUpdate();
+      instance.willUpdate(new Map());
 
       expect(instance.template).toBeDefined();
       expect(instance.component).toBeDefined();
@@ -101,7 +101,7 @@ describe('Component (Lit-specific)', () => {
       const instance = new TestComponent();
       instance.triggerAttributeChange = vi.fn();
 
-      instance.willUpdate();
+      instance.willUpdate(new Map());
 
       expect(instance.triggerAttributeChange).toHaveBeenCalled();
     });

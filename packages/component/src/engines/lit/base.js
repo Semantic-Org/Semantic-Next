@@ -63,10 +63,15 @@ class LitWebComponentBase extends LitElement {
     super.connectedCallback();
   }
 
-  willUpdate() {
+  willUpdate(changedProperties) {
     if (isServer) {
       this.triggerAttributeChange();
     }
+    // lit owns the accessors, so a write reaches the shadow signal here, the first moment
+    // lit reports it, the way the native accessor pushes it at the write itself
+    changedProperties.forEach((oldValue, name) => {
+      this.settingsVars?.get(name)?.set(this[name]);
+    });
     if (!this.template) {
       const prototypeTemplate = this.constructor.template;
       this.template = prototypeTemplate.clone({
@@ -80,7 +85,7 @@ class LitWebComponentBase extends LitElement {
       this.component = this.template.instance;
       this.dataContext = this.template.getDataContext();
     }
-    super.willUpdate();
+    super.willUpdate(changedProperties);
   }
 
   updated() {

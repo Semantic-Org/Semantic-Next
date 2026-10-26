@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { reaction } from '@semantic-ui/reactivity';
+import { flush, reaction } from '@semantic-ui/reactivity';
 import { Renderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -144,6 +144,51 @@ describe('Template.mount', () => {
       $(el).settings({ route: 'contact' });
       await tick();
       expect(el.textContent).toContain('contact');
+    });
+
+    it('renders the data a render call carries, on a mounted template and on a tag', async () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      const row = Row.mount(el, { settings: { label: 'mounted' } });
+      row.render({ label: 'carried' });
+      await tick();
+      expect(el.textContent).toContain('carried');
+      expect(el.settings.label).toBe('carried');
+
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-render'),
+        template: '<p class="row">{label}</p>',
+        defaultSettings: { label: 'tag' },
+      });
+      const tag = document.createElement(Tagged.componentTagName);
+      document.body.append(tag);
+      await tag.rendered;
+      tag.template.render({ label: 'carried too' });
+      await tick();
+      expect(tag.shadowRoot.textContent).toContain('carried too');
+      expect(tag.label).toBe('carried too');
+    });
+
+    it('reaches a reaction on settings at write time, before any render', () => {
+      const seen = [];
+      const Row = defineComponent({
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'start' },
+        createComponent: ({ settings, reaction }) => {
+          reaction(() => {
+            seen.push(settings.label);
+          });
+          return {};
+        },
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      Row.mount(el);
+      expect(seen).toEqual(['start']);
+      el.label = 'written';
+      flush();
+      expect(seen).toEqual(['start', 'written']);
     });
 
     it('delegates events on the element and keeps state per instance', async () => {

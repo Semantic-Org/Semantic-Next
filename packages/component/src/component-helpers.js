@@ -126,6 +126,9 @@ export function defineAccessors(target, properties) {
       set(value) {
         const old = this.properties.get(propName);
         this.properties.set(propName, value);
+        // the shadow signal learns the write here, so a reaction on settings fires
+        // without waiting for a render to re-read the store
+        this.settingsVars?.get(propName)?.set(value);
         if (!config.hasChanged || config.hasChanged(value, old)) {
           this.requestUpdate();
         }
@@ -289,9 +292,6 @@ export function createSettingsProxy(el) {
       if (!settingSignal) {
         settingSignal = signal(setting);
         el.settingsVars.set(property, settingSignal);
-      }
-      else {
-        settingSignal.set(setting);
       }
       settingSignal.depend();
       return setting;
