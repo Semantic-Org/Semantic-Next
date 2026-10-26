@@ -1378,8 +1378,9 @@ export const Template = class Template {
       return true;
     };
 
-    // a child registered through setParent is also reachable through the dom
-    const visited = new Set();
+    // a child registered through setParent is also reachable through the dom. it is
+    // pushed once, from the dom, and its own children are still searched from the link
+    const found = new Set();
 
     // a tag renders into its shadow root, a mounted el into itself
     const root = template.element?.renderRoot || template.element?.shadowRoot;
@@ -1388,7 +1389,7 @@ export const Template = class Template {
         if (node?.children) {
           for (const child of node.children) {
             if (child.component && isMatch(child.component)) {
-              visited.add(child.template);
+              found.add(child.template);
               result.push({
                 ...child.component,
                 ...child.dataContext,
@@ -1406,12 +1407,13 @@ export const Template = class Template {
     }
 
     // Then check subtemplate children (recursive lookup for nested partials)
+    const visited = new Set();
     function search(childTemplates, templateName) {
       if (childTemplates) {
         childTemplates.forEach((childTemplate) => {
           if (visited.has(childTemplate)) { return; }
           visited.add(childTemplate);
-          if (!templateName || (childTemplate.templateName === templateName)) {
+          if (!found.has(childTemplate) && (!templateName || childTemplate.templateName === templateName)) {
             result.push({
               ...childTemplate.instance,
               ...childTemplate.data,
