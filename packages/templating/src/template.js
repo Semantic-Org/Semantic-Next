@@ -1217,8 +1217,10 @@ export const Template = class Template {
   // only a value the store does not already hold is written: a default stays a default
   // and never becomes a property, and an unchanged render schedules nothing
   updateSettings(dataContext) {
+    // the same split the overlay makes: a nested template declares its own, a root
+    // template's element holds the full set, since a tagless definition carries {}
     const settings = this.settings || this.element?.settings;
-    const declared = this.defaultSettings ?? this.element?.defaultSettings;
+    const declared = this.isSubtemplate() ? this.defaultSettings : this.element?.defaultSettings;
     if (!settings || !declared) {
       return;
     }

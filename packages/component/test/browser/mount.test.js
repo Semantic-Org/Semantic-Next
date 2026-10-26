@@ -168,6 +168,15 @@ describe('Template.mount', () => {
       await tick();
       expect(tag.shadowRoot.textContent).toContain('carried too');
       expect(tag.label).toBe('carried too');
+
+      // a key only the mount declared is carried too
+      const Route = defineComponent({ template: '<p>{route}</p>' });
+      const outlet = document.createElement('div');
+      document.body.append(outlet);
+      const page = Route.mount(outlet, { settings: { route: 'home' } });
+      page.render({ route: 'about' });
+      await tick();
+      expect(outlet.textContent).toContain('about');
     });
 
     it('reaches a reaction on settings at write time, before any render', () => {
