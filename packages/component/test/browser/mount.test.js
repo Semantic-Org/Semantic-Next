@@ -247,6 +247,17 @@ describe('Template.mount', () => {
       expect(rowColor(b)).toBe('rgb(1, 2, 3)');
     });
 
+    it('is a no-op on a template that was never mounted', () => {
+      const Row = defineRow();
+      expect(() => Row.unmount()).not.toThrow();
+      const Bare = defineComponent({
+        renderingEngine: { renderer: Renderer },
+        template: '<i>bare</i>',
+      });
+      expect(() => Bare.unmount()).not.toThrow();
+      expect(() => Bare.clone().unmount()).not.toThrow();
+    });
+
     it('cascades from an AbortSignal', () => {
       const Row = defineRow();
       const el = document.createElement('div');
@@ -290,6 +301,10 @@ describe('Template.mount', () => {
       document.body.append(a, b);
       const row = Row.mount(a);
       expect(() => row.mount(b)).toThrow(expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }));
+      row.unmount();
+      // a destroyed instance stays refused, the prototype is what mounts again
+      expect(() => row.mount(b)).toThrow(expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }));
+      expect(() => Row.mount(b)).not.toThrow();
     });
 
     it('refuses a target that already carries a mounted template', () => {
@@ -314,6 +329,22 @@ describe('Template.mount', () => {
       expect(() => Bare.mount(el)).toThrow(
         expect.objectContaining({ code: 'unsupportedEngine', at: 'Template.mount' }),
       );
+    });
+
+    it('leaves no stamps on the element when createComponent throws', () => {
+      const Broken = defineComponent({
+        template: '<i>never</i>',
+        createComponent: () => {
+          throw new Error('boom');
+        },
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      expect(() => Broken.mount(el)).toThrow('boom');
+      expect(el.template).toBeUndefined();
+      expect(el.component).toBeUndefined();
+      expect(el.dataContext).toBeUndefined();
+      expect(el.childNodes.length).toBe(0);
     });
 
     it('refuses an anchor until the range form exists', () => {
@@ -389,6 +420,34 @@ describe('Template.mount', () => {
       expect(child.component.parentSeenAtCreate).toBe('mountWrapper');
       expect(child.template.findParent()?.templateName).toBe('mountWrapper');
       expect(wrapper.findChildren().length).toBe(1);
+    });
+  });
+
+  describe('walks through a mounted child', () => {
+    it('reaches the subtemplates of a mounted child with and without a name', async () => {
+      const Host = defineComponent({
+        tagName: uniqueTag('mount-walk-host'),
+        template: '<section class="area"></section>',
+      });
+      const Item = defineComponent({ template: '<span class="item">{name}</span>' });
+      const List = defineComponent({
+        templateName: 'walkList',
+        template: '<ul>{#each item in items}{> item name=item}{/each}</ul>',
+        defaultSettings: { items: ['x', 'y'] },
+        subTemplates: { item: Item },
+      });
+      const host = document.createElement(Host.componentTagName);
+      document.body.append(host);
+      await host.rendered;
+
+      List.mount(host.shadowRoot.querySelector('.area'));
+
+      const named = host.template.findChildren('item');
+      const all = host.template.findChildren();
+      expect(named.length).toBe(2);
+      // the list once, its two items once each, nothing twice and nothing skipped
+      expect(all.length).toBe(3);
+      expect(all.filter((child) => child.templateName === 'walkList').length).toBe(1);
     });
   });
 

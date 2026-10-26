@@ -36,10 +36,11 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
       explanation: isDevelopment ? '`signal` is already aborted' : 0,
     });
   }
-  if (!template.isPrototype && template.mounted) {
+  // an instance mounts once, from fresh: mounted, unmounted, or living elsewhere all refuse
+  if (!template.isPrototype && template.initialized) {
     throwError('duplicateMount', 'Template.mount', {
       explanation: isDevelopment
-        ? `template instance '${template.templateName}' is already mounted. Call \`mount()\` on the prototype template to mount another instance`
+        ? `template instance '${template.templateName}' is already initialized. Call \`mount()\` on the prototype template to mount another instance`
         : 0,
     });
   }
@@ -73,9 +74,6 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   // the settings a callback sees are the element's, handed to the instance so the
   // returned handle talks the same way
   instance.settings = el.settings;
-  // stamped before anything renders: a defined child element upgrades during insertion
-  // and reads these to find its parent
-  el.template = instance;
 
   registerHost(instance, el);
   if (instance.css) {
@@ -83,6 +81,9 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   }
 
   instance.initialize();
+  // stamped before anything renders: a defined child element upgrades during insertion
+  // and reads these to find its parent
+  el.template = instance;
   el.component = instance.instance;
   el.dataContext = instance.getDataContext();
 
