@@ -1406,6 +1406,9 @@ export const Template = class Template {
       return true;
     };
 
+    // a child registered through setParent is also reachable through the dom
+    const visited = new Set();
+
     // a tag renders into its shadow root, a mounted el into itself
     const root = template.element?.renderRoot || template.element?.shadowRoot;
     if (root) {
@@ -1413,6 +1416,7 @@ export const Template = class Template {
         if (node?.children) {
           for (const child of node.children) {
             if (child.component && isMatch(child.component)) {
+              visited.add(child.template);
               result.push({
                 ...child.component,
                 ...child.dataContext,
@@ -1430,7 +1434,6 @@ export const Template = class Template {
     }
 
     // Then check subtemplate children (recursive lookup for nested partials)
-    const visited = new Set();
     function search(childTemplates, templateName) {
       if (childTemplates) {
         childTemplates.forEach((childTemplate) => {

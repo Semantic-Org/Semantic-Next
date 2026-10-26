@@ -11,6 +11,7 @@ import {
   setDefaultSettings,
 } from '../../component-helpers.js';
 import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
+import { registerHost } from './mount.js';
 
 /*
   Standard web component base class — extends HTMLElement directly.
@@ -128,9 +129,12 @@ class WebComponentBase extends HTMLElementBase {
     });
 
     this.template.isHydrating = true;
+    registerHost(this.template, this);
     this.template.initialize();
     this.component = this.template.instance;
     this.dataContext = this.template.getDataContext();
+    // hydrated content tears down through the same door as mounted content
+    this.template.mounted = { el: this, renderRoot: this.shadowRoot, properties: null };
 
     // Build entries for hydration (same marker IDs the server produced).
     // Cache on the prototype — entries depend only on AST structure, not data.
@@ -191,20 +195,9 @@ class WebComponentBase extends HTMLElementBase {
     removeDataSuiBind(this.shadowRoot);
   }
 
+  // the tag door is the el door with a host that contracted itself in its constructor
   fullRender(prototypeTemplate) {
-    this.template = prototypeTemplate.clone({
-      data: this.getData(),
-      element: this,
-      renderRoot: this.renderRoot,
-    });
-    if (!this.template.initialized) {
-      this.template.initialize();
-    }
-    this.component = this.template.instance;
-    this.dataContext = this.template.getDataContext();
-
-    const fragment = this.template.render(this.getData());
-    this.shadowRoot.append(fragment);
+    prototypeTemplate.mount(this.shadowRoot);
   }
 
   disconnectedCallback() {
@@ -213,10 +206,7 @@ class WebComponentBase extends HTMLElementBase {
     // teardown so block hydration relocating nested components is safe.
     queueMicrotask(() => {
       if (this.isConnected || !this.template) { return; }
-      this.template.onDestroyed();
-      delete this.template;
-      delete this.component;
-      delete this.dataContext;
+      this.template.unmount();
     });
   }
 

@@ -1,5 +1,5 @@
 import { ASTNode } from '@semantic-ui/compiler';
-import { CallParams, FactoryParams, Template } from '@semantic-ui/templating';
+import { CallParams, FactoryParams, MountSettings, Template } from '@semantic-ui/templating';
 import { ComponentConfig, PropertyConfig, WebComponentBase } from './engines/native/base.js';
 
 /**
@@ -192,6 +192,10 @@ export interface EngineDefinition {
   serverRenderer?: new(...args: any[]) => any;
   /** Builds the custom element class for a component definition. */
   factory: (options: ComponentFactoryOptions) => ComponentConstructor;
+  /** Mounts a template into an element the caller owns. A prototype mounts a clone and returns it. */
+  mount?: (template: Template, target: Element | ShadowRoot, options?: MountSettings) => Template;
+  /** Tears down what {@link mount} put in place. */
+  unmount?: (template: Template) => void;
 }
 
 /**
@@ -210,6 +214,13 @@ export interface ComponentConstructor<M extends Record<string, any> = Record<str
 
   /** Serializable form of the component's template definition. */
   toDefinition(): Record<string, any>;
+
+  /**
+   * Mounts the prototype template into an element the caller owns, so a `mount` call
+   * site survives adding a tag to its definition. Attributes are not observed on a
+   * plain element; settings carry the same values.
+   */
+  mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 
   /** Whether the shadow root is created with `delegatesFocus`. */
   delegatesFocus: boolean;

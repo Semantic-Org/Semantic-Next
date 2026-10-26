@@ -10,6 +10,10 @@ export interface Engine {
   serverRenderer?: new(settings?: any) => any;
   /** Builds the custom element class for a component definition. */
   factory?: (settings: any) => CustomElementConstructor;
+  /** Mounts a template into an element the caller owns. A prototype mounts a clone and returns it. */
+  mount?: (template: any, target: Element | ShadowRoot, options?: any) => any;
+  /** Tears down what {@link mount} put in place. */
+  unmount?: (template: any) => void;
 }
 
 /**

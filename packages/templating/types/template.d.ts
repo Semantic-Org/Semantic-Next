@@ -1,6 +1,7 @@
 import { ASTNode } from '@semantic-ui/compiler';
 import { EventHandler, Query, QueryOptions } from '@semantic-ui/query';
 import { Matcher, Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
+import type { Engine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 /**
@@ -68,8 +69,10 @@ export interface TemplateSettings {
   subTemplates?: Record<string, Template>;
   /** A function to create a component instance associated with the template. */
   createComponent?: (params: FactoryParams) => Record<string, any>;
-  /** The parent template (if this is a nested template). */
+  /** The parent template for the walks. Set through `setParent` by the renderer or by mount. */
   parentTemplate?: Template;
+  /** Rendered inside a parent's render, borrowing its host. Set by the renderer, never by a caller. */
+  nested?: boolean;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine?: string | object;
   /** Indicates if this is a prototype template. */
@@ -689,6 +692,26 @@ export interface AttachSettings {
   endNode?: Node;
 }
 
+/** Options for {@link Template.mount}. */
+export interface MountSettings {
+  /** Initial settings, declared defaults underneath. A key not declared still reaches the data context. */
+  settings?: Record<string, any>;
+  /** Ends the mount when aborted. A signal already aborted at mount time throws. */
+  signal?: AbortSignal;
+  /** Reserved for the range form. Refused today: mount replaces the contents of its target. */
+  anchor?: Node;
+}
+
+/** What the engine put in place for a mounted template, read back by `unmount`. */
+export interface MountRecord {
+  /** The element that carries the stamps and, for a bare element, the contract. */
+  el: Element;
+  /** Where the content was rendered: the element itself, or a host's shadow root. */
+  renderRoot: Element | ShadowRoot;
+  /** Accessor configuration installed on a bare element, `null` when the host contracted itself. */
+  properties: Record<string, any> | null;
+}
+
 export class Template {
   /** Static counter for the total number of templates created. */
   static templateCount: number;
@@ -731,8 +754,12 @@ export class Template {
   onUpdatedCallback: (params: CallParams) => void;
   /** Callback function invoked when the theme changes. */
   onThemeChangedCallback: (params: CallParams) => void;
-  /** The parent template (if this is a nested template). */
+  /** The parent template for the walks. Set through `setParent` by the renderer or by mount. */
   parentTemplate?: Template;
+  /** Rendered inside a parent's render, borrowing its host. A mounted template is not nested. */
+  nested: boolean;
+  /** Set by the engine while mounted through {@link mount}, `null` once unmounted. */
+  mounted?: MountRecord | null;
   /** Array of reactive reactions associated with the template. */
   reactions: Reaction[];
   /** Mutation observers watching for theme changes, disconnected on destroy. */
@@ -874,6 +901,29 @@ export class Template {
    * @param options - Attach settings
    */
   attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): Promise<void>;
+
+  /**
+   * The engine this template renders through, resolved from `renderingEngine`.
+   * Throws when nothing is registered under that name.
+   */
+  resolveEngine(): Engine;
+
+  /**
+   * Mounts this template into an element the caller owns. A prototype mounts a clone
+   * and returns it; an instance mounts itself once. The element gets the same contract
+   * a host carries, so `el.settings`, Query writes, `findParent` and lifecycle events
+   * behave as they do on a tag. The engine does every touch of the target.
+   * @param target - The element to take over, or a host's shadow root
+   * @param options - Mount settings
+   * @returns The live instance
+   */
+  mount(target: Element | ShadowRoot, options?: MountSettings): Template;
+
+  /**
+   * Ends a mount: destroys the instance, removes what it rendered, and restores the
+   * element. A second call is a no-op.
+   */
+  unmount(): void;
 
   /**
    * Gets the combined data context, including data, state, and instance properties.

@@ -67,17 +67,14 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   // returned handle talks the same way
   instance.settings = el.settings;
 
-  const host = hostAbove(el);
-  if (host) {
-    instance.setParent(host);
-  }
+  registerHost(instance, el);
   if (instance.css) {
     adoptStylesheet(instance.css, renderRoot);
   }
 
   nonreactive(() => instance.initialize());
   instance.attach(renderRoot);
-  const fragment = nonreactive(() => instance.render());
+  const fragment = nonreactive(() => instance.render(data));
   renderRoot.replaceChildren(fragment);
 
   el.template = instance;
@@ -108,11 +105,13 @@ export function unmount(instance) {
   }
 }
 
-// the nearest sui host above the element, read the way findParent reads it
-function hostAbove(el) {
+// registers the nearest sui host above the element before anything runs, so findParent
+// answers from createComponent on. The climb reads the element the way findParent does
+export function registerHost(instance, el) {
   for (let node = el.parentNode || el.host; node; node = node.parentNode || node.host) {
     if (node.template instanceof Template && !node.template.isPrototype) {
-      return node.template;
+      instance.setParent(node.template);
+      return;
     }
   }
 }

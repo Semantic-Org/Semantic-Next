@@ -307,10 +307,6 @@ describe('Component', () => {
     });
 
     it('should handle disconnectedCallback correctly', async () => {
-      const mockTemplate = {
-        onDestroyed: vi.fn(),
-      };
-
       const TestComponent = defineComponent({
         tagName: 'test-disconnect-component',
         template: '<div>Disconnect Test</div>',
@@ -318,18 +314,20 @@ describe('Component', () => {
 
       const prototypeDestroyedSpy = vi.spyOn(TestComponent.template, 'onDestroyed').mockImplementation(() => {});
 
-      const instance = new TestComponent();
-      instance.template = mockTemplate;
+      const instance = document.createElement('test-disconnect-component');
+      document.body.appendChild(instance);
+      const template = instance.template;
+      expect(template).toBeDefined();
 
-      instance.disconnectedCallback();
+      instance.remove();
       await Promise.resolve();
 
-      // Instance template's onDestroyed should be called
-      expect(mockTemplate.onDestroyed).toHaveBeenCalled();
-      // Prototype template should NOT be destroyed — it's shared across instances
+      // the instance template is destroyed, the shared prototype is not
+      expect(template.destroyed).toBe(true);
       expect(prototypeDestroyedSpy).not.toHaveBeenCalled();
-      // Template reference should be cleared
+      // the element no longer points at a template, so a reconnect renders fresh
       expect(instance.template).toBeUndefined();
+      expect(instance.shadowRoot.childNodes.length).toBe(0);
     });
   });
 
