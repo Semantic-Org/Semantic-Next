@@ -76,13 +76,13 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.renderRoot = this.shadowRoot;
 
-    if (this.css) {
-      adoptStylesheet(this.css, this.shadowRoot);
-    }
-
     const prototypeTemplate = this.constructor.template;
 
     if (hasServerContent && this.canHydrate()) {
+      // mount adopts css on the render path, hydration has to do it itself
+      if (this.css) {
+        adoptStylesheet(this.css, this.shadowRoot);
+      }
       // DSD means the visual is already correct — defer hydration wiring
       // to avoid blocking the parser, but use microtask to close the gap
       // where events would be lost (rAF leaves a full frame unbound)
@@ -193,10 +193,10 @@ class WebComponentBase extends HTMLElementBase {
     removeDataSuiBind(this.shadowRoot);
   }
 
-  // the host set itself up in its constructor and knows its data, so it makes the copy
-  // and mounts that. the prototype path in mount is for a bare element
+  // the host set itself up in its constructor. mount reads its data once and makes the
+  // copy, a prototype never mounts itself
   fullRender(prototypeTemplate) {
-    prototypeTemplate.clone({ data: this.getData(), element: this }).mount(this.shadowRoot);
+    prototypeTemplate.mount(this.shadowRoot);
   }
 
   disconnectedCallback() {
