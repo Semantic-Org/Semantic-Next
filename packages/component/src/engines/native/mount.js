@@ -54,7 +54,9 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   // a bare element has no property store, a host built its own in its constructor
   const bare = !el.properties;
   const properties = bare ? setupElement(el, template, settings) : null;
-  each(settings, (value, name) => {
+  // an instance's own data lands on the element first and the settings passed here on
+  // top, so the element is the one source every render reads
+  each(template.isPrototype ? settings : { ...template.data, ...settings }, (value, name) => {
     el[name] = value;
   });
 
@@ -66,7 +68,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   }
   else {
     instance.setElement(el);
-    instance.setDataContext({ ...instance.data, ...data }, { rerender: false });
+    instance.data = data;
   }
 
   // the settings a callback sees are the element's, handed to the instance so the
@@ -117,11 +119,11 @@ export function unmount(instance) {
 *******************************/
 
 // what a host's constructor gives a custom element, given to a bare element instead.
-// keys passed at mount count as declared so an undeclared value still reaches the
-// data context and gets its own accessor
+// keys an instance carries or a mount passes count as declared, so an undeclared value
+// still reaches the data context and gets its own accessor
 function setupElement(el, template, settings) {
   const properties = getProperties({
-    defaultSettings: { ...template.defaultSettings, ...settings },
+    defaultSettings: { ...template.defaultSettings, ...template.data, ...settings },
   });
   el.properties = new Map();
   el.renderRoot = el;

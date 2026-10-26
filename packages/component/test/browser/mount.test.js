@@ -295,6 +295,21 @@ describe('Template.mount', () => {
       expect(b.textContent).toContain('b');
     });
 
+    it("keeps a mounted clone's own data under passed settings and above declared defaults", () => {
+      const Row = defineRow();
+      const a = document.createElement('div');
+      const b = document.createElement('div');
+      document.body.append(a, b);
+
+      const own = Row.clone({ data: { label: 'custom' } }).mount(a);
+      expect(a.textContent).toContain('custom');
+      // darkMode stays a live getter on the merged data, not a flattened boolean
+      expect(typeof Object.getOwnPropertyDescriptor(own.data, 'darkMode')?.get).toBe('function');
+
+      Row.clone({ data: { label: 'custom' } }).mount(b, { settings: { label: 'passed' } });
+      expect(b.textContent).toContain('passed');
+    });
+
     it('mounts an instance once and refuses a second mount', () => {
       const Row = defineRow();
       const a = document.createElement('div');
@@ -355,6 +370,19 @@ describe('Template.mount', () => {
       expect(() => Row.mount(el, { anchor: el })).toThrow(
         expect.objectContaining({ code: 'unsupportedAnchor', at: 'Template.mount' }),
       );
+    });
+
+    it("adopts a tagged component's css once, through mount", async () => {
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-css'),
+        template: '<p class="row">styled</p>',
+        css: '.row { color: rgb(7, 8, 9); }',
+      });
+      const el = document.createElement(Tagged.componentTagName);
+      document.body.append(el);
+      await el.rendered;
+      expect(rowColor(el.shadowRoot)).toBe('rgb(7, 8, 9)');
+      expect(el.shadowRoot.adoptedStyleSheets.length).toBe(1);
     });
 
     it('mounts from a tagged class through its prototype template', () => {
