@@ -398,13 +398,14 @@ export const Template = class Template {
     }
   }
 
-  // the engine owns every touch of the target, this template never sees it
+  // the engine owns every touch of the target, this template never sees it. neither
+  // door registers on the reaction that called it, the caller tracked its own reads
   mount(target, options) {
-    return this.engine.mount(this, target, options);
+    return nonreactive(() => this.engine.mount(this, target, options));
   }
 
   unmount() {
-    return this.engine.unmount(this);
+    return nonreactive(() => this.engine.unmount(this));
   }
 
   getDataContext() {

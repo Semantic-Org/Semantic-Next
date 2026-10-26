@@ -1,4 +1,3 @@
-import { nonreactive } from '@semantic-ui/reactivity';
 // direct import avoids circular chunk dependency between component and templating
 import { Template } from '@semantic-ui/templating/template';
 import { adoptStylesheet, createErrors, each, isDevelopment, isServer } from '@semantic-ui/utils';
@@ -82,12 +81,12 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     adoptStylesheet(instance.css, renderRoot);
   }
 
-  nonreactive(() => instance.initialize());
+  instance.initialize();
   el.component = instance.instance;
   el.dataContext = instance.getDataContext();
 
   instance.attach(renderRoot);
-  const fragment = nonreactive(() => instance.render(data));
+  const fragment = instance.render(data);
   renderRoot.replaceChildren(fragment);
   instance.mounted = { el, renderRoot, properties };
 
