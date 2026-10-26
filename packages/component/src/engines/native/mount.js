@@ -70,8 +70,18 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     // returned handle talks the same way
     instance.settings = el.settings;
 
+    let carriedStyle;
     if (instance.css) {
-      adoptStylesheet(instance.css, renderRoot);
+      const root = renderRoot.adoptedStyleSheets ? renderRoot : renderRoot.getRootNode();
+      if (root.adoptedStyleSheets) {
+        adoptStylesheet(instance.css, root);
+      }
+      else {
+        // a detached element has no root to adopt onto yet. its css travels inside the
+        // content and applies wherever the element lands
+        carriedStyle = document.createElement('style');
+        carriedStyle.textContent = instance.css;
+      }
     }
 
     instance.initialize();
@@ -83,6 +93,9 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
 
     instance.attach(renderRoot);
     const fragment = instance.render(data);
+    if (carriedStyle) {
+      fragment.prepend(carriedStyle);
+    }
     renderRoot.replaceChildren(fragment);
   }
   catch (error) {

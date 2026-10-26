@@ -84,6 +84,17 @@ describe('Template.mount', () => {
       row.unmount();
     });
 
+    it('carries its css with a detached element into whatever root it lands in', () => {
+      const Row = defineRow({ css: '.row { color: rgb(13, 14, 15); }' });
+      const el = document.createElement('div');
+      Row.mount(el, { settings: { label: 'late' } });
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      document.body.append(host);
+      shadow.append(el);
+      expect(rowColor(shadow)).toBe('rgb(13, 14, 15)');
+    });
+
     it('falls back to declared defaults and accepts undeclared settings', () => {
       const Row = defineRow();
       const el = document.createElement('div');
@@ -207,6 +218,24 @@ describe('Template.mount', () => {
         await tick();
         expect(tag.shadowRoot.textContent).toContain('default');
       }
+    });
+
+    it('renders a write that bypassed the accessor at the next render, on a tag', async () => {
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-bypass'),
+        template: '<p>{foo}</p>',
+        properties: { foo: { type: String, noAccessor: true } },
+        defaultSettings: { foo: 'a' },
+      });
+      const tag = document.createElement(Tagged.componentTagName);
+      document.body.append(tag);
+      await tag.rendered;
+      expect(tag.shadowRoot.textContent).toContain('a');
+      tag.foo = 'b';
+      tag.requestUpdate();
+      await tick();
+      await tick();
+      expect(tag.shadowRoot.textContent).toContain('b');
     });
 
     it('reaches a reaction on settings at write time, before any render', () => {
@@ -348,6 +377,15 @@ describe('Template.mount', () => {
       expect(row.destroyed).toBe(true);
       expect(row.mounted).toBeNull();
       expect(() => row.unmount()).not.toThrow();
+    });
+
+    it('reads settings as nothing after unmount instead of throwing', () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      const row = Row.mount(el, { settings: { label: 'gone' } });
+      row.unmount();
+      expect(row.settings.label).toBeUndefined();
     });
 
     it('leaves adopted css in place for siblings', () => {
