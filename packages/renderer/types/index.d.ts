@@ -21,7 +21,7 @@ export type { ExpressionArray, ExpressionEvaluatorSettings } from './expression-
 export { isRecovery, isTracing, setRecovery, setTracing } from './helpers.js';
 
 // engine registry
-export { getEngine, registerEngine } from './engine-registry.js';
+export { getEngine, registerEngine, resolveEngine } from './engine-registry.js';
 export type { Engine } from './engine-registry.js';
 
 // native renderer

@@ -11,6 +11,11 @@ describe('Engine Selection', () => {
   let tagCounter = 0;
   const uniqueTag = () => `engine-sel-${++tagCounter}`;
 
+  it('refuses an unregistered engine name at definition', () => {
+    expect(() => defineComponent({ tagName: uniqueTag(), template: '<i></i>', renderingEngine: 'missing-engine' }))
+      .toThrow(expect.objectContaining({ code: 'engineNotRegistered', at: 'missing-engine' }));
+  });
+
   it('should render with renderingEngine: "native" (string)', async () => {
     const tag = uniqueTag();
     defineComponent({
