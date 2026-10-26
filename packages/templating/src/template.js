@@ -42,7 +42,7 @@ import {
 const { throwError } = createErrors({ namespace: 'templating' });
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
-import { getEngine } from '@semantic-ui/renderer';
+import { resolveEngine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
@@ -137,6 +137,7 @@ export const Template = class Template {
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
+    this.engine = resolveEngine(renderingEngine);
     if (renderRoot) {
       this.attach(renderRoot);
     }
@@ -355,10 +356,9 @@ export const Template = class Template {
       this.reactions.push(stateReaction);
     }
 
-    const engine = this.resolveEngine();
-    const RendererClass = (Template.isServer && engine.serverRenderer)
-      ? engine.serverRenderer
-      : engine.renderer;
+    const RendererClass = (Template.isServer && this.engine.serverRenderer)
+      ? this.engine.serverRenderer
+      : this.engine.renderer;
     this.renderer = new RendererClass({
       ast: this.ast,
       data: this.overlaySettingsSignals(this.getDataContext()),
@@ -397,41 +397,13 @@ export const Template = class Template {
     }
   }
 
-  resolveEngine() {
-    const engine = isObject(this.renderingEngine)
-      ? this.renderingEngine
-      : getEngine(this.renderingEngine);
-    if (!engine) {
-      // a synchronous throw on purpose: the async report let execution fall
-      // through to a second, accidental error on the missing engine
-      throwError('engineNotRegistered', String(this.renderingEngine), {
-        explanation: isDevelopment
-          ? `Renderer "${this.renderingEngine}" not registered.`
-            + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`
-          : 0,
-      });
-    }
-    return engine;
-  }
-
   // the engine owns every touch of the target, this template never sees it
   mount(target, options) {
-    const engine = this.resolveEngine();
-    if (!engine.mount) {
-      throwError('unsupportedEngine', 'Template.mount', {
-        explanation: isDevelopment
-          ? `rendering engine '${this.renderingEngine}' does not support \`mount()\``
-          : 0,
-      });
-    }
-    return engine.mount(this, target, options);
+    return this.engine.mount(this, target, options);
   }
 
   unmount() {
-    if (!this.mounted) {
-      return;
-    }
-    this.resolveEngine().unmount(this);
+    return this.engine.unmount(this);
   }
 
   getDataContext() {

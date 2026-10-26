@@ -1,5 +1,6 @@
 import { $ } from '@semantic-ui/query';
 import { reaction } from '@semantic-ui/reactivity';
+import { Renderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -301,6 +302,18 @@ describe('Template.mount', () => {
       expect(el.textContent).toContain('first');
       first.unmount();
       expect(() => Row.mount(el)).not.toThrow();
+    });
+
+    it('refuses through an engine that has no mount', () => {
+      const Bare = defineComponent({
+        renderingEngine: { renderer: Renderer },
+        template: '<i>bare</i>',
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      expect(() => Bare.mount(el)).toThrow(
+        expect.objectContaining({ code: 'unsupportedEngine', at: 'Template.mount' }),
+      );
     });
 
     it('refuses an anchor until the range form exists', () => {

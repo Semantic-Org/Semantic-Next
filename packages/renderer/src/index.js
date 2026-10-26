@@ -7,7 +7,7 @@ export { decodeItemKey, encodeItemKey, getCollectionType, getEachData, getItemId
 export { lisIndices } from './shared/lis.js';
 
 // engine registry
-export { getEngine, registerEngine } from './engine-registry.js';
+export { getEngine, registerEngine, resolveEngine } from './engine-registry.js';
 
 // native renderer
 export { Renderer } from './engines/native/renderer.js';

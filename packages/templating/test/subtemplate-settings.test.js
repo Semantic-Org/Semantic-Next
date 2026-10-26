@@ -1,10 +1,11 @@
 import { flush, reaction, Signal } from '@semantic-ui/reactivity';
-import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
+import { registerEngine, Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Template } from '@semantic-ui/templating';
 
 const realEngine = { renderer: Renderer, serverRenderer: ServerRenderer };
+registerEngine('native', realEngine);
 
 afterEach(() => {
   Template.renderedTemplates.clear();

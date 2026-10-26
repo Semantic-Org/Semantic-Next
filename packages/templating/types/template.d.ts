@@ -764,6 +764,8 @@ export class Template {
   renderRoot?: ShadowRoot | HTMLElement;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine: string | object;
+  /** The engine resolved from `renderingEngine` at construction. Throws there when nothing is registered under the name. */
+  engine: Engine;
   /** The renderer instance for the active engine. Engines supply their own class, so this stays open. */
   renderer: any;
   /** The most recent `render()` result: a DocumentFragment on the client, markup on the server. */
@@ -899,16 +901,11 @@ export class Template {
   attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): Promise<void>;
 
   /**
-   * The engine this template renders through, resolved from `renderingEngine`.
-   * Throws when nothing is registered under that name.
-   */
-  resolveEngine(): Engine;
-
-  /**
    * Mounts this template into an element the caller owns. A prototype mounts a clone
    * and returns it; an instance mounts itself once. The element gets the same setup
    * a host carries, so `el.settings`, Query writes, `findParent` and lifecycle events
-   * behave as they do on a tag. The engine does every touch of the target.
+   * behave as they do on a tag. The engine does every touch of the target, and an
+   * engine without a mount refuses with `unsupportedEngine`.
    * @param target - The element to take over, or a host's shadow root
    * @param options - Mount settings
    * @returns The live instance
