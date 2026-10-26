@@ -85,7 +85,7 @@ export const Template = class Template {
     defaultSettings,
     subTemplates,
     createComponent,
-    parentTemplate, // tree link read by findParent, only setParent writes it
+    parentTemplate, // the parent template when nested, only setParent writes it
     renderingEngine = 'native',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
@@ -208,10 +208,8 @@ export const Template = class Template {
     }
   }
 
-  // a subtemplate renders inside its parent's render and borrows the parent's element.
-  // a mounted or tagged template registers a parent for the walks and brings its own
   isSubtemplate() {
-    return this.parentTemplate !== undefined && this.element === this.parentTemplate.element;
+    return this.parentTemplate !== undefined;
   }
 
   setParent(parentTemplate) {
@@ -399,7 +397,7 @@ export const Template = class Template {
   }
 
   // the engine owns every touch of the target, this template never sees it. neither
-  // door registers on the reaction that called it, the caller tracked its own reads
+  // call registers on the reaction that made it, the caller tracked its own reads
   mount(target, options) {
     return nonreactive(() => this.engine.mount(this, target, options));
   }

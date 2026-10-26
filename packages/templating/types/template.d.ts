@@ -69,7 +69,7 @@ export interface TemplateSettings {
   subTemplates?: Record<string, Template>;
   /** A function to create a component instance associated with the template. */
   createComponent?: (params: FactoryParams) => Record<string, any>;
-  /** The parent template for the walks. Set through `setParent` by the renderer or by mount. */
+  /** The parent template when nested. Set through `setParent` by the renderer. */
   parentTemplate?: Template;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine?: string | object;
@@ -752,7 +752,7 @@ export class Template {
   onUpdatedCallback: (params: CallParams) => void;
   /** Callback function invoked when the theme changes. */
   onThemeChangedCallback: (params: CallParams) => void;
-  /** The parent template for the walks. Set through `setParent` by the renderer or by mount. */
+  /** The parent template when nested. Set through `setParent` by the renderer. */
   parentTemplate?: Template;
   /** Set by the engine while mounted through {@link mount}, `null` once unmounted. */
   mounted?: MountRecord | null;

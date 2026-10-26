@@ -55,20 +55,12 @@ describe('Template.isSubtemplate', () => {
     expect(child.isSubtemplate()).toBe(false);
   });
 
-  it('follows from borrowing the parent element, not from the link alone', () => {
-    const host = { settings: {} };
-    const parent = new Template({ element: host });
-
-    // a mounted or tagged template registers its host for the walks and brings its own element
-    const own = new Template({ element: { settings: {} } });
-    own.setParent(parent);
-    expect(own.parentTemplate).toBe(parent);
-    expect(own.isSubtemplate()).toBe(false);
-
-    const borrowed = new Template();
-    borrowed.setElement(host);
-    borrowed.setParent(parent);
-    expect(borrowed.isSubtemplate()).toBe(true);
+  it('returns true after setParent', () => {
+    const parent = new Template();
+    const child = new Template();
+    child.setParent(parent);
+    expect(child.isSubtemplate()).toBe(true);
+    expect(child.parentTemplate).toBe(parent);
   });
 
   it('returns false after removeParent clears the parent reference', () => {
