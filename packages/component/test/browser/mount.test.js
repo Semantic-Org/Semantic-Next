@@ -4,6 +4,7 @@ import { Renderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { LitEngine } from '../../src/engines/lit/register.js';
 import { defineComponent } from '../../src/index.js';
 
 // Template.mount through the native engine: a caller hands over an element and the
@@ -177,6 +178,35 @@ describe('Template.mount', () => {
       page.render({ route: 'about' });
       await tick();
       expect(outlet.textContent).toContain('about');
+    });
+
+    it('renders the default again when a setting is cleared, mounted, native tag, and lit tag', async () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      const row = Row.mount(el, { settings: { label: 'set' } });
+      row.settings.label = null;
+      await tick();
+      expect(el.textContent).toContain('default');
+
+      for (const engine of ['native', LitEngine]) {
+        const Tagged = defineComponent({
+          tagName: uniqueTag('mount-clear'),
+          renderingEngine: engine,
+          template: '<p>{label}</p>',
+          defaultSettings: { label: 'default' },
+        });
+        const tag = document.createElement(Tagged.componentTagName);
+        tag.setAttribute('label', 'set');
+        document.body.append(tag);
+        await tag.rendered;
+        await tick();
+        expect(tag.shadowRoot.textContent).toContain('set');
+        tag.removeAttribute('label');
+        await tick();
+        await tick();
+        expect(tag.shadowRoot.textContent).toContain('default');
+      }
     });
 
     it('reaches a reaction on settings at write time, before any render', () => {
@@ -430,20 +460,35 @@ describe('Template.mount', () => {
       );
     });
 
-    it('leaves no stamps on the element when createComponent throws', () => {
+    it('leaves nothing on the element when createComponent throws, and a retry owns it', () => {
+      let ticks = 0;
       const Broken = defineComponent({
         template: '<i>never</i>',
-        createComponent: () => {
+        defaultSettings: { label: 'first' },
+        createComponent: ({ interval }) => {
+          interval(() => ticks++, 1);
           throw new Error('boom');
         },
       });
       const el = document.createElement('div');
       document.body.append(el);
-      expect(() => Broken.mount(el)).toThrow('boom');
+      expect(() => Broken.mount(el, { settings: { label: 'first' } })).toThrow('boom');
       expect(el.template).toBeUndefined();
       expect(el.component).toBeUndefined();
       expect(el.dataContext).toBeUndefined();
+      expect(el.settings).toBeUndefined();
+      expect(el.properties).toBeUndefined();
+      expect('label' in el).toBe(false);
       expect(el.childNodes.length).toBe(0);
+
+      const Row = defineRow();
+      const row = Row.mount(el, { settings: { label: 'second' } });
+      expect(el.textContent).toContain('second');
+      row.unmount();
+      expect('label' in el).toBe(false);
+      return new Promise((resolve) => setTimeout(resolve, 10)).then(() => {
+        expect(ticks).toBe(0);
+      });
     });
 
     it('refuses an anchor until the range form exists', () => {
@@ -580,6 +625,43 @@ describe('Template.mount', () => {
       // the list once, its two items once each, nothing twice and nothing skipped
       expect(all.length).toBe(3);
       expect(all.filter((child) => child.templateName === 'walkList').length).toBe(1);
+    });
+  });
+
+  describe('a shadow root as the target', () => {
+    it("renders into a bare host's shadow root and still reaches tagged children", async () => {
+      const Child = defineComponent({
+        tagName: uniqueTag('mount-shadow-child'),
+        template: '<i>child</i>',
+      });
+      const Wrapper = defineComponent({
+        template: `<div class="row"><${Child.componentTagName}></${Child.componentTagName}></div>`,
+        css: '.row { color: rgb(10, 11, 12); }',
+      });
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      document.body.append(host);
+
+      const wrapper = Wrapper.mount(shadow);
+      await shadow.querySelector(Child.componentTagName).rendered;
+
+      expect(wrapper.findChildren().length).toBe(1);
+      expect(rowColor(shadow)).toBe('rgb(10, 11, 12)');
+      expect(host.renderRoot).toBe(shadow);
+    });
+  });
+
+  describe('teardown hygiene', () => {
+    it('leaves no scheduling flag on the element after an unmount in the same tick', async () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      const row = Row.mount(el);
+      row.settings.label = 'late';
+      row.unmount();
+      await tick();
+      expect('pendingRender' in el).toBe(false);
+      expect('updateScheduled' in el).toBe(false);
     });
   });
 

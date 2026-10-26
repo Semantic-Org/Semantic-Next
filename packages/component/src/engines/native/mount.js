@@ -1,4 +1,4 @@
-import { adoptStylesheet, createErrors, each, isDevelopment, isServer } from '@semantic-ui/utils';
+import { adoptStylesheet, createErrors, each, isDevelopment, isServer, mapObject } from '@semantic-ui/utils';
 
 import {
   createSettingsProxy,
@@ -53,43 +53,68 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
 
   // a bare element has no property store, a host built its own in its constructor
   const bare = !el.properties;
-  const properties = bare ? setupElement(el, template, settings) : null;
-
-  // a prototype mounts a copy built on the element's data, an instance mounts itself
-  const data = el.getData();
+  const properties = bare ? setupElement(el, template, settings, renderRoot) : null;
   let instance = template;
-  if (template.isPrototype) {
-    instance = template.clone({ data, element: el });
+  try {
+    // a prototype mounts a copy built on the element's data, an instance mounts itself
+    const data = el.getData();
+    if (template.isPrototype) {
+      instance = template.clone({ data, element: el });
+    }
+    else {
+      instance.setElement(el);
+      instance.data = data;
+    }
+
+    // the settings a callback sees are the element's, handed to the instance so the
+    // returned handle talks the same way
+    instance.settings = el.settings;
+
+    if (instance.css) {
+      adoptStylesheet(instance.css, renderRoot);
+    }
+
+    instance.initialize();
+    // stamped before anything renders: a defined child element upgrades during insertion
+    // and reads these to find its parent
+    el.template = instance;
+    el.component = instance.instance;
+    el.dataContext = instance.getDataContext();
+
+    instance.attach(renderRoot);
+    const fragment = instance.render(data);
+    renderRoot.replaceChildren(fragment);
   }
-  else {
-    instance.setElement(el);
-    instance.data = data;
+  catch (error) {
+    discard(instance, el, properties);
+    throw error;
   }
-
-  // the settings a callback sees are the element's, handed to the instance so the
-  // returned handle talks the same way
-  instance.settings = el.settings;
-
-  if (instance.css) {
-    adoptStylesheet(instance.css, renderRoot);
-  }
-
-  instance.initialize();
-  // stamped before anything renders: a defined child element upgrades during insertion
-  // and reads these to find its parent
-  el.template = instance;
-  el.component = instance.instance;
-  el.dataContext = instance.getDataContext();
-
-  instance.attach(renderRoot);
-  const fragment = instance.render(data);
-  renderRoot.replaceChildren(fragment);
   instance.mounted = { el, renderRoot, properties };
 
   if (signal) {
     signal.addEventListener('abort', () => instance.unmount(), { once: true, signal: instance.abortSignal });
   }
   return instance;
+}
+
+// a mount that fails partway leaves nothing behind: the instance's timers and reactions
+// end, the element is as it was, and the error reaches the caller
+function discard(instance, el, properties) {
+  if (!instance.isPrototype) {
+    if (instance.initialized) {
+      instance.onDestroyed();
+    }
+    else {
+      instance.clearReactions();
+      instance.abortController.abort('mount failed');
+    }
+  }
+  delete el.template;
+  delete el.component;
+  delete el.dataContext;
+  if (properties) {
+    restoreElement(el, properties);
+  }
 }
 
 export function unmount(instance) {
@@ -117,14 +142,14 @@ export function unmount(instance) {
 // keys an instance carries or a mount passes count as declared, under the template's own
 // defaults, so each gets an accessor, a seeded store, and a shadow signal the overlay
 // forces, and the element is the one source every render reads
-function setupElement(el, template, settings) {
+function setupElement(el, template, settings, renderRoot) {
   const declared = { ...template.defaultSettings, ...template.data, ...settings };
   const properties = getProperties({ defaultSettings: declared });
   el.properties = new Map();
   each({ ...template.data, ...settings }, (value, name) => {
     el.properties.set(name, value);
   });
-  el.renderRoot = el;
+  el.renderRoot = renderRoot;
   el.setSetting = function(name, value) {
     this[name] = value;
   };
@@ -138,8 +163,12 @@ function setupElement(el, template, settings) {
     }
     this.pendingRender = true;
     queueMicrotask(() => {
+      // unmounted in the meantime: the element was restored, leave it that way
+      if (!this.template) {
+        return;
+      }
       this.pendingRender = false;
-      this.template?.render(this.getData());
+      this.template.render(this.getData());
     });
   };
   // the data a host builds per render
@@ -155,7 +184,10 @@ function setupElement(el, template, settings) {
     });
     return data;
   };
-  setDefaultSettings(el, { defaultSettings: declared });
+  // every declared key, with the template's own default as its value. a key the mount
+  // declared has none, so clearing it reads as empty rather than as the value it arrived with
+  const defaults = mapObject(declared, (value, name) => template.defaultSettings?.[name]);
+  setDefaultSettings(el, { defaultSettings: defaults });
   defineAccessors(el, properties);
   el.settings = createSettingsProxy(el);
   return properties;
