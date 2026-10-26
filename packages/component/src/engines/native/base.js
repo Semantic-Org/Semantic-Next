@@ -195,9 +195,10 @@ class WebComponentBase extends HTMLElementBase {
     removeDataSuiBind(this.shadowRoot);
   }
 
-  // the host set itself up in its constructor, mount does the rest
+  // the host set itself up in its constructor and knows its data, so it makes the copy
+  // and mounts that. the prototype path in mount is for a bare element
   fullRender(prototypeTemplate) {
-    prototypeTemplate.mount(this.shadowRoot);
+    prototypeTemplate.clone({ data: this.getData(), element: this }).mount(this.shadowRoot);
   }
 
   disconnectedCallback() {

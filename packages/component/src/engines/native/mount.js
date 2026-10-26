@@ -59,6 +59,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     el[name] = value;
   });
 
+  // a prototype mounts a copy built on the element's data, an instance mounts itself
   const data = el.getData();
   let instance = template;
   if (template.isPrototype) {
