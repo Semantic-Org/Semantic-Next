@@ -134,21 +134,21 @@ export function unmount(instance) {
         Element Upgrade
 *******************************/
 
-// a plain element wears the component's class while mounted, the way the custom elements
-// polyfill upgraded an element: its prototype swapped in, the constructor's work run.
-// nothing is copied onto the element. keys an instance carries or a mount passes beyond
-// the class's declaration get accessors of their own and a signal through the defaults
+// a plain element inherits the component class's prototype while mounted, the way the
+// custom elements polyfill upgraded an element: prototype swapped in, the constructor's
+// work run, nothing copied onto the element. keys an instance carries or a mount passes
+// beyond the class's declaration get accessors of their own and a signal through the defaults
 function upgradeElement(el, template, settings, renderRoot) {
-  const Host = template.hostClass ??= createHostClass(template);
+  const ComponentClass = template.componentClass ??= createComponentClass(template);
   const upgrade = { original: Object.getPrototypeOf(el), extras: null };
-  Object.setPrototypeOf(el, Host.prototype);
+  Object.setPrototypeOf(el, ComponentClass.prototype);
   el.construct();
   el.renderRoot = renderRoot;
 
   const carried = { ...template.data, ...settings };
   const undeclared = {};
   each(carried, (value, name) => {
-    if (!(name in Host.properties)) {
+    if (!(name in ComponentClass.properties)) {
       undeclared[name] = value;
     }
   });
@@ -166,9 +166,9 @@ function upgradeElement(el, template, settings, renderRoot) {
   return upgrade;
 }
 
-// a tagless template has no class until it is first mounted: the factory a tag uses,
-// minus the registration
-function createHostClass(template) {
+// the class defineComponent would have handed a tag, made on first mount for a template
+// that never got one: the same factory, minus the registration
+function createComponentClass(template) {
   return createComponent({
     prototypeTemplate: template,
     resolvedProperties: getProperties({ defaultSettings: template.defaultSettings }),

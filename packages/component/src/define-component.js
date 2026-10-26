@@ -114,8 +114,8 @@ export const defineComponent = ({
 
     // Store tagName on the class for SSR renderToString
     webComponent.componentTagName = tagName;
-    // the class an element wears when this template mounts into it
-    prototypeTemplate.hostClass = webComponent;
+    // a mounted element inherits this class's prototype
+    prototypeTemplate.componentClass = webComponent;
     webComponent.toDefinition = () => prototypeTemplate.toDefinition();
     webComponent.mount = (target, options) => prototypeTemplate.mount(target, options);
     registerComponent(tagName, webComponent);
