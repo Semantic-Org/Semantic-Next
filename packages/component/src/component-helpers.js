@@ -112,7 +112,7 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
 /*
   Accessors over the element's property store. The factory defines them on a class
   prototype, mount defines them on a bare element, so a setting reads and writes the
-  same way through either door
+  same way whether its component was defined with a tag or mounted
 */
 export function defineAccessors(target, properties) {
   each(properties, (config, propName) => {

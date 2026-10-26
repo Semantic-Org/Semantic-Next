@@ -263,7 +263,8 @@ describe('Template.mount', () => {
       document.body.append(el);
       const controller = new AbortController();
       controller.abort();
-      expect(() => Row.mount(el, { signal: controller.signal })).toThrow(/signal/);
+      expect(() => Row.mount(el, { signal: controller.signal }))
+        .toThrow(expect.objectContaining({ code: 'expiredSignal', at: 'Template.mount' }));
       expect(el.template).toBeUndefined();
     });
   });
@@ -287,14 +288,16 @@ describe('Template.mount', () => {
       const b = document.createElement('div');
       document.body.append(a, b);
       const row = Row.mount(a);
-      expect(() => row.mount(b)).toThrow(/once/);
+      expect(() => row.mount(b)).toThrow(expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }));
     });
 
     it('refuses an anchor until the range form exists', () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
-      expect(() => Row.mount(el, { anchor: el })).toThrow(/anchor/);
+      expect(() => Row.mount(el, { anchor: el })).toThrow(
+        expect.objectContaining({ code: 'unsupportedAnchor', at: 'Template.mount' }),
+      );
     });
 
     it('mounts from a tagged class through its prototype template', () => {

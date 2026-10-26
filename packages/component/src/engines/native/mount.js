@@ -15,31 +15,33 @@ import {
 const { throwError } = createErrors({ namespace: 'component' });
 
 /*
-  The el door. A caller hands over an element and the template takes it: the element
-  gets the contract a host carries so adding a tag later changes nothing from inside,
-  the nearest sui host is registered before anything runs so findParent works from
-  onCreated, and the lifetime stays the caller's through unmount or an AbortSignal.
+  Mounts a template into an element the caller owns. A bare element is set up with what
+  a host's constructor gives a custom element, so adding a tag later changes nothing from
+  inside. The nearest sui host is registered before anything runs, and the lifetime stays
+  the caller's through unmount or an AbortSignal.
 */
 
 export function mount(template, target, { settings = {}, anchor, signal } = {}) {
   if (isServer) {
-    throwError('mountOnServer', 'Template.mount', {
-      explanation: isDevelopment ? 'mount needs a DOM. Use renderToString on the server.' : 0,
+    throwError('unsupportedServerMount', 'Template.mount', {
+      explanation: isDevelopment ? '`mount()` requires a DOM environment. Use `renderToString()` on the server' : 0,
     });
   }
   if (anchor !== undefined) {
-    throwError('mountAnchor', 'Template.mount', {
-      explanation: isDevelopment ? 'anchor is not supported. mount replaces the contents of target.' : 0,
+    throwError('unsupportedAnchor', 'Template.mount', {
+      explanation: isDevelopment ? '`anchor` is not supported. `mount()` replaces the contents of `target`' : 0,
     });
   }
   if (signal?.aborted) {
-    throwError('mountAborted', 'Template.mount', {
-      explanation: isDevelopment ? 'signal is already aborted.' : 0,
+    throwError('expiredSignal', 'Template.mount', {
+      explanation: isDevelopment ? '`signal` is already aborted' : 0,
     });
   }
   if (!template.isPrototype && template.mounted) {
-    throwError('mountTwice', template.templateName, {
-      explanation: isDevelopment ? 'an instance mounts once. Mount the prototype to mount again.' : 0,
+    throwError('duplicateMount', 'Template.mount', {
+      explanation: isDevelopment
+        ? `template instance '${template.templateName}' is already mounted. Call \`mount()\` on the prototype template to mount another instance`
+        : 0,
     });
   }
 
@@ -47,8 +49,8 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   const el = target.host ?? target;
 
   // a bare element has no property store, a host built its own in its constructor
-  const contracted = !el.properties;
-  const properties = contracted ? contractElement(el, template, settings) : null;
+  const bare = !el.properties;
+  const properties = bare ? setupElement(el, template, settings) : null;
   each(settings, (value, name) => {
     el[name] = value;
   });
@@ -94,7 +96,7 @@ export function unmount(instance) {
     return;
   }
   instance.mounted = null;
-  // the destroyed event leaves from the element while its content still stands
+  // fire destroyed before clearing the DOM so listeners can still read the rendered nodes
   instance.onDestroyed();
   mounted.renderRoot.replaceChildren();
   delete mounted.el.template;
@@ -117,13 +119,13 @@ export function registerHost(instance, el) {
 }
 
 /*******************************
-        Element Contract
+         Element Setup
 *******************************/
 
 // what a host's constructor gives a custom element, given to a bare element instead.
 // keys passed at mount count as declared so an undeclared value still reaches the
 // data context and gets its own accessor
-function contractElement(el, template, settings) {
+function setupElement(el, template, settings) {
   const properties = getProperties({
     defaultSettings: { ...template.defaultSettings, ...settings },
   });

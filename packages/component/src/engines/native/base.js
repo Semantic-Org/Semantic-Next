@@ -133,7 +133,7 @@ class WebComponentBase extends HTMLElementBase {
     this.template.initialize();
     this.component = this.template.instance;
     this.dataContext = this.template.getDataContext();
-    // hydrated content tears down through the same door as mounted content
+    // hydrated content tears down the same way mounted content does
     this.template.mounted = { el: this, renderRoot: this.shadowRoot, properties: null };
 
     // Build entries for hydration (same marker IDs the server produced).
@@ -195,7 +195,7 @@ class WebComponentBase extends HTMLElementBase {
     removeDataSuiBind(this.shadowRoot);
   }
 
-  // the tag door is the el door with a host that contracted itself in its constructor
+  // the host set itself up in its constructor, mount does the rest
   fullRender(prototypeTemplate) {
     prototypeTemplate.mount(this.shadowRoot);
   }

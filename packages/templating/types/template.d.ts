@@ -702,11 +702,11 @@ export interface MountSettings {
 
 /** What the engine put in place for a mounted template, read back by `unmount`. */
 export interface MountRecord {
-  /** The element that carries the stamps and, for a bare element, the contract. */
+  /** The element that carries `template`, `component` and `dataContext`, and for a bare element its setup. */
   el: Element;
   /** Where the content was rendered: the element itself, or a host's shadow root. */
   renderRoot: Element | ShadowRoot;
-  /** Accessor configuration installed on a bare element, `null` when the host contracted itself. */
+  /** Accessor configuration installed on a bare element, `null` when the host set itself up. */
   properties: Record<string, any> | null;
 }
 
@@ -906,7 +906,7 @@ export class Template {
 
   /**
    * Mounts this template into an element the caller owns. A prototype mounts a clone
-   * and returns it; an instance mounts itself once. The element gets the same contract
+   * and returns it; an instance mounts itself once. The element gets the same setup
    * a host carries, so `el.settings`, Query writes, `findParent` and lifecycle events
    * behave as they do on a tag. The engine does every touch of the target.
    * @param target - The element to take over, or a host's shadow root

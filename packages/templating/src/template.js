@@ -85,7 +85,7 @@ export const Template = class Template {
     defaultSettings,
     subTemplates,
     createComponent,
-    parentTemplate, // tree link read by findParent, set by any door through setParent
+    parentTemplate, // tree link read by findParent, only setParent writes it
     renderingEngine = 'native',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
@@ -397,7 +397,6 @@ export const Template = class Template {
     }
   }
 
-  // the engine supplies the renderer and, on the client, the mount door
   resolveEngine() {
     const engine = isObject(this.renderingEngine)
       ? this.renderingEngine
@@ -415,14 +414,13 @@ export const Template = class Template {
     return engine;
   }
 
-  // the el door. a prototype mounts a clone and returns it, an instance mounts itself
-  // once. the engine owns every touch of the target, this template never sees it
+  // the engine owns every touch of the target, this template never sees it
   mount(target, options) {
     const engine = this.resolveEngine();
     if (!engine.mount) {
-      throwError('mountUnsupported', String(this.renderingEngine), {
+      throwError('unsupportedEngine', 'Template.mount', {
         explanation: isDevelopment
-          ? `Rendering engine "${this.renderingEngine}" has no mount door.`
+          ? `rendering engine '${this.renderingEngine}' does not support \`mount()\``
           : 0,
       });
     }
