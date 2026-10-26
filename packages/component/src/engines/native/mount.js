@@ -54,11 +54,6 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
   // a bare element has no property store, a host built its own in its constructor
   const bare = !el.properties;
   const properties = bare ? setupElement(el, template, settings) : null;
-  // an instance's own data lands on the element first and the settings passed here on
-  // top, so the element is the one source every render reads
-  each(template.isPrototype ? settings : { ...template.data, ...settings }, (value, name) => {
-    el[name] = value;
-  });
 
   // a prototype mounts a copy built on the element's data, an instance mounts itself
   const data = el.getData();
@@ -119,13 +114,16 @@ export function unmount(instance) {
 *******************************/
 
 // what a host's constructor gives a custom element, given to a bare element instead.
-// keys an instance carries or a mount passes count as declared, so an undeclared value
-// still reaches the data context and gets its own accessor
+// keys an instance carries or a mount passes count as declared, under the template's own
+// defaults, so each gets an accessor, a seeded store, and a shadow signal the overlay
+// forces, and the element is the one source every render reads
 function setupElement(el, template, settings) {
-  const properties = getProperties({
-    defaultSettings: { ...template.defaultSettings, ...template.data, ...settings },
-  });
+  const declared = { ...template.defaultSettings, ...template.data, ...settings };
+  const properties = getProperties({ defaultSettings: declared });
   el.properties = new Map();
+  each({ ...template.data, ...settings }, (value, name) => {
+    el.properties.set(name, value);
+  });
   el.renderRoot = el;
   el.setSetting = function(name, value) {
     this[name] = value;
@@ -157,7 +155,7 @@ function setupElement(el, template, settings) {
     });
     return data;
   };
-  setDefaultSettings(el, { defaultSettings: template.defaultSettings });
+  setDefaultSettings(el, { defaultSettings: declared });
   defineAccessors(el, properties);
   el.settings = createSettingsProxy(el);
   return properties;

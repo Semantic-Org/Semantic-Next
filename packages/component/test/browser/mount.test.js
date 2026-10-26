@@ -73,6 +73,16 @@ describe('Template.mount', () => {
       expect(rowColor(el)).toBe('rgb(1, 2, 3)');
     });
 
+    it('mounts into a detached element and keeps its css for when the element lands', () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      const row = Row.mount(el, { settings: { label: 'detached' } });
+      expect(el.textContent).toContain('detached');
+      document.body.append(el);
+      expect(rowColor(el)).toBe('rgb(1, 2, 3)');
+      row.unmount();
+    });
+
     it('falls back to declared defaults and accepts undeclared settings', () => {
       const Row = defineRow();
       const el = document.createElement('div');
@@ -115,6 +125,25 @@ describe('Template.mount', () => {
       await tick();
       expect(el.textContent).toContain('three');
       expect(row.settings.label).toBe('three');
+    });
+
+    it('updates an undeclared setting passed at mount, through the proxy and through Query', async () => {
+      const Row = defineComponent({
+        template: '<p class="row">{route}</p>',
+        defaultSettings: { label: 'declared' },
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      const row = Row.mount(el, { settings: { route: 'home' } });
+      expect(el.textContent).toContain('home');
+
+      row.settings.route = 'about';
+      await tick();
+      expect(el.textContent).toContain('about');
+
+      $(el).settings({ route: 'contact' });
+      await tick();
+      expect(el.textContent).toContain('contact');
     });
 
     it('delegates events on the element and keeps state per instance', async () => {
