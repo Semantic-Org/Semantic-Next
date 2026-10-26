@@ -32,10 +32,10 @@ export const CURRICULUM = [
     intro:
       'A row of emoji reactions you can toggle. Initial reactions come from an HTML attribute that the component parses on `initialize()`; clicking a reaction flips its `active` flag and adjusts the count.',
     newPatterns:
-      '`defaultSettings`, `defaultState`, `createComponent`, `events`, `{#each}`, `getIndex` / `setIndex`, `initialize()`, `data-*` parsing, `{activeIf}`.',
+      '`defaultSettings`, `defaultState`, `createComponent`, `events`, `{#each}`, `getIndex` / `setIndex`, `initialize()`, scope resolution in event `data`, `{activeIf}`.',
     whatToNotice: [
       '`state.reactionState.getIndex(index)` and `setIndex(index, value)` read and replace a single array item by index — no manual `map` or spread.',
-      'Event handlers receive a `data` object containing parsed `data-*` attributes from the event target. `data-index="{i}"` in the template becomes `data.index` in the handler.',
+      'Event handlers receive a `data` object resolved from the block scope at the event target. `index` from `{#each reaction, index in reactionState}` arrives as `data.index` in the handler, with no `data-*` attribute to write.',
       'The component works from a single HTML tag: `<emoji-reactions reactions="👍 12, ❤️ 5">`. Settings are parsed from the attribute string in `initialize()`.',
     ],
   },

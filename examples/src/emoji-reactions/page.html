@@ -424,8 +424,8 @@ body {
 });
 
 <span class="hljs-keyword">const</span> events = {
-  <span class="hljs-string">&#x27;click .reaction&#x27;</span>({ self, data }) {
-    self.<span class="hljs-title function_">toggle</span>(data.<span class="hljs-property">index</span>);
+  <span class="hljs-string">&#x27;click .reaction&#x27;</span>({ <span class="hljs-variable language_">self</span>, data }) {
+    <span class="hljs-variable language_">self</span>.<span class="hljs-title function_">toggle</span>(data.<span class="hljs-property">index</span>);
   },
 };
 
@@ -503,11 +503,11 @@ body {
       </details>
       <aside class="notes">
         <h2>New patterns</h2>
-        <p><code>defaultSettings</code>, <code>defaultState</code>, <code>createComponent</code>, <code>events</code>, <code>{#each}</code>, <code>getIndex</code> / <code>setIndex</code>, <code>initialize()</code>, <code>data-*</code> parsing, <code>{activeIf}</code>.</p>
+        <p><code>defaultSettings</code>, <code>defaultState</code>, <code>createComponent</code>, <code>events</code>, <code>{#each}</code>, <code>getIndex</code> / <code>setIndex</code>, <code>initialize()</code>, scope resolution in event <code>data</code>, <code>{activeIf}</code>.</p>
         <h2>What to notice</h2>
         <ul>
           <li><code>state.reactionState.getIndex(index)</code> and <code>setIndex(index, value)</code> read and replace a single array item by index — no manual <code>map</code> or spread.</li>
-          <li>Event handlers receive a <code>data</code> object containing parsed <code>data-*</code> attributes from the event target. <code>data-index=&quot;{i}&quot;</code> in the template becomes <code>data.index</code> in the handler.</li>
+          <li>Event handlers receive a <code>data</code> object resolved from the block scope at the event target. <code>index</code> from <code>{#each reaction, index in reactionState}</code> arrives as <code>data.index</code> in the handler, with no <code>data-*</code> attribute to write.</li>
           <li>The component works from a single HTML tag: <code>&lt;emoji-reactions reactions=&quot;👍 12, ❤️ 5&quot;&gt;</code>. Settings are parsed from the attribute string in <code>initialize()</code>.</li>
         </ul>
         <nav class="walk">
