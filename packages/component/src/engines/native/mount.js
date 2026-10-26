@@ -47,6 +47,11 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
 
   const renderRoot = target;
   const el = target.host ?? target;
+  if (el.template?.mounted) {
+    throwError('duplicateMount', 'Template.mount', {
+      explanation: isDevelopment ? '`target` already carries a mounted template. Call `unmount()` on it first' : 0,
+    });
+  }
 
   // a bare element has no property store, a host built its own in its constructor
   const bare = !el.properties;
@@ -55,7 +60,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     el[name] = value;
   });
 
-  const data = dataFrom(el, properties);
+  const data = el.getData();
   let instance = template;
   if (template.isPrototype) {
     instance = template.clone({ data, element: el });
@@ -147,8 +152,21 @@ function setupElement(el, template, settings) {
     this.pendingRender = true;
     queueMicrotask(() => {
       this.pendingRender = false;
-      this.template?.render(dataFrom(this, properties));
+      this.template?.render(this.getData());
     });
+  };
+  // the data a host builds per render
+  el.getData = function() {
+    const element = this;
+    const data = getSettingsFromConfig(element, { properties });
+    Object.defineProperty(data, 'darkMode', {
+      get() {
+        return element.isDarkMode();
+      },
+      enumerable: true,
+      configurable: true,
+    });
+    return data;
   };
   setDefaultSettings(el, { defaultSettings: template.defaultSettings });
   defineAccessors(el, properties);
@@ -168,6 +186,7 @@ function restoreElement(el, properties) {
     'setSetting',
     'isDarkMode',
     'requestUpdate',
+    'getData',
     'defaultSettings',
     'settings',
     'settingsVars',
@@ -176,20 +195,4 @@ function restoreElement(el, properties) {
   ], (name) => {
     delete el[name];
   });
-}
-
-// the data a host builds per render, for an element that has no getData of its own
-function dataFrom(el, properties) {
-  if (!properties) {
-    return el.getData();
-  }
-  const data = getSettingsFromConfig(el, { properties });
-  Object.defineProperty(data, 'darkMode', {
-    get() {
-      return el.isDarkMode();
-    },
-    enumerable: true,
-    configurable: true,
-  });
-  return data;
 }

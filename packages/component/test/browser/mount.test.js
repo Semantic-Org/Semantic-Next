@@ -291,6 +291,18 @@ describe('Template.mount', () => {
       expect(() => row.mount(b)).toThrow(expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }));
     });
 
+    it('refuses a target that already carries a mounted template', () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      const first = Row.mount(el, { settings: { label: 'first' } });
+      expect(() => Row.mount(el)).toThrow(expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }));
+      expect(first.destroyed).toBe(false);
+      expect(el.textContent).toContain('first');
+      first.unmount();
+      expect(() => Row.mount(el)).not.toThrow();
+    });
+
     it('refuses an anchor until the range form exists', () => {
       const Row = defineRow();
       const el = document.createElement('div');
