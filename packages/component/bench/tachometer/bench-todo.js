@@ -159,11 +159,10 @@ async function mount() {
   return el;
 }
 
-function destroy() {
-  container.innerHTML = '';
-  // Collect on teardown so each op measures on a freed heap, not the old-space
-  // the previous op grew. Runs after every performance.measure, never inside a
-  // measured region.
+// a full collect, never inside a measured region. on teardown so each op measures on a
+// freed heap, not the old-space the previous op grew, and after setup so the op's mark
+// starts on an empty nursery rather than wherever setup's allocation left it
+function collect() {
   if (globalThis.gc) {
     try {
       globalThis.gc({ type: 'major', execution: 'sync', flavor: 'last-resort' });
@@ -172,6 +171,11 @@ function destroy() {
       globalThis.gc();
     }
   }
+}
+
+function destroy() {
+  container.innerHTML = '';
+  collect();
 }
 
 function getTodos(el) {
@@ -183,6 +187,7 @@ async function setup(n) {
   const el = await mount();
   el.component.addBulk(n);
   flushWork();
+  collect();
   return el;
 }
 
