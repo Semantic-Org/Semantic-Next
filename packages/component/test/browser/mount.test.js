@@ -65,7 +65,9 @@ describe('Template.mount', () => {
       expect(el.settings.label).toBe('first');
       expect(el.isLightDOM).toBe(true);
       expect(el.isCustomElement).toBe(false);
-      await row.lifecyclePromise('rendered');
+      expect(el.isMounted).toBe(true);
+      expect(el.isRendered).toBe(true);
+      await el.rendered;
     });
 
     it('adopts css onto the document and the rule reaches the mounted content', () => {
@@ -170,17 +172,22 @@ describe('Template.mount', () => {
       const tag = document.createElement(Tagged.componentTagName);
       document.body.append(tag);
       await tag.rendered;
-      tag.template.render({ label: 'carried too' });
+      tag.render({ label: 'carried too' });
       await tick();
       expect(tag.shadowRoot.textContent).toContain('carried too');
       expect(tag.label).toBe('carried too');
+
+      tag.update({ label: 'updated too' });
+      await tick();
+      expect(tag.shadowRoot.textContent).toContain('updated too');
+      expect(tag.label).toBe('updated too');
 
       // a key only the mount declared is carried too
       const Route = defineComponent({ template: '<p>{route}</p>' });
       const outlet = document.createElement('div');
       document.body.append(outlet);
-      const page = Route.mount(outlet, { settings: { route: 'home' } });
-      page.render({ route: 'about' });
+      Route.mount(outlet, { settings: { route: 'home' } });
+      outlet.update({ route: 'about' });
       await tick();
       expect(outlet.textContent).toContain('about');
     });
@@ -750,7 +757,7 @@ describe('Template.mount', () => {
       await tick();
       expect(el.childNodes.length).toBe(0);
       expect(el.updateScheduled).toBeFalsy();
-      expect(el._pendingRender).toBeFalsy();
+      expect(el.pendingRender).toBeFalsy();
       expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
     });
   });

@@ -78,7 +78,6 @@ class WebComponentBase extends HTMLElementBase {
   construct({ isLightDOM = false, settings, renderRoot } = {}) {
     this.isLightDOM = isLightDOM;
     this.isCustomElement = !isLightDOM;
-    this.renderCallbacks = [];
     this.properties = new Map();
     this.renderRoot = renderRoot;
 
@@ -235,7 +234,6 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.isLightDOM = undefined;
     this.isCustomElement = undefined;
-    this.renderCallbacks = undefined;
     this.properties = undefined;
     this.renderRoot = undefined;
     this.isHydrating = undefined;
@@ -246,7 +244,7 @@ class WebComponentBase extends HTMLElementBase {
     this.uiClasses = undefined;
     this.defaultSettings = undefined;
     this.updateScheduled = undefined;
-    this._pendingRender = undefined;
+    this.pendingRender = undefined;
   }
 
   connectedCallback() {
@@ -289,7 +287,7 @@ class WebComponentBase extends HTMLElementBase {
         // Version mismatch — discard server content
         this.shadowRoot.innerHTML = '';
       }
-      this.fullRender(prototypeTemplate);
+      this.mount(prototypeTemplate);
     }
   }
 
@@ -388,12 +386,6 @@ class WebComponentBase extends HTMLElementBase {
     removeDataSuiBind(this.shadowRoot);
   }
 
-  // the host set itself up in its constructor. mount reads its data once and makes the
-  // copy, a prototype never mounts itself
-  fullRender(prototypeTemplate) {
-    prototypeTemplate.mount(this.shadowRoot);
-  }
-
   disconnectedCallback() {
     if (!this.template) { return; }
     // disconnect+connect in one task is a move, not a removal. defer
@@ -447,16 +439,24 @@ class WebComponentBase extends HTMLElementBase {
     return new Promise(resolve => setTimeout(resolve, 0));
   }
 
+  render(data = this.getData()) {
+    return this.template?.render(data);
+  }
+
+  update(data) {
+    return this.render(data);
+  }
+
   requestUpdate() {
     this.updateScheduled = true;
-    if (this._pendingRender) {
+    if (this.pendingRender) {
       return;
     }
-    this._pendingRender = true;
+    this.pendingRender = true;
     queueMicrotask(() => {
-      this._pendingRender = false;
       if (this.template) {
-        this.template.render(this.getData());
+        this.pendingRender = false;
+        this.render();
       }
     });
   }
@@ -535,9 +535,15 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   /*******************************
-      Lifecycle Promises
+      Lifecycle State & Promises
   *******************************/
 
+  get isMounted() {
+    return Boolean(this.template?.mounted);
+  }
+  get isRendered() {
+    return Boolean(this.template?.rendered);
+  }
   get created() {
     return this.template?.lifecyclePromise('created');
   }

@@ -159,9 +159,6 @@ export declare class WebComponentBase extends HTMLElement {
   /** Default settings storage, merged from `defaultSettings` and spec default values. */
   protected defaultSettings: Record<string, any>;
 
-  /** Callbacks to run after rendering. */
-  protected renderCallbacks: Array<() => void>;
-
   /** Signals backing the settings proxy, keyed by setting name. */
   protected settingsVars: Map<string, Signal<any>>;
 
@@ -180,9 +177,6 @@ export declare class WebComponentBase extends HTMLElement {
   /** Removes hydration markers and `data-sui-bind` hints from the shadow root. */
   removeMarkers(): void;
 
-  /** Renders the template from scratch and appends it to the shadow root. */
-  fullRender(prototypeTemplate: Template): void;
-
   /** Called when the element is removed from the document. Teardown is deferred so moves are not treated as removals. */
   disconnectedCallback(): void;
 
@@ -191,6 +185,12 @@ export declare class WebComponentBase extends HTMLElement {
 
   /** Resolves once any scheduled render has flushed. */
   readonly updateComplete: Promise<void>;
+
+  /** Renders or updates the element's template with optional additional data. */
+  render(data?: Record<string, any>): any;
+
+  /** Updates the element's template with optional additional data. Alias for {@link render}. */
+  update(data?: Record<string, any>): any;
 
   /** Schedules a render on the next microtask. Repeated calls in the same task coalesce. */
   requestUpdate(): void;
@@ -227,6 +227,12 @@ export declare class WebComponentBase extends HTMLElement {
 
   /** Whether dark mode is active. Returns `undefined` on the server. */
   isDarkMode(): boolean | undefined;
+
+  /** True while the element has a mounted template. */
+  readonly isMounted: boolean;
+
+  /** True once the element's template has completed its initial render. */
+  readonly isRendered: boolean;
 
   /** Resolves after `onCreated` runs. `undefined` before the template exists. */
   readonly created: Promise<void> | undefined;
