@@ -1,6 +1,6 @@
-import { adoptStylesheet, createErrors, each, isDevelopment, isServer, keys, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, createErrors, isDevelopment, isServer, noop } from '@semantic-ui/utils';
 
-import { defineAccessors, getProperties, getPropertySettings } from '../../component-helpers.js';
+import { getProperties } from '../../component-helpers.js';
 import { WebComponentBase } from './base.js';
 import { createComponent } from './factory.js';
 
@@ -48,8 +48,9 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     });
   }
 
-  // a bare element has no property store, a host built its own in its constructor
-  const upgrade = el.properties ? null : upgradeElement(el, template, settings, renderRoot);
+  if (!el.isCustomElement) {
+    upgradeElement(el, template, settings, renderRoot);
+  }
   let instance = template;
   try {
     // a prototype mounts a copy built on the element's data, an instance mounts itself
@@ -67,7 +68,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     instance.settings = el.settings;
 
     // a host adopted its own css when it connected, a bare element has nobody else to
-    if (upgrade && instance.css) {
+    if (el.isLightDOM && instance.css) {
       adoptStylesheet(instance.css, renderRoot);
     }
 
@@ -83,10 +84,10 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     renderRoot.replaceChildren(fragment);
   }
   catch (error) {
-    discard(instance, el, upgrade);
+    discard(instance, el);
     throw error;
   }
-  instance.mounted = { el, renderRoot, upgrade };
+  instance.mounted = { el, renderRoot };
 
   if (signal) {
     signal.addEventListener('abort', () => instance.unmount(), { once: true, signal: instance.abortSignal });
@@ -96,7 +97,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
 
 // a mount that fails partway leaves nothing behind: the instance's timers and reactions
 // end, the element is as it was, and the error reaches the caller
-function discard(instance, el, upgrade) {
+function discard(instance, el) {
   if (!instance.isPrototype) {
     if (instance.initialized) {
       instance.onDestroyed();
@@ -106,11 +107,11 @@ function discard(instance, el, upgrade) {
       instance.abortController.abort('mount failed');
     }
   }
-  delete el.template;
-  delete el.component;
-  delete el.dataContext;
-  if (upgrade) {
-    restoreElement(el, upgrade);
+  el.template = undefined;
+  el.component = undefined;
+  el.dataContext = undefined;
+  if (el.isLightDOM) {
+    restoreElement(el);
   }
 }
 
@@ -125,11 +126,11 @@ export function unmount(instance) {
   // fire destroyed before clearing the DOM so listeners can still read the rendered nodes
   instance.onDestroyed();
   mounted.renderRoot.replaceChildren();
-  delete mounted.el.template;
-  delete mounted.el.component;
-  delete mounted.el.dataContext;
-  if (mounted.upgrade) {
-    restoreElement(mounted.el, mounted.upgrade);
+  mounted.el.template = undefined;
+  mounted.el.component = undefined;
+  mounted.el.dataContext = undefined;
+  if (mounted.el.isLightDOM) {
+    restoreElement(mounted.el);
   }
 }
 
@@ -145,35 +146,13 @@ export function unmount(instance) {
 function upgradeElement(el, template, settings, renderRoot) {
   const ComponentClass = template.componentClass ??= createComponentClass(template);
   const original = Object.getPrototypeOf(el);
-  const upgrade = { original, extras: null };
+  el.originalPrototype = original;
   Object.setPrototypeOf(el, getUpgradePrototype(ComponentClass, original));
-  el.construct();
-  el.renderRoot = renderRoot;
-
-  const carried = { ...template.data, ...settings };
-  const undeclared = {};
-  each(carried, (value, name) => {
-    if (!(name in ComponentClass.properties)) {
-      undeclared[name] = value;
-    }
+  el.construct({
+    isLightDOM: true,
+    settings: { ...template.data, ...settings },
+    renderRoot,
   });
-  if (keys(undeclared).length) {
-    upgrade.extras = {};
-    each(undeclared, (value, name) => {
-      upgrade.extras[name] = getPropertySettings({
-        name,
-        type: value?.constructor,
-        propertyOnly: true,
-      });
-      el.defaultSettings[name] = undefined;
-    });
-    defineAccessors(el, upgrade.extras);
-  }
-  // seeded in the store rather than through the accessors, so nothing renders early
-  each(carried, (value, name) => {
-    el.properties.set(name, value);
-  });
-  return upgrade;
 }
 
 // layers the component class over the element's native tag prototype so a mounted
@@ -208,30 +187,9 @@ function createComponentClass(template) {
   });
 }
 
-// the constructor's fields stay as names holding nothing: a delete would leave the
-// element in dictionary mode for the rest of its life
-function restoreElement(el, { original, extras }) {
-  if (extras) {
-    each(extras, (config, name) => {
-      if (!config.noAccessor) {
-        delete el[name];
-      }
-    });
-  }
+function restoreElement(el) {
+  const original = el.originalPrototype;
+  el.originalPrototype = undefined;
+  el.teardown();
   Object.setPrototypeOf(el, original);
-  each([
-    'renderCallbacks',
-    'properties',
-    'css',
-    'componentSpec',
-    'settings',
-    'settingsVars',
-    'uiClasses',
-    'defaultSettings',
-    'renderRoot',
-    'updateScheduled',
-    '_pendingRender',
-  ], (name) => {
-    el[name] = undefined;
-  });
 }

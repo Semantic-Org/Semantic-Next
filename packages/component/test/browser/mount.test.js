@@ -63,6 +63,8 @@ describe('Template.mount', () => {
       expect(el.component).toBe(row.instance);
       expect(el.dataContext.label).toBe('first');
       expect(el.settings.label).toBe('first');
+      expect(el.isLightDOM).toBe(true);
+      expect(el.isCustomElement).toBe(false);
       await row.lifecyclePromise('rendered');
     });
 
@@ -712,6 +714,7 @@ describe('Template.mount', () => {
       expect(wrapper.findChildren().length).toBe(1);
       expect(rowColor(shadow)).toBe('rgb(10, 11, 12)');
       expect(host.renderRoot).toBe(shadow);
+      expect(wrapper.callParams.isHydrating).toBe(false);
     });
   });
 

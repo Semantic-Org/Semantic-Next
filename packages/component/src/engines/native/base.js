@@ -1,8 +1,9 @@
 import { MARKER_VERSION } from '@semantic-ui/renderer';
-import { adoptStylesheet, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { adoptStylesheet, each, isFunction, isServer, kebabToCamel, keys } from '@semantic-ui/utils';
 
 import {
   createSettingsProxy,
+  defineAccessors,
   getProperties,
   getPropertySettings,
   getSettingsFromConfig,
@@ -39,14 +40,17 @@ class WebComponentBase extends HTMLElementBase {
   // the constructor's work on its own: a plain element that mount upgrades with this class
   // runs it the way the custom elements polyfill ran a definition's constructor after
   // swapping an element's prototype
-  construct() {
+  construct({ isLightDOM = false, settings, renderRoot } = {}) {
+    this.isLightDOM = isLightDOM;
+    this.isCustomElement = !isLightDOM;
     this.renderCallbacks = [];
     this.properties = new Map();
+    this.renderRoot = renderRoot;
 
     // If the element has a declarative shadow root (created by DSD parsing),
     // suppress requestUpdate until hydration completes — attribute parsing
     // fires before connectedCallback and would schedule a render cascade
-    if (this.shadowRoot) {
+    if (this.isCustomElement && this.shadowRoot) {
       this.isHydrating = true;
     }
 
@@ -65,6 +69,53 @@ class WebComponentBase extends HTMLElementBase {
     else {
       this.defaultSettings = {};
     }
+
+    if (this.isLightDOM && settings) {
+      const undeclared = {};
+      each(settings, (value, name) => {
+        if (!resolvedProperties || !(name in resolvedProperties)) {
+          undeclared[name] = this.constructor.getPropertySettings({
+            name,
+            type: value?.constructor,
+            propertyOnly: true,
+          });
+          this.defaultSettings[name] = undefined;
+        }
+        // seeded in the store rather than through the accessors, so nothing renders early
+        this.properties.set(name, value);
+      });
+      if (keys(undeclared).length) {
+        this.extraProperties = undeclared;
+        defineAccessors(this, undeclared);
+      }
+    }
+  }
+
+  // the constructor's fields stay as names holding nothing: a delete would leave the
+  // element in dictionary mode for the rest of its life
+  teardown() {
+    if (this.extraProperties) {
+      each(this.extraProperties, (config, name) => {
+        if (!config.noAccessor) {
+          delete this[name];
+        }
+      });
+      this.extraProperties = undefined;
+    }
+    this.isLightDOM = undefined;
+    this.isCustomElement = undefined;
+    this.renderCallbacks = undefined;
+    this.properties = undefined;
+    this.renderRoot = undefined;
+    this.isHydrating = undefined;
+    this.css = undefined;
+    this.componentSpec = undefined;
+    this.settings = undefined;
+    this.settingsVars = undefined;
+    this.uiClasses = undefined;
+    this.defaultSettings = undefined;
+    this.updateScheduled = undefined;
+    this._pendingRender = undefined;
   }
 
   connectedCallback() {
