@@ -629,7 +629,7 @@ export interface CallParams<
   darkMode: boolean;
 
   /**
-   * Forces a re-render of the component.
+   * Re-evaluates every expression in place and rebuilds every `{#rerender}` block.
    *
    * @example
    * rerender();
@@ -847,12 +847,13 @@ export class Template {
   createReactiveState(defaultState?: Record<string, any>, data?: DataContext): Record<string, Signal<any>>;
 
   /**
-   * Sets the data context for the template.
-   * @param data - The new data context.
-   * @param options - Options.
-   * @param options.rerender - whether to force a rerender. default true
+   * Merges a partial context into `data` and reports whether a key with nothing reactive
+   * behind it changed. A declared setting moves through its own signal and a getter is
+   * the caller's live value, so neither counts.
+   * @param data - Keys to merge.
+   * @returns Whether a plain key changed.
    */
-  setDataContext(data: DataContext, options?: { rerender?: boolean; }): void;
+  setDataContext(data?: DataContext): boolean;
 
   /**
    * Whether this template is rendered inside another template rather than as a component.
@@ -1003,12 +1004,34 @@ export class Template {
   getEventOrigin(): Element | undefined;
 
   /**
-   * Renders the template through the active engine.
-   * @param additionalData - Additional data to be merged into the template's data context.
+   * Brings the template to `data` and builds it once. A later call updates in place and
+   * hands back what the engine produced the first time.
+   * @param data - Keys to merge before building.
    * @returns Whatever the engine's renderer produces: a DocumentFragment on the client,
    * markup on the server.
    */
-  render(additionalData?: DataContext): any;
+  render(data?: DataContext): any;
+
+  /**
+   * Brings the template to `data`. A declared setting moves through its signal, every
+   * other key is plain data that reaches the DOM through the coarse channel.
+   * @param data - Keys to merge.
+   * @returns Whether a plain key changed.
+   */
+  update(data?: DataContext): boolean;
+
+  /**
+   * Hands the renderer the full context with settings overlaid as signals and the keys
+   * `data` carries on top.
+   * @param data - Keys that override the context for this pass.
+   */
+  syncRenderer(data?: DataContext): void;
+
+  /**
+   * The escape valve: every binding re-evaluates and every `{#rerender}` region rebuilds.
+   * A component element's properties are read first so a write behind an accessor counts.
+   */
+  rerender(): void;
 
   /**
    * Engine-facing flag setter: marks the template as rendered and clears the destroyed flag.
@@ -1117,10 +1140,16 @@ export class Template {
   createSubtemplateSettings(): void;
 
   /**
-   * Updates settings from additional data passed to `render()`.
-   * @param additionalData - The additional data passed to render().
+   * Updates settings from the data passed to `update()` or `render()`.
+   * @param additionalData - The keys an update carries.
    */
   updateSettings(additionalData?: DataContext): void;
+
+  /**
+   * The settings this template declares: a nested template's own, a root template's
+   * element's full set.
+   */
+  getDeclaredSettings(): Record<string, any> | undefined;
 
   /**
    * `setInterval` scoped to the template, cleared when the template is destroyed.

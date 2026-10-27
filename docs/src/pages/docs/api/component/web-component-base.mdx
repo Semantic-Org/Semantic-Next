@@ -5,7 +5,7 @@ title: Web Component Base
 icon: box
 description: API reference for the WebComponentBase class in Semantic UI Component system
 package: "@semantic-ui/component"
-methods: ["getProperties", "getPropertySettings", "mount", "unmount", "render", "update", "requestUpdate", "addRenderCallback", "setDefaultSettings", "getSettingsFromConfig", "createSettingsProxy", "getUIClasses", "isDarkMode", "$", "$$", "call"]
+methods: ["getProperties", "getPropertySettings", "mount", "unmount", "update", "requestUpdate", "addRenderCallback", "setDefaultSettings", "getSettingsFromConfig", "createSettingsProxy", "getUIClasses", "isDarkMode", "$", "$$", "call"]
 ---
 
 `WebComponentBase` is the base web component class used to create web components with `defineComponent`. It handles internal utilities related to component lifecycle and other internals of the framework.
@@ -42,6 +42,7 @@ import { WebComponentBase } from '@semantic-ui/component';
 | updated         | Promise       | Resolves after the next `onUpdated`, or immediately if no update is pending |
 | destroyed       | Promise       | Resolves after `onDestroyed` runs                                           |
 | updateComplete  | Promise       | Resolves once any scheduled update has flushed                              |
+| isUpdatePending | boolean       | `true` while a `requestUpdate()` waits for its microtask                    |
 | renderCallbacks | Array         | Array of callbacks executed after rendering (`lit` engine only)             |
 
 ## Static Methods
@@ -163,33 +164,19 @@ Row.mount(el, { settings: { label: 'Mounted' } });
 el.unmount();
 ```
 
-### render
-
-```javascript
-render(data);
-```
-
-Renders or updates the element's template with optional additional data (defaults to `this.getData()`).
-
-#### Parameters
-
-| Name | Type   | Description                           |
-|------|--------|---------------------------------------|
-| data | Object | Optional data merged into the context |
-
 ### update
 
 ```javascript
 update(data);
 ```
 
-Updates the element's template with optional additional data. Alias for `render(data)`.
+Brings the template to `data`, which defaults to the element's current settings. A declared setting moves through its signal. Every other key is plain data, re-evaluated wherever the template reads it.
 
 #### Parameters
 
-| Name | Type   | Description                           |
-|------|--------|---------------------------------------|
-| data | Object | Optional data merged into the context |
+| Name | Type   | Description                                |
+|------|--------|--------------------------------------------|
+| data | Object | Keys to merge, defaults to `this.getData()` |
 
 ### requestUpdate
 
@@ -197,7 +184,7 @@ Updates the element's template with optional additional data. Alias for `render(
 requestUpdate();
 ```
 
-Schedules a coalesced update on the next microtask.
+Schedules an update from the element's current settings on the next microtask. Repeated calls in the same task coalesce.
 
 ### addRenderCallback
 
