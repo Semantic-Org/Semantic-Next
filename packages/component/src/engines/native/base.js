@@ -203,19 +203,24 @@ class WebComponentBase extends HTMLElementBase {
     return template;
   }
 
-  // clean up partial initialization and restore the element when mount() throws
+  // clean up partial initialization and restore the element when mount() throws. the element
+  // comes back even when a destroy callback throws, so a retry owns it
   discard(template) {
-    if (template && !template.isPrototype) {
-      if (template.initialized) {
-        template.onDestroyed();
-      }
-      else {
-        template.clearReactions();
-        template.abortController.abort('mount failed');
+    try {
+      if (template && !template.isPrototype) {
+        if (template.initialized) {
+          template.onDestroyed();
+        }
+        else {
+          template.clearReactions();
+          template.abortController.abort('mount failed');
+        }
       }
     }
-    this.removeTemplateFromEl();
-    this.restoreElement();
+    finally {
+      this.removeTemplateFromEl();
+      this.restoreElement();
+    }
   }
 
   unmount() {
@@ -225,11 +230,16 @@ class WebComponentBase extends HTMLElementBase {
     }
     template.mounted = false;
     template.settings = undefined;
-    // fire onDestroyed before clearing the DOM so callbacks can still query rendered nodes
-    template.onDestroyed();
-    this.renderRoot.replaceChildren();
-    this.removeTemplateFromEl();
-    this.restoreElement();
+    // fire onDestroyed before clearing the DOM so callbacks can still query rendered nodes.
+    // a throw there still reaches the caller, after the element is cleared and restored
+    try {
+      template.onDestroyed();
+    }
+    finally {
+      this.renderRoot.replaceChildren();
+      this.removeTemplateFromEl();
+      this.restoreElement();
+    }
   }
 
   // only an element upgraded by upgradeElement has an originalPrototype to restore, a custom

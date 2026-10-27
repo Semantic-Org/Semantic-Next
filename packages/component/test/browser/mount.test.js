@@ -712,6 +712,46 @@ describe('Template.mount', () => {
       });
     });
 
+    it('restores the element when a failed mount hits a destroy callback that throws', () => {
+      const Broken = defineComponent({
+        template: '<p>broken</p>',
+        onCreated() {
+          throw new Error('created boom');
+        },
+        onDestroyed() {
+          throw new Error('destroyed boom');
+        },
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      expect(() => Broken.mount(el)).toThrow();
+      // the discard ran the throwing callback, and the element still came back
+      expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
+      expect(el.template).toBeUndefined();
+      const row = defineRow().mount(el, { settings: { label: 'after' } });
+      expect(el.textContent).toContain('after');
+      row.unmount();
+    });
+
+    it('restores the element when unmount hits a destroy callback that throws', () => {
+      const Row = defineRow({
+        onDestroyed() {
+          throw new Error('destroyed boom');
+        },
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      const row = Row.mount(el, { settings: { label: 'first' } });
+      expect(() => row.unmount()).toThrow('destroyed boom');
+      // the throw reached the caller, and the element is as it was: no content, no stamps
+      expect(el.textContent).toBe('');
+      expect(el.template).toBeUndefined();
+      expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
+      const again = Row.mount(el, { settings: { label: 'again' } });
+      expect(el.textContent).toContain('again');
+      expect(() => again.unmount()).toThrow('destroyed boom');
+    });
+
     it('refuses an anchor until the range form exists', () => {
       const Row = defineRow();
       const el = document.createElement('div');
