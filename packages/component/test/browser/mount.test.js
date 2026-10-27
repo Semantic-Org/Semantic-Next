@@ -118,6 +118,20 @@ describe('Template.mount', () => {
       row.unmount();
     });
 
+    it('refuses the same reserved name on a fresh element and on one that was unmounted', () => {
+      const Row = defineRow();
+      const refused = expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' });
+      // an internal field the element only writes later, so the check must not depend on
+      // whether a previous mount's teardown already named it
+      const fresh = document.createElement('div');
+      document.body.append(fresh);
+      expect(() => Row.mount(fresh, { settings: { pendingRender: true } })).toThrow(refused);
+      const used = document.createElement('div');
+      document.body.append(used);
+      Row.mount(used, { settings: { label: 'once' } }).unmount();
+      expect(() => Row.mount(used, { settings: { pendingRender: true } })).toThrow(refused);
+    });
+
     it('registers in the template registry and leaves it on unmount', () => {
       const Row = defineRow({ templateName: 'registryRow' });
       const el = document.createElement('div');
