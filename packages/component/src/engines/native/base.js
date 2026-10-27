@@ -19,6 +19,7 @@ import {
   getSettingsFromConfig,
   getUIClasses,
   isDarkMode,
+  resolveAttributeAliases,
   setDefaultSettings,
 } from '../../component-helpers.js';
 import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
@@ -125,25 +126,28 @@ class WebComponentBase extends HTMLElementBase {
 
     if (this.isLightDOM && settings) {
       const undeclared = {};
-      each(settings, (value, name) => {
-        if (!resolvedProperties || !(name in resolvedProperties)) {
+      // a settings object speaks the spec's dialects the way a tag does, and an alias key
+      // lands under its canonical name
+      each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
+        const key = resolvedProperties?.[name]?.aliasFor ?? name;
+        if (!resolvedProperties || !(key in resolvedProperties)) {
           // refuse undeclared settings that would shadow an existing element property or method
-          if (name in this || inArray(name, WebComponentBase.fields)) {
+          if (key in this || inArray(key, WebComponentBase.fields)) {
             throwError('reservedSetting', 'Template.mount', {
               explanation: isDevelopment
-                ? `setting '${name}' is already a property of the element. Pass it under another name`
+                ? `setting '${key}' is already a property of the element. Pass it under another name`
                 : 0,
             });
           }
-          undeclared[name] = this.constructor.getPropertySettings({
-            name,
+          undeclared[key] = this.constructor.getPropertySettings({
+            name: key,
             type: value?.constructor,
             propertyOnly: true,
           });
-          this.defaultSettings[name] = undefined;
+          this.defaultSettings[key] = undefined;
         }
         // write directly to the backing map to avoid scheduling a render before mount
-        this.properties.set(name, value);
+        this.properties.set(key, value);
       });
       if (keys(undeclared).length) {
         this.extraProperties = undeclared;

@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { LitEngine } from '../../src/engines/lit/register.js';
 import { NativeEngine } from '../../src/engines/native/register.js';
 import { defineComponent } from '../../src/index.js';
+import { createIconLikeSpec } from './fixtures.js';
 
 // Template.mount through the native engine: a caller hands over an element and the
 // template takes it. Every test goes through defineComponent and a real element.
@@ -322,6 +323,43 @@ describe('Template.mount', () => {
       a.querySelector('.bump').click();
       expect(rowA.state.bumps.get()).toBe(2);
       expect(rowB.state.bumps.get()).toBe(0);
+    });
+  });
+
+  describe('settings dialects', () => {
+    it('resolves a kebab key to its declared camelCase setting', () => {
+      const Row = defineComponent({
+        template: '<p>{maxItems}</p>',
+        defaultSettings: { maxItems: 10 },
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      Row.mount(el, { settings: { 'max-items': 5 } });
+      expect(el.textContent).toBe('5');
+      expect(el.maxItems).toBe(5);
+    });
+
+    it('speaks the three spec dialects a tag speaks', () => {
+      const Icon = defineComponent({
+        tagName: uniqueTag('mount-icon-spec'),
+        template: '<i class="{icon}"></i>',
+        componentSpec: createIconLikeSpec(),
+      });
+      const mountWith = (settings) => {
+        const el = document.createElement('div');
+        document.body.append(el);
+        Icon.mount(el, { settings });
+        return el;
+      };
+      // verbose, with the value fuzzed
+      expect(mountWith({ icon: 'down chevron' }).settings.icon).toBe('chevron-down');
+      // concise, a bare attribute and a compound alias
+      expect(mountWith({ 'chevron-down': true }).settings.icon).toBe('chevron-down');
+      expect(mountWith({ 'link-icon': true }).settings.icon).toBe('link');
+      // classic, a class string
+      const classic = mountWith({ class: 'chevron-down large' });
+      expect(classic.settings.icon).toBe('chevron-down');
+      expect(classic.settings.size).toBe('large');
     });
   });
 
