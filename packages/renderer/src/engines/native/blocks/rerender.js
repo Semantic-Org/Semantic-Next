@@ -1,4 +1,4 @@
-import { isEqual } from '@semantic-ui/utils';
+import { Signal } from '@semantic-ui/reactivity';
 import { defineBlock } from '../define-block.js';
 import { registerBlock } from './registry.js';
 
@@ -7,7 +7,8 @@ import { registerBlock } from './registry.js';
   {#rerender} / {#guard} — both compile to AST node.type === 'rerender'.
   rerender sets node.expression and rebuilds on every wake, a signal the
   expression read or the coarse channel, the value is never compared. guard
-  sets node.key and rebuilds only when the key's value changed, by deep equality.
+  sets node.key and rebuilds only when the key's value changed, by the same
+  equality a signal uses to decide it changed.
 
 */
 
@@ -36,7 +37,7 @@ const rerender = defineBlock({
       : '{#rerender}',
 
   create() {
-    return { key: undefined };
+    return { key: undefined, equality: Signal.equality };
   },
 
   render(ctx) {
@@ -54,7 +55,7 @@ const rerender = defineBlock({
 
   update(ctx) {
     const key = readKeys(ctx);
-    if (ctx.node.key && isEqual(key, ctx.self.key)) {
+    if (ctx.node.key && ctx.self.equality(key, ctx.self.key)) {
       return;
     }
     ctx.self.key = key;
