@@ -121,14 +121,14 @@ describe('Template.mount', () => {
     it('refuses the same reserved name on a fresh element and on one that was unmounted', () => {
       const Row = defineRow();
       const refused = expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' });
-      // pendingRender is only assigned on update, so construct() must pre-initialize it
+      // isUpdatePending is only assigned on requestUpdate, so construct() must pre-initialize it
       const fresh = document.createElement('div');
       document.body.append(fresh);
-      expect(() => Row.mount(fresh, { settings: { pendingRender: true } })).toThrow(refused);
+      expect(() => Row.mount(fresh, { settings: { isUpdatePending: true } })).toThrow(refused);
       const used = document.createElement('div');
       document.body.append(used);
       Row.mount(used, { settings: { label: 'once' } }).unmount();
-      expect(() => Row.mount(used, { settings: { pendingRender: true } })).toThrow(refused);
+      expect(() => Row.mount(used, { settings: { isUpdatePending: true } })).toThrow(refused);
     });
 
     it('registers in the template registry and leaves it on unmount', () => {
