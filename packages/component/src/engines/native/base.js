@@ -70,7 +70,12 @@ class WebComponentBase extends HTMLElementBase {
   // the custom element's properties and methods like settings, requestUpdate(), and $,
   // acting as a facsimile of the custom element without losing its native behavior
   static getUpgradePrototype(original) {
-    const cache = this.upgradePrototypes ??= new WeakMap();
+    // a subclass reads the parent's cache through the static chain, so each class checks
+    // for its own before writing one
+    if (!Object.hasOwn(this, 'upgradePrototypes')) {
+      this.upgradePrototypes = new WeakMap();
+    }
+    const cache = this.upgradePrototypes;
     let proto = cache.get(original);
     if (!proto) {
       WebComponentBase.baseDescriptors ??= Object.getOwnPropertyDescriptors(WebComponentBase.prototype);

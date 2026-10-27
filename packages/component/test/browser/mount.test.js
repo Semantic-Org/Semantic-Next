@@ -623,6 +623,29 @@ describe('Template.mount', () => {
       expect(Object.getPrototypeOf(el)).toBe(HTMLElement.prototype);
     });
 
+    it('gives a subclass of a component class its own upgrade prototype', () => {
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-subclass'),
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'parent' },
+      });
+      class Fancy extends Tagged {
+        extra() {
+          return 'extra';
+        }
+      }
+      // mount always upgrades with the defined class, so the static is the one door a
+      // subclass reaches the cache through: the parent's entry must not serve the child
+      const parent = document.createElement('div');
+      const child = document.createElement('div');
+      Tagged.upgradeElement(parent, { renderRoot: parent });
+      Fancy.upgradeElement(child, { renderRoot: child });
+      expect(child.extra()).toBe('extra');
+      expect(parent.extra).toBeUndefined();
+      parent.restoreElement();
+      child.restoreElement();
+    });
+
     it('refuses through an engine that has no mount', () => {
       const Bare = defineComponent({
         renderingEngine: { renderer: Renderer },
