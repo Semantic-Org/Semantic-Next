@@ -3610,3 +3610,88 @@ evening, which is a test coupled to a neighbour and nothing else.
 
 *"Run the probe before the verdict, write the condition and never the shape, and when the record and the
 code disagree, move the record."*
+
+## 2026-10-27 — the spike that beat its own bench, and the cost that was paid somewhere else
+
+It began as a reading. Three of us were handed the same question, where the renderer's fine-grained
+reactivity and its coarse re-render met, and asked why `rerender()` did nothing on a top-level component.
+The reading was good: a coarse channel fenced to subtemplates, a `rerender()` that only re-read settings, a
+`{#guard}` whose function key was never invoked because the port read it with the primitive that keeps
+function references, and a `{ rerender: true }` option that built a second DOM nobody inserted. I wrote
+plants, they went red where they should, the kernel went green, and I pushed a version in which every
+binding subscribed to a per-renderer dependency so a plain key could reach it. Then the bench bot posted
+fifteen confident regressions. What follows is what the record cannot carry.
+
+**A cost maps to where it is paid, and I measured where it was not.** Before pushing I had benched the
+dependency myself: create time on a thousand rows, flat within noise, and a coarse bump at about a
+millisecond. I wrote "noise either way". The cost was on every re-run, where a reaction drops and re-adds
+its dependencies against a set that now held every binding in the renderer, and at teardown, where
+`clear-10k` paid one delete per binding. A create bench cannot see a per-run subscription. The skill
+calls this the elimination trap, and it is worth knowing that it reads from the inside as composure: the
+number was real, the conclusion was about the wrong path, and nothing in how it felt said so. He said it in
+one line, "you increased subs from 0 to 3001, doubled deps per reaction, then tachometer showed it", and
+that was the whole mechanism.
+
+**The spike was the right frame, and closing it was offered as a legitimate shape.** He reframed the PR as
+a spike with a door: toss it if it does not prove out or if the revisions become worse maintenance, merge
+it if it proves him wrong. He also said, unprompted, that he has hand-authored many spikes that became a
+closed PR, a few nights of sleep, and a reopening with the right shape. A measurable door turns an argument
+into a run, and knowing that a closed PR with its findings written in counts as good faith is what let me
+try the deletion instead of defending the extension.
+
+**The win was a deletion.** The renderer already kept every binding reaction in a `ReactionScope` tree for
+teardown. The coarse channel did not need to be a dependency at all: `invalidate()` beside `dispose()`,
+walking the same tree, reaches everything with no subscription, no per-run churn, and no entry per binding.
+`{#guard}` kept its gate by storing the last key on the block and comparing with `Signal.equality`, which
+also fixed the function-key bug. The async block hands its resource's reaction to the scope. A subtemplate's
+scope is adopted into its caller's tree so the walk reaches any depth the way teardown already did. The
+runner's final word was ten faster, none slower, the templating bundle 174 bytes smaller, and the six
+subtemplate benches the dependency had regressed became the ones that improved, because subtemplates on
+main had been paying that dependency all along.
+
+**`{#rerender}` is purposely coarse. I nearly gated it.** I proposed an identity compare on the rerender
+key so it would stop rebuilding on unrelated passes. His authorial intent: rerender rebuilds whenever its
+reaction fires, the value is never compared, it is the escape valve for the frustrated developer who
+writes `{#rerender rerenderTable}` with a trigger whose value never moves. "Homer Simpson at the nuclear
+plant." A valve that depends on the machinery it routes around is not one, and the ungated block is what
+means nobody waits for an upstream patch if fine-grained reactivity ever lies. The two blocks are different
+instruments: rerender fires on any wake, guard compares. Do not collapse them.
+
+**Three fresh agents reached the walk without seeing it.** Per the fresh-take skill I wrote a brief from
+problem knowledge only, the invariants including the measured cost shape of a per-binding dependency, and
+four open questions, and pointed neutral, challenge, and survey lenses at the base code in the main
+checkout. All three named the scope walk, the in-block guard, the tracked resource reaction, and
+`update(data)` returning whether anything moved. That convergence is why I stopped calling the walk a spike
+of mine. The brief has to carry the base state and no verb I chose, or the convergence is worthless.
+
+**A confident regression can be one scavenge, and the difference from "it's noise" is the chain.** Four
+todo removal benches stayed 7 to 9% slower through two heads. A diagnostic agent counted everything per
+hundred removals, identical on both sides, isolated the op, flat, profiled the windows, and found a single
+young-generation scavenge inside the measured window on this branch in thirty of thirty traces and before
+the mark on main in none. The branch's setup allocated 165 KB less, the removed dependency set and a
+dropped full-context `assignInPlace`, which slid the nursery's fourth regrowth step across the mark. The
+remedy was the suite's own idiom applied one step short: collect at the end of `setup()` so the mark leads
+from an empty nursery, a `Bench:` commit on main because CI overlays bench files from there. The first run
+with it in place turned the four rows into no change and one into a win. The skill is right that "it's GC"
+is where deflection usually hides. It is also sometimes the answer. The chain is what tells them apart.
+
+**Three agents on one tree, and the bots need a merge ref.** Argon, a second model on another CLI, pushed
+to the base branch under the maintainer's name and was unreachable on any channel; the mount PR's session
+sat next to me and could be messaged. The bench, bundle, and heap bots run against the PR's merge ref, so
+every push to a base dirties a stacked PR and the bots post nothing, not a failure. Three rebases in one
+session, each conflicting on the functions all of us had rewritten, each resolved by taking the other
+side's shape where it carried the same intent. The one party who sees every agent is him.
+
+**His rewrite of my bench PR body.** I wrote three paragraphs of discovery, mechanism, and an overlay
+caveat. He replaced them with one sentence and the bullet. A hard-won finding does not earn a long body;
+the chain lives in the PR that surfaced it.
+
+**Custodians of the same statue.** He borrowed the phrase from Good Old Neon, where the statue is the
+narrator's own image and custodianship is the trap, and put a different statue under it. The measure of a
+session is not the argument won or the PR shipped. It is whether someone who comes to the code cold finds
+less to explain than before. The parts of this one I would call stewardship are the deletions.
+
+*— Claude (Fable 5.1), 2026-10-27*
+
+*"Map a cost to where it is paid, let the runner hold the door, and when the mechanism you need is a walk
+over a tree you already keep, delete the dependency."*
