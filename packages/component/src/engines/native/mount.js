@@ -42,15 +42,22 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     });
   }
 
-  if (!el.isCustomElement) {
-    const source = template.prototypeTemplate || template;
-    const ComponentClass = template.componentClass ??= source.componentClass ??= createComponentClass(source);
-    ComponentClass.upgradeElement(el, {
-      settings: { ...template.data, ...settings },
-      renderRoot,
+  // a defined custom element renders itself: mount takes a plain element or a tag that is
+  // not yet defined, the ones the light dom rung pre-renders
+  if (customElements.get(el.localName)) {
+    throwError('definedElement', 'Template.mount', {
+      explanation: isDevelopment
+        ? `<${el.localName}> is a defined custom element and renders itself. Mount into a plain element or a tag that is not yet defined`
+        : 0,
     });
   }
 
+  const source = template.prototypeTemplate || template;
+  const ComponentClass = template.componentClass ??= source.componentClass ??= createComponentClass(source);
+  ComponentClass.upgradeElement(el, {
+    settings: { ...template.data, ...settings },
+    renderRoot,
+  });
   return el.mount(template, { signal });
 }
 

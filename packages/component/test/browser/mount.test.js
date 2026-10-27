@@ -585,6 +585,43 @@ describe('Template.mount', () => {
       expect(() => Row.mount(el)).not.toThrow();
     });
 
+    it('refuses a defined custom element as a target and leaves it as it was', () => {
+      const Row = defineRow();
+      const refused = expect.objectContaining({ code: 'definedElement', at: 'Template.mount' });
+      // a native tag that never connected has no render root to take the content
+      const Native = defineComponent({
+        tagName: uniqueTag('mount-native-target'),
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'native' },
+      });
+      const native = document.createElement(Native.componentTagName);
+      expect(() => Row.mount(native, { settings: { label: 'x' } })).toThrow(refused);
+      expect(native.template).toBeUndefined();
+      expect(native instanceof Native).toBe(true);
+      // a lit element renders itself and never set the flag the old gate read
+      const Lit = defineComponent({
+        tagName: uniqueTag('mount-lit-target'),
+        renderingEngine: LitEngine,
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'lit' },
+      });
+      const lit = document.createElement(Lit.componentTagName);
+      const proto = Object.getPrototypeOf(lit);
+      expect(() => Row.mount(lit, { settings: { label: 'x' } })).toThrow(refused);
+      expect(Object.getPrototypeOf(lit)).toBe(proto);
+    });
+
+    it('mounts into a custom tag that is not defined, the light dom rendering target', () => {
+      const Row = defineRow();
+      const el = document.createElement('unregistered-card');
+      document.body.append(el);
+      const row = Row.mount(el, { settings: { label: 'undefined tag' } });
+      expect(el.textContent).toContain('undefined tag');
+      expect(el instanceof Row.componentClass).toBe(true);
+      row.unmount();
+      expect(Object.getPrototypeOf(el)).toBe(HTMLElement.prototype);
+    });
+
     it('refuses through an engine that has no mount', () => {
       const Bare = defineComponent({
         renderingEngine: { renderer: Renderer },
