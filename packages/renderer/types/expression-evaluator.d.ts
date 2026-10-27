@@ -1,4 +1,3 @@
-import { Dependency } from '@semantic-ui/reactivity';
 import { DataContext } from '@semantic-ui/templating';
 import { Cache } from '@semantic-ui/utils';
 
@@ -15,8 +14,6 @@ export interface ExpressionEvaluatorSettings {
   data?: DataContext;
   /** Template helpers reachable from an expression. */
   helpers?: Record<string, any>;
-  /** Coarse invalidation for renderers that receive data from a parent. */
-  dataVersion?: Dependency;
 }
 
 /**
@@ -64,8 +61,6 @@ export class ExpressionEvaluator {
   data?: DataContext;
   /** Template helpers reachable from an expression. */
   helpers: Record<string, any>;
-  /** Coarse invalidation dependency, depended on by {@link evaluate}. */
-  dataVersion?: Dependency;
   /** @internal Context the reusable JS Proxy currently reads from. */
   jsContext: DataContext | null;
   /** @internal Reused Proxy backing `with(ctx)` evaluation of JS expressions. */
@@ -79,8 +74,7 @@ export class ExpressionEvaluator {
   setData(data: DataContext): void;
 
   /**
-   * Resolves an expression string against a data context, registering a
-   * dependency on `dataVersion` when one was supplied.
+   * Resolves an expression string against a data context.
    * @param expression - Expression source
    * @param data - Data context, defaults to the evaluator's own
    */
