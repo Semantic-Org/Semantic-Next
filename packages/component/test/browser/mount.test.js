@@ -106,7 +106,7 @@ describe('Template.mount', () => {
       const el = document.createElement('div');
       document.body.append(el);
       // an attached template property, a base method, and a native DOM property
-      for (const name of ['component', 'render', 'title']) {
+      for (const name of ['component', 'update', 'title']) {
         expect(() => Row.mount(el, { settings: { [name]: 'taken' } }))
           .toThrow(expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' }));
       }
