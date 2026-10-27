@@ -101,6 +101,23 @@ describe('Template.mount', () => {
       expect(row.settings.item).toBe(item);
     });
 
+    it('refuses an undeclared setting named like something the element already has', () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      // a stamp, a base method, a native property
+      for (const name of ['component', 'render', 'title']) {
+        expect(() => Row.mount(el, { settings: { [name]: 'taken' } }))
+          .toThrow(expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' }));
+      }
+      // the refused mount left the element as it was, and a retry owns it
+      expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
+      expect(el.title).toBe('');
+      const row = Row.mount(el, { settings: { label: 'after' } });
+      expect(el.textContent).toContain('after');
+      row.unmount();
+    });
+
     it('registers in the template registry and leaves it on unmount', () => {
       const Row = defineRow({ templateName: 'registryRow' });
       const el = document.createElement('div');

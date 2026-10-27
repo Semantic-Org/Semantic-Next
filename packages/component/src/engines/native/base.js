@@ -1,5 +1,14 @@
 import { MARKER_VERSION } from '@semantic-ui/renderer';
-import { adoptStylesheet, each, isFunction, isServer, kebabToCamel, keys } from '@semantic-ui/utils';
+import {
+  adoptStylesheet,
+  createErrors,
+  each,
+  isDevelopment,
+  isFunction,
+  isServer,
+  kebabToCamel,
+  keys,
+} from '@semantic-ui/utils';
 
 import {
   createSettingsProxy,
@@ -23,6 +32,7 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 */
 
 const HTMLElementBase = isServer ? class {} : HTMLElement;
+const { throwError } = createErrors({ namespace: 'component' });
 let baseDescriptors;
 
 class WebComponentBase extends HTMLElementBase {
@@ -42,11 +52,18 @@ class WebComponentBase extends HTMLElementBase {
     const original = Object.getPrototypeOf(el);
     el.originalPrototype = original;
     Object.setPrototypeOf(el, this.getUpgradePrototype(original));
-    el.construct({
-      isLightDOM: true,
-      settings,
-      renderRoot,
-    });
+    try {
+      el.construct({
+        isLightDOM: true,
+        settings,
+        renderRoot,
+      });
+    }
+    catch (error) {
+      // a refused upgrade leaves the element as it was
+      el.restoreElement();
+      throw error;
+    }
   }
 
   // layers the component class over the element's native tag prototype so a mounted
@@ -80,6 +97,11 @@ class WebComponentBase extends HTMLElementBase {
     this.isCustomElement = !isLightDOM;
     this.properties = new Map();
     this.renderRoot = renderRoot;
+    // the stamps mount writes later, declared here so a setting passed at mount cannot
+    // take their names
+    this.template = undefined;
+    this.component = undefined;
+    this.dataContext = undefined;
 
     // If the element has a declarative shadow root (created by DSD parsing),
     // suppress requestUpdate until hydration completes — attribute parsing
@@ -108,6 +130,15 @@ class WebComponentBase extends HTMLElementBase {
       const undeclared = {};
       each(settings, (value, name) => {
         if (!resolvedProperties || !(name in resolvedProperties)) {
+          // an undeclared key gets an own accessor, so it cannot take a name the element
+          // already answers to: a stamp, a method, a native property
+          if (name in this) {
+            throwError('reservedSetting', 'Template.mount', {
+              explanation: isDevelopment
+                ? `setting '${name}' is already a property of the element. Pass it under another name`
+                : 0,
+            });
+          }
           undeclared[name] = this.constructor.getPropertySettings({
             name,
             type: value?.constructor,
