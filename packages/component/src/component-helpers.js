@@ -265,7 +265,7 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
     const setting = elementProp
       ?? el.defaultSettings[propertyName]
       ?? (componentSpec?.defaultSettings || {})[propertyName];
-    if (setting !== undefined) {
+    if (setting !== undefined || el.properties?.has(propertyName)) {
       settings[propertyName] = setting;
     }
     if (componentSpec && settings[elementProp] !== undefined) {
@@ -274,7 +274,7 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
   }
   // a key a mount declared beyond the class lives only in the store
   el.properties?.forEach((value, propertyName) => {
-    if (value !== undefined && !(propertyName in settings)) {
+    if (!(propertyName in settings)) {
       settings[propertyName] = value;
     }
   });

@@ -184,10 +184,13 @@ describe('Template.mount', () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
-      const row = Row.mount(el, { settings: { label: 'set' } });
+      const row = Row.mount(el, { settings: { label: 'set', extra: 'ephemeral' } });
       row.settings.label = null;
+      row.settings.extra = undefined;
       await tick();
       expect(el.textContent).toContain('default');
+      expect(row.settings.extra).toBeUndefined();
+      expect(el.extra).toBeUndefined();
 
       for (const engine of ['native', LitEngine]) {
         const Tagged = defineComponent({
