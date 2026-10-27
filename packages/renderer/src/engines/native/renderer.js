@@ -1,4 +1,3 @@
-import { Dependency } from '@semantic-ui/reactivity';
 import { assignInPlace, createCache, filterObject, inArray } from '@semantic-ui/utils';
 
 import {
@@ -200,13 +199,11 @@ export class Renderer {
     // Sequential debug ID. Subtree caching would key on hashCode(ast+data)
     // but isn't implemented in the native engine.
     this.id = ++Renderer.nextId;
-    this.dataDep = new Dependency();
     this.scope = new ReactionScope();
 
     this.evaluator = new ExpressionEvaluator({
       data: this.data,
       helpers: this.helpers,
-      dataVersion: this.dataDep,
     });
 
     // DOM change notification — coalesced so multiple async resolutions
@@ -232,11 +229,9 @@ export class Renderer {
     }
   }
 
-  // every expression read also tracks the data version, the coarse channel a plain key
-  // change fires. named to mirror ExpressionEvaluator.lookupExpressionValue, 2-arg
-  // positional because it runs per expression in hot reactive loops
+  // named to mirror ExpressionEvaluator.lookupExpressionValue, 2-arg positional because
+  // it runs per expression in hot reactive loops
   lookupExpression(expression, data) {
-    this.dataDep.depend();
     return this.evaluator.lookupExpressionValue(expression, data);
   }
 
@@ -601,9 +596,11 @@ export class Renderer {
     assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData, preserveGetters: true });
   }
 
-  // the coarse channel: every binding re-evaluates and every {#rerender} region rebuilds
+  // the coarse channel: every reaction this renderer owns re-runs, so every binding
+  // re-evaluates and every {#rerender} region rebuilds. a walk over the scope tree rather
+  // than a dependency, so a binding pays nothing per run to be reachable
   bumpDataVersion() {
-    this.dataDep.changed();
+    this.scope.invalidate();
     this.notifyUpdate();
   }
 

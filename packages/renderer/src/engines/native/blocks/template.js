@@ -35,10 +35,10 @@ const { throwError } = createErrors({ namespace: 'renderer' });
   getter descriptors. Each reactiveData entry's getter evaluates its
   expression at access time, so source-signal deps register on whichever
   Reaction is current at that read, the binding's own Reaction. A
-  subtemplate's record also registers the caller's data version, which is
-  how a plain key changing in the caller's context reaches the props it
-  passed on. A snippet's bindings run on the caller's renderer and track
-  that version already. Per-key isolation is structural. A binding that reads
+  plain key changing in the caller's context reaches the props it passed
+  on when the caller's coarse pass re-runs this block and passes down. A
+  snippet's bindings run on the caller's renderer and are reached directly.
+  Per-key isolation is structural. A binding that reads
   record.label registers labelVal, a sibling binding reading record.status
   registers statusVal, and mutating labelVal wakes only the label binding.
 
@@ -121,7 +121,7 @@ function unpackBlobData(node, data, evaluator) {
 
 const ABSORB_SET = () => {};
 
-function buildArgsRecord({ node, parentData, evaluator, target, callerDep = null }) {
+function buildArgsRecord({ node, parentData, evaluator, target }) {
   // Declared-key collection. Two flavors: static (eager value) and
   // expression (lazy lookup). Parallel arrays avoid an object allocation
   // per declared key.
@@ -176,11 +176,6 @@ function buildArgsRecord({ node, parentData, evaluator, target, callerDep = null
       enumerable: true,
       get: kinds[i] === 's'
         ? () => val
-        : callerDep
-        ? () => {
-          callerDep.depend();
-          return evaluator.lookupExpressionValue(val, parentData);
-        }
         : () => evaluator.lookupExpressionValue(val, parentData),
       set: ABSORB_SET,
     });
@@ -278,7 +273,6 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
       parentData,
       evaluator: self.evaluator,
       target: node.inheritsData ? extend({}, parentData, blob) : blob,
-      callerDep: self.dataDep,
     });
   }
   if (!Object.hasOwn(instance.data, DECLARED_KEYS)) {
@@ -326,7 +320,6 @@ function setupSettingsMirror({ node, data, scope, region, self }) {
 
   self.settingsScope = scope.child();
   self.settingsScope.reaction(region.anchor, () => {
-    self.dataDep.depend();
     for (const key of settingsKeys) {
       const expr = node.reactiveData[key];
       settingsProxy[key] = self.evaluator.lookupExpressionValue(expr, data);
@@ -361,7 +354,6 @@ const templateBlock = defineBlock({
       subTemplates: renderer.subTemplates,
       snippets: renderer.snippets,
       parentTemplate: renderer.template,
-      dataDep: renderer.dataDep,
       templateType: null,
       currentTemplateId: null,
       currentSnippet: null,
@@ -379,7 +371,6 @@ const templateBlock = defineBlock({
       return;
     }
 
-    self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
@@ -415,7 +406,6 @@ const templateBlock = defineBlock({
       return;
     }
 
-    self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
@@ -469,7 +459,6 @@ const templateBlock = defineBlock({
       return;
     }
 
-    self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
 

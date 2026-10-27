@@ -38,6 +38,13 @@ export class ReactionScope {
     return childScope;
   }
 
+  // the coarse channel: every reaction in the tree re-runs on the next flush, a
+  // stopped one is skipped by invalidate itself
+  invalidate() {
+    for (const reaction of this.reactions) { reaction.invalidate(); }
+    for (const child of this.children) { child.invalidate(); }
+  }
+
   // Detach in O(1): a standalone dispose swap-pops itself out of `parent.children`
   // via its stored slot index instead of indexOf + splice, and `fromParent` lets a
   // parent tearing down its whole subtree skip the per-child unlink (clearing the
