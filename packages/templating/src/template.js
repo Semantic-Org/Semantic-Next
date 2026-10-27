@@ -951,6 +951,8 @@ export const Template = class Template {
     });
   }
 
+  // run nonreactively so reading settings or data during render does not subscribe an
+  // enclosing parent reaction. inner bindings register their own dependencies
   render(additionalData = {}) {
     return nonreactive(() => {
       if (!this.initialized) {
