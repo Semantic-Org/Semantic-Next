@@ -404,14 +404,26 @@ export const Template = class Template {
   }
 
   mount(target, options) {
-    return nonreactive(() => this.resolvedEngine.mount(this, target, options));
+    const engine = this.resolvedEngine;
+    if (!engine.mount) {
+      throwError('unsupportedEngine', 'Template.mount', {
+        explanation: isDevelopment ? 'the rendering engine does not support `mount()`' : 0,
+      });
+    }
+    return nonreactive(() => engine.mount(this, target, options));
   }
 
   unmount() {
     if (!this.mounted) {
       return;
     }
-    return nonreactive(() => this.resolvedEngine.unmount(this));
+    const engine = this.resolvedEngine;
+    if (!engine.unmount) {
+      throwError('unsupportedEngine', 'Template.unmount', {
+        explanation: isDevelopment ? 'the rendering engine does not support `unmount()`' : 0,
+      });
+    }
+    return nonreactive(() => engine.unmount(this));
   }
 
   getDataContext() {

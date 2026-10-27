@@ -6,13 +6,6 @@ const engines = new Map();
 export const registerEngine = (name, engine) => engines.set(name, engine);
 export const getEngine = (name) => engines.get(name);
 
-// fallback for engines that do not implement mount()
-const unsupportedMount = () => {
-  throwError('unsupportedEngine', 'Template.mount', {
-    explanation: isDevelopment ? 'the rendering engine does not support `mount()`' : 0,
-  });
-};
-
 export const resolveEngine = (engine) => {
   const resolved = isObject(engine) ? engine : getEngine(engine);
   if (!resolved) {
@@ -22,6 +15,5 @@ export const resolveEngine = (engine) => {
         : 0,
     });
   }
-  resolved.mount ??= unsupportedMount;
   return resolved;
 };

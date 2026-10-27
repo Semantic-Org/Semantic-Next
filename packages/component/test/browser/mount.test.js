@@ -5,6 +5,7 @@ import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { LitEngine } from '../../src/engines/lit/register.js';
+import { NativeEngine } from '../../src/engines/native/register.js';
 import { defineComponent } from '../../src/index.js';
 
 // Template.mount through the native engine: a caller hands over an element and the
@@ -632,6 +633,29 @@ describe('Template.mount', () => {
       expect(() => Bare.mount(el)).toThrow(
         expect.objectContaining({ code: 'unsupportedEngine', at: 'Template.mount' }),
       );
+    });
+
+    it('refuses unmount through an engine that has no unmount, and leaves the engine object as it was', () => {
+      const engine = { renderer: Renderer, mount: NativeEngine.mount };
+      const Half = defineComponent({
+        renderingEngine: engine,
+        template: '<i>half</i>',
+      });
+      const el = document.createElement('div');
+      document.body.append(el);
+      const half = Half.mount(el);
+      expect(el.textContent).toBe('half');
+      expect(() => half.unmount()).toThrow(
+        expect.objectContaining({ code: 'unsupportedEngine', at: 'Template.unmount' }),
+      );
+      el.unmount();
+      // resolution reads the engine, it does not write a fallback onto it
+      const bare = { renderer: Renderer };
+      const Bare = defineComponent({ renderingEngine: bare, template: '<i>bare</i>' });
+      expect(() => Bare.mount(document.createElement('div'))).toThrow(
+        expect.objectContaining({ code: 'unsupportedEngine', at: 'Template.mount' }),
+      );
+      expect(Object.hasOwn(bare, 'mount')).toBe(false);
     });
 
     it('leaves nothing on the element when createComponent throws, and a retry owns it', () => {

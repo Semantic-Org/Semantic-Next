@@ -37,9 +37,9 @@ export function registerEngine(name: string, engine: Engine): void;
 export function getEngine(name: string): Engine | undefined;
 
 /**
- * Resolves a rendering engine from a registered name or an engine object.
- * Throws `engineNotRegistered` if a named engine is not registered, and supplies
- * a default `mount` fallback that throws `unsupportedEngine`.
+ * Resolves a rendering engine from a registered name or an engine object and
+ * returns it as is. Throws `engineNotRegistered` if a named engine is not
+ * registered. `Template.mount` and `unmount` refuse an engine without that verb.
  * @param engine - Engine name or engine object
  */
 export function resolveEngine(engine: string | Engine): Engine;
