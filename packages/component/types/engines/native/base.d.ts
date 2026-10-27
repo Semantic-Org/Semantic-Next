@@ -68,7 +68,11 @@ export declare class WebComponentBase extends HTMLElement {
    * and spec-driven `uiClasses`. Called by the constructor for custom elements and by
    * `upgradeElement` when mounting onto a plain element.
    */
-  construct(): void;
+  construct(options?: {
+    isLightDOM?: boolean;
+    settings?: Record<string, any>;
+    renderRoot?: ShadowRoot | Element;
+  }): void;
 
   /**
    * Prototype template every instance clones from.
@@ -133,8 +137,8 @@ export declare class WebComponentBase extends HTMLElement {
    */
   settings: Record<string, any>;
 
-  /** The root the template renders into. Assigned from `shadowRoot` in `connectedCallback`. */
-  renderRoot?: ShadowRoot;
+  /** The root the template renders into: `shadowRoot` for a custom element, the mount target for a light DOM mount. */
+  renderRoot?: ShadowRoot | Element;
 
   /** Current property values, backing the accessors the factory installs. */
   properties: Map<string, any>;
@@ -151,7 +155,7 @@ export declare class WebComponentBase extends HTMLElement {
   /** Mounts a template into this element's renderRoot. */
   mount(template: Template, options?: { signal?: AbortSignal; }): Template;
 
-  /** Tears down the mounted template and restores the element if it was upgraded in light DOM. */
+  /** Tears down the mounted template and restores the element if it borrowed its prototype from `upgradeElement`. */
   unmount(): void;
 
   /** Computes the `{uiClasses}` string. Only present for spec-driven components. */

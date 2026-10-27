@@ -757,8 +757,10 @@ export class Template {
   renderRoot?: ShadowRoot | HTMLElement;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine: string | object;
-  /** The engine resolved from `renderingEngine` at construction. Throws there when nothing is registered under the name. */
-  engine: Engine;
+  /** The engine, resolved on first `initialize()` or `mount()` through `resolvedEngine`. Undefined before then. */
+  engine?: Engine;
+  /** Resolves and caches `engine` from `renderingEngine`. Throws `engineNotRegistered` when nothing is registered under the name. */
+  readonly resolvedEngine: Engine;
   /** The renderer instance for the active engine. Engines supply their own class, so this stays open. */
   renderer: any;
   /** The most recent `render()` result: a DocumentFragment on the client, markup on the server. */
