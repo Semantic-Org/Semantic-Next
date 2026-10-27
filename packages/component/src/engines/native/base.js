@@ -83,13 +83,13 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.renderRoot = this.shadowRoot;
 
+    if (this.css) {
+      adoptStylesheet(this.css, this.shadowRoot);
+    }
+
     const prototypeTemplate = this.constructor.template;
 
     if (hasServerContent && this.canHydrate()) {
-      // mount adopts css on the render path, hydration has to do it itself
-      if (this.css) {
-        adoptStylesheet(this.css, this.shadowRoot);
-      }
       // DSD means the visual is already correct — defer hydration wiring
       // to avoid blocking the parser, but use microtask to close the gap
       // where events would be lost (rAF leaves a full frame unbound)

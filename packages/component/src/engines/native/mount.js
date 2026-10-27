@@ -64,7 +64,8 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     // returned handle talks the same way
     instance.settings = el.settings;
 
-    if (instance.css) {
+    // a host adopted its own css when it connected, a bare element has nobody else to
+    if (upgrade && instance.css) {
       adoptStylesheet(instance.css, renderRoot);
     }
 
