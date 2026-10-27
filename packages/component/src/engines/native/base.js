@@ -71,8 +71,7 @@ class WebComponentBase extends HTMLElementBase {
   // the custom element's properties and methods like settings, requestUpdate(), and $,
   // acting as a facsimile of the custom element without losing its native behavior
   static getUpgradePrototype(original) {
-    // a subclass reads the parent's cache through the static chain, so each class checks
-    // for its own before writing one
+    // keep a separate cache per component subclass rather than inheriting the parent's
     if (!Object.hasOwn(this, 'upgradePrototypes')) {
       this.upgradePrototypes = new WeakMap();
     }
@@ -126,8 +125,7 @@ class WebComponentBase extends HTMLElementBase {
 
     if (this.isLightDOM && settings) {
       const undeclared = {};
-      // a settings object speaks the spec's dialects the way a tag does, and an alias key
-      // lands under its canonical name
+      // resolve spec attribute aliases and kebab-case setting keys to their canonical property names
       each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
         const key = resolvedProperties?.[name]?.aliasFor ?? name;
         if (!resolvedProperties || !(key in resolvedProperties)) {
@@ -207,8 +205,7 @@ class WebComponentBase extends HTMLElementBase {
     return template;
   }
 
-  // clean up partial initialization and restore the element when mount() throws. the element
-  // comes back even when a destroy callback throws, so a retry owns it
+  // clean up partial initialization and restore the element when mount() throws
   discard(template) {
     try {
       if (template && !template.isPrototype) {
@@ -234,8 +231,7 @@ class WebComponentBase extends HTMLElementBase {
     }
     template.mounted = false;
     template.settings = undefined;
-    // fire onDestroyed before clearing the DOM so callbacks can still query rendered nodes.
-    // a throw there still reaches the caller, after the element is cleared and restored
+    // fire onDestroyed before clearing the DOM so callbacks can still query rendered nodes
     try {
       template.onDestroyed();
     }
@@ -246,8 +242,7 @@ class WebComponentBase extends HTMLElementBase {
     }
   }
 
-  // only an element upgraded by upgradeElement has an originalPrototype to restore, a custom
-  // element keeps its own
+  // only restore the prototype if the element was upgraded by upgradeElement
   restoreElement() {
     const original = this.originalPrototype;
     if (!original) {

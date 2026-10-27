@@ -42,8 +42,7 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     });
   }
 
-  // a defined custom element renders itself: mount takes a plain element or a tag that is
-  // not yet defined, the ones the light dom rung pre-renders
+  // refuse defined custom elements, which manage their own lifecycle (undefined custom tags are allowed for light DOM mounting)
   if (customElements.get(el.localName)) {
     throwError('definedElement', 'Template.mount', {
       explanation: isDevelopment
