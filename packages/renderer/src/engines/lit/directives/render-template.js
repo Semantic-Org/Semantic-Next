@@ -84,7 +84,7 @@ export class RenderTemplateDirective extends AsyncDirective {
       dataContext = this.unpackData(this.data);
     }
     this.template.setDataContext(dataContext, { rerender: false });
-    return this.template.render();
+    return this.template.render(dataContext);
   }
 
   maybeCreateTemplate() {
