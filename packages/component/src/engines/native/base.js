@@ -91,6 +91,18 @@ class WebComponentBase extends HTMLElementBase {
     }
   }
 
+  addTemplateToEl(template) {
+    this.template = template;
+    this.component = template.instance;
+    this.dataContext = template.getDataContext();
+  }
+
+  removeTemplateFromEl() {
+    this.template = undefined;
+    this.component = undefined;
+    this.dataContext = undefined;
+  }
+
   // the constructor's fields stay as names holding nothing: a delete would leave the
   // element in dictionary mode for the rest of its life
   teardown() {
@@ -187,15 +199,14 @@ class WebComponentBase extends HTMLElementBase {
 
     // Don't pass renderRoot — avoids triggering attach() from the constructor.
     // Matches the subtemplate pattern: explicit initialize() → work → attach().
-    this.template = prototypeTemplate.clone({
+    const template = prototypeTemplate.clone({
       data,
       element: this,
     });
 
-    this.template.isHydrating = true;
-    this.template.initialize();
-    this.component = this.template.instance;
-    this.dataContext = this.template.getDataContext();
+    template.isHydrating = true;
+    template.initialize();
+    this.addTemplateToEl(template);
     // hydrated content tears down the same way mounted content does
     this.template.mounted = { el: this, renderRoot: this.shadowRoot, properties: null };
 

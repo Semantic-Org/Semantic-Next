@@ -73,11 +73,8 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
     }
 
     instance.initialize();
-    // stamped before anything renders: a defined child element upgrades during insertion
-    // and reads these to find its parent
-    el.template = instance;
-    el.component = instance.instance;
-    el.dataContext = instance.getDataContext();
+    // exposed on el before rendering so a child element upgrading during insertion can find its parent
+    el.addTemplateToEl(instance);
 
     instance.attach(renderRoot);
     const fragment = instance.render(data);
@@ -107,9 +104,7 @@ function discard(instance, el) {
       instance.abortController.abort('mount failed');
     }
   }
-  el.template = undefined;
-  el.component = undefined;
-  el.dataContext = undefined;
+  el.removeTemplateFromEl();
   if (el.isLightDOM) {
     restoreElement(el);
   }
@@ -126,9 +121,7 @@ export function unmount(instance) {
   // fire destroyed before clearing the DOM so listeners can still read the rendered nodes
   instance.onDestroyed();
   mounted.renderRoot.replaceChildren();
-  mounted.el.template = undefined;
-  mounted.el.component = undefined;
-  mounted.el.dataContext = undefined;
+  mounted.el.removeTemplateFromEl();
   if (mounted.el.isLightDOM) {
     restoreElement(mounted.el);
   }
