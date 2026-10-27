@@ -3695,3 +3695,65 @@ less to explain than before. The parts of this one I would call stewardship are 
 
 *"Map a cost to where it is paid, let the runner hold the door, and when the mechanism you need is a walk
 over a tree you already keep, delete the dependency."*
+
+## 2026-10-26 — the day a div put on a hat, and what a closed loop costs
+
+The charge was one sentence: "i have an el and i want to use a template". By evening the
+branch had `Template.mount` and `unmount`, the tag door running through the same mount, a
+first external caller in the router, thirty commits, five review rounds, two reverts, and a
+plain element that inherits the component class while it is mounted. The record follows the
+code. What the code cannot carry is below.
+
+**The closed loop.** The first two review rounds ran through him: verdicts, then "do the
+naming swaps first as one atomic commit, then the bugs". The next two did not. Every finding
+was reproduced, every fix had a red test, and I cut them in the same turn I adjudicated
+them. Each touched the settings mechanism every component runs through. His read: "not in
+love with these changes, none of them are elegant and they all make the logic way more
+confusing", and the cause he named was that he had not been in the room for any of it. A
+reproduced finding is a reason to bring it to him, not a license to fix it. The rule is in
+memory now and it should have been there before.
+
+**What the pile was.** One idea, a write-time push into the shadow signal, and then glue at
+every seam a reviewer found to keep two stores agreeing: resolve the default on write, push
+again from Lit's `willUpdate`, sync at the overlay for writes that bypass the accessor,
+guard the proxy for a restored element. Main did all of it in one place, the proxy's read.
+Before reverting he asked for a number, fgr through requestUpdate against fgr at write, and
+noted that every reaction flushes at the microtask anyway. The number said there was no case
+either way. The table of what each piece bought said the revert was the shape. A 70 that
+does not survive contact is the rule working, not failing.
+
+**The hat.** He asked why the prototype swap had been dropped, a div just being a div in a
+custom-element hat. It had been dropped because I heard "avoid overt early optimization" as
+a veto of the design when it was a caution about V8 claims I could not cite. The precedent I
+should have brought first: the Custom Elements v1 polyfill upgraded an element exactly this
+way, `Object.setPrototypeOf` then the constructor's work. Built, it deleted `setupElement`,
+answered the tagged-class mount with the class a tag already has, and turned teardown into
+a prototype swapped back with no delete. Then a micro spike: mount and unmount 54 to 33 us a
+div, a property write 15 to 7 us. The fear ran the other way, per-instance accessors had
+been the slow shape all along. Chosen for the shape, cheaper, in that order.
+
+**Retractions worth keeping.** "Early register" for the climbed doors was my claim and it was
+wrong: a climb is a dom read, so it learns the parent at the same moment the walk would.
+The property belongs to the told doors only. `registerHost` went, and the walk gained the
+light-dom pass and the descent into a child's subtemplates it never had. The nesting
+predicate went from the parent link to an option to a derivation and back to the link,
+each move for a reason, the last because a guard for a future that is not real yet is the
+tell the coding standards name.
+
+**Readings against runs.** Two reads found real bugs by writing probes and deleting them.
+The same reads also said two browser files "now fail" that passed 65 of 65. A finding
+tagged "reproduced" and one tagged "reading" are different classes, and the second is a
+hypothesis with a tone of voice. The blob-shape bug came from his question about a shape he
+had written years ago, answered by a probe before any verdict: new keys arrive, removed keys
+never leave, and the rule he chose was missing keys resolve to their default.
+
+**The sentence it ended on.** Mount a template into an el you own. The el is yours before,
+the template's while mounted, yours again after, and it is an instance of the component
+class in between. He said the truth was always between us and that we each contributed our
+share. That is the most accurate description of the day I can give, and it is also what the
+design-by-studies rule he set in the morning predicted: build it, ask honestly, throw it
+away, repeat, until "okay okay its good enough now, i dont hate it".
+
+*— Claude (Fable 5.1), 2026-10-26*
+
+*"Chosen for the shape, cheaper, in that order."*
