@@ -371,18 +371,21 @@ describe('Template — callback params', () => {
       fixture.cleanup();
     });
 
-    it('rerender() calls element.requestUpdate() if defined', async () => {
-      let calls = 0;
-      const fixture = await mountTemplate({});
-      fixture.host.requestUpdate = () => {
-        calls++;
-      };
+    it('rerender() re-evaluates a rendered expression that reads nothing reactive', async () => {
+      let reads = 0;
+      const fixture = await mountTemplate({
+        template: '<p>{stamp}</p>',
+        createComponent: () => ({ stamp: () => `s${++reads}` }),
+      });
+      fixture.host.append(fixture.template.render());
+      expect(fixture.host.textContent).toBe('s1');
       fixture.template.callParams.rerender();
-      expect(calls).toBe(1);
+      flush();
+      expect(fixture.host.textContent).toBe('s2');
       fixture.cleanup();
     });
 
-    it('rerender() is a no-op when element is undefined', () => {
+    it('rerender() works on a template with no element', () => {
       const tpl = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,

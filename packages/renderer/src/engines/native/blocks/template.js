@@ -35,11 +35,10 @@ const { throwError } = createErrors({ namespace: 'renderer' });
   getter descriptors. Each reactiveData entry's getter evaluates its
   expression at access time, so source-signal deps register on whichever
   Reaction is current at that read, the binding's own Reaction. A
-  subtemplate's record under a subtemplate caller also registers the
-  caller's data version, which is how a replacement of the caller's
-  context as a unit (its own data= call) reaches the props it passed on.
-  A snippet's bindings run on the caller's renderer and track that version
-  already. Per-key isolation is structural. A binding that reads
+  subtemplate's record also registers the caller's data version, which is
+  how a plain key changing in the caller's context reaches the props it
+  passed on. A snippet's bindings run on the caller's renderer and track
+  that version already. Per-key isolation is structural. A binding that reads
   record.label registers labelVal, a sibling binding reading record.status
   registers statusVal, and mutating labelVal wakes only the label binding.
 
@@ -279,7 +278,7 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
       parentData,
       evaluator: self.evaluator,
       target: node.inheritsData ? extend({}, parentData, blob) : blob,
-      callerDep: self.callerDep,
+      callerDep: self.dataDep,
     });
   }
   if (!Object.hasOwn(instance.data, DECLARED_KEYS)) {
@@ -327,7 +326,7 @@ function setupSettingsMirror({ node, data, scope, region, self }) {
 
   self.settingsScope = scope.child();
   self.settingsScope.reaction(region.anchor, () => {
-    self.callerDep?.depend();
+    self.dataDep.depend();
     for (const key of settingsKeys) {
       const expr = node.reactiveData[key];
       settingsProxy[key] = self.evaluator.lookupExpressionValue(expr, data);
@@ -363,8 +362,6 @@ const templateBlock = defineBlock({
       snippets: renderer.snippets,
       parentTemplate: renderer.template,
       dataDep: renderer.dataDep,
-      // the data version a passed prop follows when the caller is itself a subtemplate
-      callerDep: renderer.receivesData ? renderer.dataDep : null,
       templateType: null,
       currentTemplateId: null,
       currentSnippet: null,
@@ -500,13 +497,7 @@ const templateBlock = defineBlock({
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {
-      // Same template — `instance.render(blobData)` merges blobData into
-      // the instance's dataContext via additionalData, then setDataContext
-      // assigns the full result onto this.data. A separate setDataContext
-      // call here would be a destructive partial sync (small source vs full
-      // target → assignInPlace deletes everything not in blobData), only
-      // for render() to immediately re-assign the full set.
-      self.currentInstance.render(blobData);
+      self.currentInstance.update(blobData);
     }
   },
 

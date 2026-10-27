@@ -256,51 +256,46 @@ describe('Template — setDataContext', () => {
     expect(template.data).toEqual({ a: 1, b: 2 });
   });
 
-  it('sets dataReplaced=true when something changes', () => {
+  it('reports whether a plain key changed', () => {
     const template = new Template({
       data: { a: 1 },
     });
-    template.dataReplaced = false;
-    template.setDataContext({ a: 1, b: 2 });
-    expect(template.dataReplaced).toBe(true);
+    expect(template.setDataContext({ a: 1 })).toBe(false);
+    expect(template.setDataContext({ a: 2 })).toBe(true);
+    expect(template.setDataContext({ b: 2 })).toBe(true);
   });
 
-  it('does not set dataReplaced when nothing changes', () => {
+  it('keeps the keys it was not given', () => {
     const template = new Template({
       data: { a: 1, b: 2 },
     });
-    template.dataReplaced = false;
-    template.setDataContext({ a: 1, b: 2 });
-    expect(template.dataReplaced).toBe(false);
+    template.setDataContext({ a: 3 });
+    expect(template.data).toEqual({ a: 3, b: 2 });
   });
 
-  it('default { rerender: true } resets this.rendered to false', () => {
+  it('leaves a declared setting out of the change report', () => {
+    // a setting reaches the DOM through its own signal, so it never fires the coarse channel
     const template = new Template({
-      data: { a: 1 },
+      data: {},
+      defaultSettings: { label: 'start' },
     });
-    template.rendered = true;
-    template.setDataContext({ a: 2 });
-    expect(template.rendered).toBe(false);
+    template.setParent(new Template({}));
+    expect(template.setDataContext({ label: 'next' })).toBe(false);
+    expect(template.data.label).toBe('next');
+    expect(template.setDataContext({ other: 1 })).toBe(true);
   });
 
-  it('{ rerender: false } preserves this.rendered', () => {
+  it('leaves a getter on this.data in place', () => {
     const template = new Template({
-      data: { a: 1 },
+      data: {},
     });
-    template.rendered = true;
-    template.setDataContext({ a: 2 }, { rerender: false });
-    expect(template.rendered).toBe(true);
-  });
-
-  it('deletes orphaned keys silently', () => {
-    // assignInPlace strips keys not in the source unless preserveExistingKeys
-    // is set; setDataContext does not pass it, so missing keys disappear.
-    const template = new Template({
-      data: { a: 1, b: 2 },
+    Object.defineProperty(template.data, 'live', {
+      get: () => 'live',
+      configurable: true,
+      enumerable: true,
     });
-    template.setDataContext({ a: 1 });
-    expect(template.data).toEqual({ a: 1 });
-    expect('b' in template.data).toBe(false);
+    expect(template.setDataContext({ live: 'replaced' })).toBe(false);
+    expect(template.data.live).toBe('live');
   });
 });
 
@@ -549,27 +544,6 @@ describe('Template — markRendered', () => {
     template.markRendered();
     expect(template.rendered).toBe(true);
     expect(template.destroyed).toBe(false);
-  });
-});
-
-/*-------------------
-   dataReplaced flag
---------------------*/
-
-// The first-render branch in render() never clears dataReplaced — only the
-// follow-up else-if branch does. After the initial walk-through the flag
-// remains stuck-true; pin the current behavior so changes are visible.
-
-describe('Template — dataReplaced flag is sticky on first render', () => {
-  it('first-render walk-through leaves dataReplaced true', () => {
-    const template = new Template({
-      data: { a: 1 },
-    });
-    template.dataReplaced = false;
-    template.setDataContext({ a: 1, b: 2 }, { rerender: false });
-    expect(template.dataReplaced).toBe(true);
-    template.rendered = true;
-    expect(template.dataReplaced).toBe(true);
   });
 });
 

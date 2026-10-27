@@ -185,7 +185,6 @@ export class Renderer {
       snippets,
       helpers,
       isSVG = false,
-      receivesData = false,
       protectedKeys,
     } = {},
   ) {
@@ -197,7 +196,6 @@ export class Renderer {
     this.collectSnippets(this.ast);
     this.helpers = helpers || {};
     this.isSVG = isSVG;
-    this.receivesData = receivesData;
     this.protectedKeys = protectedKeys;
     // Sequential debug ID. Subtree caching would key on hashCode(ast+data)
     // but isn't implemented in the native engine.
@@ -234,15 +232,11 @@ export class Renderer {
     }
   }
 
-  // Look up an expression value — only track dataDep for renderers that receive
-  // data from a parent (subtemplates). Top-level component renderers use
-  // fine-grained Signal tracking and don't need coarse invalidation.
-  // Named to mirror ExpressionEvaluator.lookupExpressionValue; 2-arg positional
-  // because it's in hot reactive loops (per-expression, potentially 100× per render).
+  // every expression read also tracks the data version, the coarse channel a plain key
+  // change fires. named to mirror ExpressionEvaluator.lookupExpressionValue, 2-arg
+  // positional because it runs per expression in hot reactive loops
   lookupExpression(expression, data) {
-    if (this.receivesData) {
-      this.dataDep.depend();
-    }
+    this.dataDep.depend();
     return this.evaluator.lookupExpressionValue(expression, data);
   }
 
@@ -607,7 +601,7 @@ export class Renderer {
     assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData, preserveGetters: true });
   }
 
-  /* This is used only in coarse data invalidation of subtrees where parent cannot track dependencies */
+  // the coarse channel: every binding re-evaluates and every {#rerender} region rebuilds
   bumpDataVersion() {
     this.dataDep.changed();
     this.notifyUpdate();

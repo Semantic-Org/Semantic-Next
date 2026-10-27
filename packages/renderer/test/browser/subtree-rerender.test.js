@@ -286,5 +286,64 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).not.toContain('B:2');
       });
     });
+
+    /*******************************
+        rerender and guard keys
+    *******************************/
+
+    describe('rerender and guard keys', () => {
+      it('rerender rebuilds when a dependency fires even though the key value is unchanged', async () => {
+        const tag = uniqueTag();
+        let builds = 0;
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '{#rerender invalidated}<span>{stamp}</span>{/rerender}',
+          defaultState: { version: 0 },
+          createComponent: ({ state }) => ({
+            invalidated: () => {
+              state.version.get();
+              return 'same';
+            },
+            stamp: () => `build-${++builds}`,
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+        expect(shadowText(el)).toContain('build-1');
+
+        el.template.state.version.increment();
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('build-2');
+      });
+
+      it('guard rebuilds only when the key function returns a different value', async () => {
+        const tag = uniqueTag();
+        let builds = 0;
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '{#guard status}<span>{stamp}</span>{/guard}',
+          defaultState: { id: 1 },
+          createComponent: ({ state }) => ({
+            status: () => (state.id.get() % 2 === 0 ? 'even' : 'odd'),
+            stamp: () => `build-${++builds}`,
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+        expect(shadowText(el)).toContain('build-1');
+
+        el.template.state.id.set(3);
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('build-1');
+
+        el.template.state.id.set(4);
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('build-2');
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

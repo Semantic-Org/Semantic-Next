@@ -5,15 +5,17 @@ import { registerBlock } from './registry.js';
 /*
 
   {#rerender} / {#guard} — both compile to AST node.type === 'rerender'.
-  Guard sets node.key (deep-equality-gated re-render via guard);
-  rerender sets node.expression (any-signal-change re-render via plain
-  lookupExpression).
+  rerender sets node.expression and rebuilds whenever anything the expression
+  read fires, the value is never compared. guard sets node.key and rebuilds
+  only when the key's value changed, by deep equality.
 
 */
 
-function trackDeps({ node, data, lookupExpression, self }) {
+// both read through lookupExpression so a function key is invoked and a plain key
+// updated through the coarse channel reaches the block
+function trackDeps({ node, lookupExpression }) {
   if (node.key) {
-    guard(() => self.evaluator.lookupTokenValue(node.key, data));
+    guard(() => lookupExpression(node.key));
   }
   if (node.expression) {
     lookupExpression(node.expression);
@@ -34,12 +36,6 @@ const rerender = defineBlock({
       : node.key
       ? `{#guard ${node.key}}`
       : '{#rerender}',
-
-  create({ renderer }) {
-    // Capture evaluator so hooks can call lookupTokenValue for the
-    // single-token node.key path — the hook bag doesn't expose it.
-    return { evaluator: renderer.evaluator };
-  },
 
   render(ctx) {
     trackDeps(ctx);
