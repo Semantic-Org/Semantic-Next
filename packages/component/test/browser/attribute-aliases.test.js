@@ -304,6 +304,25 @@ describe('Attribute Alias Resolution', () => {
   *******************************/
 
   describe('converters', () => {
+    it('should give an expert-form setting the converter its type implies', async () => {
+      const tag = uniqueTag();
+      defineComponent({
+        tagName: tag,
+        template: '<div></div>',
+        defaultSettings: {
+          active: { type: Boolean, default: false },
+        },
+      });
+
+      const el = document.createElement(tag);
+      el.setAttribute('active', '');
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      // presence reads as true through the Boolean converter, the same as a plain default
+      expect(el.settings.active).toBe(true);
+    });
+
     it('should apply Boolean fromAttribute converter on kebab alias', async () => {
       const tag = uniqueTag();
       defineComponent({

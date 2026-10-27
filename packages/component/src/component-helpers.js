@@ -72,13 +72,15 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
       // this can either be a settings object or a default value
       // i.e. { foo: 'baz' } // basic
       // or { foo: { type: String, defaultValue: 'baz' } // expert
-      properties[propertyName] = (defaultValue?.type)
-        ? defaultValue
-        : getPropertySettings({
-          name: propertyName,
-          type: defaultValue?.constructor,
-          propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
-        });
+      properties[propertyName] = getPropertySettings(
+        (defaultValue?.type)
+          ? { name: propertyName, ...defaultValue }
+          : {
+            name: propertyName,
+            type: defaultValue?.constructor,
+            propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
+          },
+      );
     });
   }
 
@@ -135,7 +137,7 @@ export function defineAccessors(target, properties) {
   });
 }
 
-export function getPropertySettings({ name, type = String, propertyOnly = false } = {}) {
+export function getPropertySettings({ name, type = String, propertyOnly = false, ...declared } = {}) {
   // converts type = 'string' -> String
   // this is because component spec cannot serialize prototypes in JSON
   if (isString(type)) {
@@ -211,7 +213,8 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
       },
     };
   }
-  return property;
+  // an expert declaration keeps what it said over the defaults its type implies
+  return { ...property, ...declared, type };
 }
 
 /*******************************
