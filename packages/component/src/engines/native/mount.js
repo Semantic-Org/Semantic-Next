@@ -1,6 +1,6 @@
 import { adoptStylesheet, createErrors, each, isDevelopment, isServer, keys, noop } from '@semantic-ui/utils';
 
-import { defineAccessors, getProperties } from '../../component-helpers.js';
+import { defineAccessors, getProperties, getPropertySettings } from '../../component-helpers.js';
 import { WebComponentBase } from './base.js';
 import { createComponent } from './factory.js';
 
@@ -158,11 +158,16 @@ function upgradeElement(el, template, settings, renderRoot) {
     }
   });
   if (keys(undeclared).length) {
-    upgrade.extras = getProperties({ defaultSettings: undeclared });
-    defineAccessors(el, upgrade.extras);
-    each(keys(undeclared), (name) => {
+    upgrade.extras = {};
+    each(undeclared, (value, name) => {
+      upgrade.extras[name] = getPropertySettings({
+        name,
+        type: value?.constructor,
+        propertyOnly: true,
+      });
       el.defaultSettings[name] = undefined;
     });
+    defineAccessors(el, upgrade.extras);
   }
   // seeded in the store rather than through the accessors, so nothing renders early
   each(carried, (value, name) => {

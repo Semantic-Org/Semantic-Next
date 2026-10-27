@@ -88,10 +88,13 @@ describe('Template.mount', () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
-      const row = Row.mount(el, { settings: { extra: 'yes' } });
+      const item = { type: 'invoice', noAccessor: true };
+      const row = Row.mount(el, { settings: { extra: 'yes', item } });
       expect(el.textContent).toContain('default');
       expect(row.getDataContext().extra).toBe('yes');
       expect(el.extra).toBe('yes');
+      expect(el.item).toBe(item);
+      expect(row.settings.item).toBe(item);
     });
 
     it('registers in the template registry and leaves it on unmount', () => {
