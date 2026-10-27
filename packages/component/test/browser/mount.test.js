@@ -187,6 +187,7 @@ describe('Template.mount', () => {
       const row = Row.mount(el, { settings: { label: 'set', extra: 'ephemeral' } });
       row.settings.label = null;
       row.settings.extra = undefined;
+      expect(row.settings.label).toBe('default');
       await tick();
       expect(el.textContent).toContain('default');
       expect(row.settings.extra).toBeUndefined();

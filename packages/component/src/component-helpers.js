@@ -304,12 +304,13 @@ export function createSettingsProxy(el) {
     },
     set: (target, property, value, receiver) => {
       el.setSetting(property, value);
+      const setting = el[property] ?? el.defaultSettings[property];
       let settingSignal = el.settingsVars.get(property);
       if (settingSignal) {
-        settingSignal.set(value);
+        settingSignal.set(setting);
       }
       else {
-        settingSignal = signal(value);
+        settingSignal = signal(setting);
         el.settingsVars.set(property, settingSignal);
       }
       return true;
