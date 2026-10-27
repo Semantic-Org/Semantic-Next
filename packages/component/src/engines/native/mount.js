@@ -170,6 +170,8 @@ function upgradeElement(el, template, settings, renderRoot) {
   return upgrade;
 }
 
+// layers the component class over the element's own tag prototype so a mounted
+// <dialog> or <button> keeps its native methods while carrying the component's stamp
 function getUpgradePrototype(ComponentClass, original) {
   const cache = ComponentClass.upgradePrototypes ??= new WeakMap();
   let proto = cache.get(original);

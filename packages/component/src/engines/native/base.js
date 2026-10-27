@@ -24,11 +24,11 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 const HTMLElementBase = isServer ? class {} : HTMLElement;
 
 class WebComponentBase extends HTMLElementBase {
+  // a mounted element keeps its own tag prototype (HTMLDivElement, HTMLDialogElement)
+  // and carries ComponentClass as its constructor, so instanceof matches both
   static [Symbol.hasInstance](instance) {
     const ctor = instance?.constructor;
-    return ctor === this
-      || Object.prototype.isPrototypeOf.call(this, ctor)
-      || Function.prototype[Symbol.hasInstance].call(this, instance);
+    return Boolean(ctor && (ctor === this || this.isPrototypeOf(ctor)));
   }
 
   constructor() {
