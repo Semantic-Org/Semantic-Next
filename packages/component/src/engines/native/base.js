@@ -210,9 +210,7 @@ class WebComponentBase extends HTMLElementBase {
       }
     }
     this.removeTemplateFromEl();
-    if (this.isLightDOM) {
-      this.restoreElement();
-    }
+    this.restoreElement();
   }
 
   unmount() {
@@ -226,13 +224,16 @@ class WebComponentBase extends HTMLElementBase {
     template.onDestroyed();
     this.renderRoot.replaceChildren();
     this.removeTemplateFromEl();
-    if (this.isLightDOM) {
-      this.restoreElement();
-    }
+    this.restoreElement();
   }
 
+  // only an element upgraded by upgradeElement has an originalPrototype to restore, a custom
+  // element keeps its own
   restoreElement() {
     const original = this.originalPrototype;
+    if (!original) {
+      return;
+    }
     this.originalPrototype = undefined;
     this.teardown();
     Object.setPrototypeOf(this, original);

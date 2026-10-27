@@ -466,6 +466,27 @@ describe('Template.mount', () => {
       expect(Object.hasOwn(el, 'label')).toBe(false);
     });
 
+    it('keeps a custom element its own prototype when it unmounts from light dom', async () => {
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-own-light'),
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'own' },
+      });
+      const el = document.createElement(Tagged.componentTagName);
+      document.body.append(el);
+      await el.rendered;
+      // a defined element rendering into light dom is the roadmap's next rung and does not
+      // exist yet, so its one visible state is set by hand: isLightDOM with an owned identity
+      el.isLightDOM = true;
+      expect(() => el.unmount()).not.toThrow();
+      expect(el instanceof Tagged).toBe(true);
+      expect(el.properties).toBeInstanceOf(Map);
+      el.remove();
+      document.body.append(el);
+      await el.rendered;
+      expect(el.shadowRoot.textContent).toBe('own');
+    });
+
     it('leaves adopted css in place for siblings', () => {
       const Row = defineRow();
       const a = document.createElement('div');
