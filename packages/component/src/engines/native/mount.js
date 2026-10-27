@@ -144,7 +144,8 @@ export function unmount(instance) {
 // property and method assignment). keys an instance carries or a mount passes beyond
 // the class's declaration get accessors of their own and a signal through the defaults
 function upgradeElement(el, template, settings, renderRoot) {
-  const ComponentClass = template.componentClass ??= createComponentClass(template);
+  const source = template.prototypeTemplate || template;
+  const ComponentClass = template.componentClass ??= source.componentClass ??= createComponentClass(source);
   const original = Object.getPrototypeOf(el);
   el.originalPrototype = original;
   Object.setPrototypeOf(el, getUpgradePrototype(ComponentClass, original));

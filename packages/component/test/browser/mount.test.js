@@ -589,6 +589,12 @@ describe('Template.mount', () => {
         Primitive.mount(host, { settings: { emphasis: 'primary' } });
         // the spec the class declared drives uiClasses on a plain element
         expect(host.querySelector('button').className).toBe('primary button');
+
+        const clonedHost = document.createElement('div');
+        document.body.append(clonedHost);
+        Primitive.template.clone({ data: { emphasis: 'secondary' } }).mount(clonedHost);
+        expect(clonedHost.querySelector('button').className).toBe('secondary button');
+        expect(clonedHost.querySelector('button').textContent).toBe('go');
       });
     });
   });

@@ -86,6 +86,8 @@ export const Template = class Template {
     defaultSettings,
     subTemplates,
     createComponent,
+    componentClass,
+    prototypeTemplate,
     parentTemplate, // the parent template when nested, only setParent writes it
     renderingEngine = 'native',
     isPrototype = false,
@@ -122,6 +124,8 @@ export const Template = class Template {
     this.plugins = [];
     this.subTemplates = subTemplates;
     this.createComponent = createComponent;
+    this.componentClass = componentClass;
+    this.prototypeTemplate = prototypeTemplate;
     this.onCreated = noop;
     this.onDestroyed = noop;
     this.onRendered = noop;
@@ -562,6 +566,8 @@ export const Template = class Template {
       parentTemplate: this.parentTemplate,
       onDestroyed: this.onDestroyedCallback,
       createComponent: this.createComponent,
+      componentClass: this.componentClass,
+      prototypeTemplate: this.prototypeTemplate || (this.isPrototype ? this : undefined),
     };
     const templateSettings = {
       ...cloneDefaults,
