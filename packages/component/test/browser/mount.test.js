@@ -416,12 +416,24 @@ describe('Template.mount', () => {
     });
 
     it('reads settings as nothing after unmount instead of throwing', () => {
-      const Row = defineRow();
+      let captured;
+      const Row = defineRow({
+        createComponent: ({ settings }) => {
+          captured = settings;
+          return {};
+        },
+      });
       const el = document.createElement('div');
       document.body.append(el);
       const row = Row.mount(el, { settings: { label: 'gone' } });
+      expect(captured.label).toBe('gone');
       row.unmount();
       expect(row.settings).toBeUndefined();
+      // a proxy captured in a callback outlives the mount, a late read or write finds nothing
+      expect(captured.label).toBeUndefined();
+      captured.label = 'late';
+      expect(captured.label).toBeUndefined();
+      expect(Object.hasOwn(el, 'label')).toBe(false);
     });
 
     it('leaves adopted css in place for siblings', () => {

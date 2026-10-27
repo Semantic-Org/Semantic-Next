@@ -288,8 +288,13 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
 */
 export function createSettingsProxy(el) {
   el.settingsVars = new Map();
+  // the signals map is the proxy's liveness. teardown drops it on unmount, and a proxy a
+  // callback captured before then reads as nothing and ignores writes instead of throwing
   return new Proxy({}, {
     get: (target, property) => {
+      if (!el.settingsVars) {
+        return undefined;
+      }
       const setting = el[property] ?? el.defaultSettings[property];
       let settingSignal = el.settingsVars.get(property);
       if (!settingSignal) {
@@ -303,6 +308,9 @@ export function createSettingsProxy(el) {
       return setting;
     },
     set: (target, property, value, receiver) => {
+      if (!el.settingsVars) {
+        return true;
+      }
       el.setSetting(property, value);
       const setting = el[property] ?? el.defaultSettings[property];
       let settingSignal = el.settingsVars.get(property);
