@@ -250,7 +250,7 @@ function stampScope(region, data) {
 // source-signal deps on the parent's outer Reaction. Reads from later
 // binding-Reaction context still register normally — the wrap only
 // silences the setup path.
-function cloneInstance({ template, templateName, templateData, self, parentData, node }) {
+function cloneInstance({ template, templateName, templateData, self, parentData, node, scope }) {
   const instance = template.clone({
     templateName,
     data: templateData,
@@ -282,6 +282,9 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   }
 
   nonreactive(() => instance.initialize());
+  // the caller's coarse pass reaches the child's bindings through the tree, and the
+  // child unlinks itself when it is destroyed
+  scope.adopt(instance.renderer.scope);
   return instance;
 }
 
@@ -383,6 +386,7 @@ const templateBlock = defineBlock({
       self,
       parentData: data,
       node,
+      scope,
     });
     setupSettingsMirror({ node, data, scope, region, self });
     const fragment = self.currentInstance.render();
@@ -418,6 +422,7 @@ const templateBlock = defineBlock({
       self,
       parentData: data,
       node,
+      scope,
     });
     setupSettingsMirror({ node, data, scope, region, self });
 
@@ -478,6 +483,7 @@ const templateBlock = defineBlock({
         self,
         parentData: data,
         node,
+        scope,
       });
       setupSettingsMirror({ node, data, scope, region, self });
       const fragment = self.currentInstance.render();
