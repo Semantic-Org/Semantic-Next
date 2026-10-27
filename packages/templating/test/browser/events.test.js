@@ -6,10 +6,8 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { registerEngine, Renderer, ServerRenderer } from '@semantic-ui/renderer';
+import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
-
-registerEngine('native', { renderer: Renderer, serverRenderer: ServerRenderer });
 
 afterEach(() => {
   Template.renderedTemplates.clear();

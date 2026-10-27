@@ -138,11 +138,16 @@ export const Template = class Template {
     this.attachStyles = attachStyles;
     this.element = element;
     this.renderingEngine = renderingEngine;
-    // resolved here, not at initialize: mount runs on a prototype, which never initializes
-    this.engine = resolveEngine(renderingEngine);
     if (renderRoot) {
       this.attach(renderRoot);
     }
+  }
+
+  // resolved on first initialize() or mount() so constructing a Template before
+  // registering an engine does not throw, while writing this.engine as a plain own
+  // property so el.template.engine is directly inspectable in DevTools without _engine
+  get resolvedEngine() {
+    return (this.engine ??= resolveEngine(this.renderingEngine));
   }
 
   toDefinition() {
@@ -356,9 +361,10 @@ export const Template = class Template {
       this.reactions.push(stateReaction);
     }
 
-    const RendererClass = (Template.isServer && this.engine.serverRenderer)
-      ? this.engine.serverRenderer
-      : this.engine.renderer;
+    const engine = this.resolvedEngine;
+    const RendererClass = (Template.isServer && engine.serverRenderer)
+      ? engine.serverRenderer
+      : engine.renderer;
     this.renderer = new RendererClass({
       ast: this.ast,
       data: this.overlaySettingsSignals(this.getDataContext()),
@@ -400,14 +406,14 @@ export const Template = class Template {
   // the engine owns every touch of the target, this template never sees it. neither
   // call registers on the reaction that made it, the caller tracked its own reads
   mount(target, options) {
-    return nonreactive(() => this.engine.mount(this, target, options));
+    return nonreactive(() => this.resolvedEngine.mount(this, target, options));
   }
 
   unmount() {
     if (!this.mounted) {
       return;
     }
-    return nonreactive(() => this.engine.unmount(this));
+    return nonreactive(() => this.resolvedEngine.unmount(this));
   }
 
   getDataContext() {

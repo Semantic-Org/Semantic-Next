@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { registerEngine, Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
-
-registerEngine('native', { renderer: Renderer, serverRenderer: ServerRenderer });
 
 describe('Template', () => {
   /*******************************
