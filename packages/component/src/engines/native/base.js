@@ -97,11 +97,9 @@ class WebComponentBase extends HTMLElementBase {
     this.isCustomElement = !isLightDOM;
     this.properties = new Map();
     this.renderRoot = renderRoot;
-    // the stamps mount writes later, declared here so a setting passed at mount cannot
+    // the stamps mount writes later start out present, so a setting passed at mount cannot
     // take their names
-    this.template = undefined;
-    this.component = undefined;
-    this.dataContext = undefined;
+    this.removeTemplateFromEl();
 
     // If the element has a declarative shadow root (created by DSD parsing),
     // suppress requestUpdate until hydration completes — attribute parsing
