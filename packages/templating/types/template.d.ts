@@ -891,7 +891,7 @@ export class Template {
    * @param renderRoot - The root element (ShadowRoot or HTMLElement) to attach to.
    * @param options - Attach settings
    */
-  attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): Promise<void>;
+  attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): void;
 
   /**
    * Mounts this template into a target element or shadow root. Calling `mount` on a
@@ -928,7 +928,7 @@ export class Template {
   /**
    * Adopts the template's stylesheet to the renderRoot (if using a ShadowRoot).
    */
-  adoptStylesheet(): Promise<void>;
+  adoptStylesheet(): void;
 
   /**
    * Creates a clone of the template with optional overrides.

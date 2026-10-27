@@ -2,7 +2,7 @@ import { $ } from '@semantic-ui/query';
 import { reaction } from '@semantic-ui/reactivity';
 import { Renderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LitEngine } from '../../src/engines/lit/register.js';
 import { NativeEngine } from '../../src/engines/native/register.js';
@@ -788,6 +788,27 @@ describe('Template.mount', () => {
       const again = Row.mount(el, { settings: { label: 'again' } });
       expect(el.textContent).toContain('again');
       expect(() => again.unmount()).toThrow('destroyed boom');
+    });
+
+    it('discards a mount whose event binding throws, and the throw reaches the caller', () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      const bind = vi.spyOn(Template.prototype, 'attachEvents').mockImplementation(() => {
+        throw new Error('bind boom');
+      });
+      try {
+        expect(() => Row.mount(el)).toThrow('bind boom');
+      }
+      finally {
+        bind.mockRestore();
+      }
+      expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
+      expect(el.template).toBeUndefined();
+      expect(el.textContent).toBe('');
+      const row = Row.mount(el, { settings: { label: 'after' } });
+      expect(el.textContent).toContain('after');
+      row.unmount();
     });
 
     it('refuses an anchor until the range form exists', () => {

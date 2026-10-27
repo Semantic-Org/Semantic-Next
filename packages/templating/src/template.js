@@ -379,7 +379,7 @@ export const Template = class Template {
     this.onCreated();
   }
 
-  async attach(
+  attach(
     renderRoot,
     { parentNode = renderRoot, startNode, endNode } = {},
   ) {
@@ -399,7 +399,7 @@ export const Template = class Template {
     this.attachEvents();
     this.bindKeys();
     if (this.attachStyles) {
-      await this.adoptStylesheet();
+      this.adoptStylesheet();
     }
   }
 
@@ -471,7 +471,7 @@ export const Template = class Template {
     return context;
   }
 
-  async adoptStylesheet() {
+  adoptStylesheet() {
     if (!this.css || !this.renderRoot?.adoptedStyleSheets) {
       return;
     }
