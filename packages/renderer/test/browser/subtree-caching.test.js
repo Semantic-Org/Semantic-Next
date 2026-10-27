@@ -1557,6 +1557,58 @@ RENDERING_ENGINES.forEach(engine => {
         expect(el.shadowRoot.querySelector('li').className).toContain('completed');
       });
 
+      it('renders a child with declared settings once per parent change', async () => {
+        const tag = uniqueTag(engine, 'sub-once');
+        let getDataCalls = 0;
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          defaultSettings: { label: 'd' },
+          template: '<span>{label}</span>',
+          createComponent: ({ settings }) => ({
+            setLocal() {
+              settings.label = 'local';
+            },
+          }),
+        });
+
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: "{> template name='child' data=getData}",
+          defaultState: { labelVal: 'init' },
+          createComponent: ({ state }) => ({
+            getData: () => {
+              getDataCalls++;
+              return { label: state.labelVal.get() };
+            },
+          }),
+          subTemplates: { child },
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await settle(el);
+        expect(shadowText(el)).toBe('<span>init</span>');
+
+        getDataCalls = 0;
+        el.template.state.labelVal.set('v1');
+        await settle(el);
+        expect(shadowText(el)).toBe('<span>v1</span>');
+        expect(getDataCalls).toBe(1);
+
+        // mutating the child's own setting must not wake the parent's data reaction
+        el.template.findChildren()[0].setLocal();
+        await settle(el);
+        expect(shadowText(el)).toBe('<span>local</span>');
+        expect(getDataCalls).toBe(1);
+
+        el.template.state.labelVal.set('v2');
+        await settle(el);
+        expect(shadowText(el)).toBe('<span>v2</span>');
+        expect(getDataCalls).toBe(2);
+      });
+
       it('should use default value when parent does not pass a setting', async () => {
         const tag = uniqueTag(engine, 'sub-defaults');
 
