@@ -3,6 +3,7 @@ import {
   adoptStylesheet,
   createErrors,
   each,
+  inArray,
   isDevelopment,
   isFunction,
   isServer,
@@ -33,7 +34,6 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 
 const HTMLElementBase = isServer ? class {} : HTMLElement;
 const { throwError } = createErrors({ namespace: 'component' });
-let baseDescriptors;
 
 class WebComponentBase extends HTMLElementBase {
   // a mounted element keeps its own tag prototype (HTMLDivElement, HTMLDialogElement)
@@ -62,6 +62,9 @@ class WebComponentBase extends HTMLElementBase {
     }
   }
 
+  // the base's own prototype descriptors, read once and shared by every upgrade prototype
+  static baseDescriptors;
+
   // layers the component class over the element's native tag prototype so a mounted
   // <dialog> can still call native methods like showModal() and close() while taking on
   // the custom element's properties and methods like settings, requestUpdate(), and $,
@@ -70,9 +73,9 @@ class WebComponentBase extends HTMLElementBase {
     const cache = this.upgradePrototypes ??= new WeakMap();
     let proto = cache.get(original);
     if (!proto) {
-      baseDescriptors ??= Object.getOwnPropertyDescriptors(WebComponentBase.prototype);
+      WebComponentBase.baseDescriptors ??= Object.getOwnPropertyDescriptors(WebComponentBase.prototype);
       proto = Object.create(original, {
-        ...baseDescriptors,
+        ...WebComponentBase.baseDescriptors,
         ...Object.getOwnPropertyDescriptors(this.prototype),
       });
       cache.set(original, proto);
@@ -87,8 +90,6 @@ class WebComponentBase extends HTMLElementBase {
 
   // shared constructor logic for custom element upgrades and light DOM mounts
   construct({ isLightDOM = false, settings, renderRoot } = {}) {
-    // initialize all instance fields via teardown() so `name in this` sees the full field set
-    this.teardown();
     this.isLightDOM = isLightDOM;
     this.isCustomElement = !isLightDOM;
     this.properties = new Map();
@@ -122,7 +123,7 @@ class WebComponentBase extends HTMLElementBase {
       each(settings, (value, name) => {
         if (!resolvedProperties || !(name in resolvedProperties)) {
           // refuse undeclared settings that would shadow an existing element property or method
-          if (name in this) {
+          if (name in this || inArray(name, WebComponentBase.fields)) {
             throwError('reservedSetting', 'Template.mount', {
               explanation: isDevelopment
                 ? `setting '${name}' is already a property of the element. Pass it under another name`
@@ -237,30 +238,40 @@ class WebComponentBase extends HTMLElementBase {
     Object.setPrototypeOf(this, original);
   }
 
-  // resets all instance fields to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
+  // instance fields the base manages: zeroed on teardown and reserved against undeclared
+  // mount settings
+  static fields = [
+    'template',
+    'component',
+    'dataContext',
+    'isLightDOM',
+    'isCustomElement',
+    'properties',
+    'renderRoot',
+    'isHydrating',
+    'css',
+    'componentSpec',
+    'settings',
+    'settingsVars',
+    'uiClasses',
+    'defaultSettings',
+    'extraProperties',
+    'updateScheduled',
+    'pendingRender',
+  ];
+
+  // resets every instance field to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
   teardown() {
-    this.removeTemplateFromEl();
     if (this.extraProperties) {
       each(this.extraProperties, (config, name) => {
         if (!config.noAccessor) {
           delete this[name];
         }
       });
-      this.extraProperties = undefined;
     }
-    this.isLightDOM = undefined;
-    this.isCustomElement = undefined;
-    this.properties = undefined;
-    this.renderRoot = undefined;
-    this.isHydrating = undefined;
-    this.css = undefined;
-    this.componentSpec = undefined;
-    this.settings = undefined;
-    this.settingsVars = undefined;
-    this.uiClasses = undefined;
-    this.defaultSettings = undefined;
-    this.updateScheduled = undefined;
-    this.pendingRender = undefined;
+    each(WebComponentBase.fields, (name) => {
+      this[name] = undefined;
+    });
   }
 
   connectedCallback() {

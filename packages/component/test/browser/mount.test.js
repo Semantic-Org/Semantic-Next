@@ -836,6 +836,35 @@ describe('Template.mount', () => {
       await tick();
       expect(el.shadowRoot.textContent).toBe('after-append');
     });
+
+    it('leaves a fresh element without the fields it has not written yet', async () => {
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-fresh'),
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'initial' },
+      });
+      const el = document.createElement(Tagged.componentTagName);
+      // names the base writes later, or only on a mount or a spec component, so a fresh
+      // element shows none of them as undefined in devtools
+      const unwritten = [
+        'template',
+        'component',
+        'dataContext',
+        'isHydrating',
+        'uiClasses',
+        'extraProperties',
+        'updateScheduled',
+        'pendingRender',
+      ];
+      for (const name of unwritten) {
+        expect(Object.hasOwn(el, name)).toBe(false);
+      }
+      document.body.append(el);
+      await el.rendered;
+      for (const name of ['isHydrating', 'uiClasses', 'extraProperties']) {
+        expect(Object.hasOwn(el, name)).toBe(false);
+      }
+    });
   });
 
   describe('reactivity hygiene', () => {
