@@ -5,7 +5,7 @@ title: Template
 icon: file-text
 description: API reference for the Template class in Semantic UI Templating
 package: '@semantic-ui/templating'
-methods: ['initialize', 'render', 'setDataContext', 'clone', 'attachEvents']
+methods: ['initialize', 'mount', 'unmount', 'render', 'setDataContext', 'clone', 'attachEvents']
 ---
 
 The `Template` class represents a compiled template and provides methods for manipulating and rendering it. It integrates with the Semantic UI component system and supports various rendering engines.
@@ -138,6 +138,66 @@ const template = new Template({
 });
 
 template.initialize();
+```
+
+### mount
+
+Mounts the template into a DOM element or shadow root. Calling `mount` on a prototype template clones an instance and mounts the clone. A plain element is upgraded with the component class while mounted so `el.settings`, property accessors, `el.$()`, and `el.unmount()` work directly on the element.
+
+#### Syntax
+```javascript
+template.mount(target, options);
+```
+
+#### Parameters
+| Name    | Type                  | Description                                        |
+|---------|-----------------------|----------------------------------------------------|
+| target  | Element \| ShadowRoot | Element or shadow root whose contents are replaced |
+| options | Object                | Optional mount configuration                       |
+
+##### Options
+
+| Name     | Type        | Description                                                |
+|----------|-------------|------------------------------------------------------------|
+| settings | Object      | Initial settings merged over declared defaults             |
+| signal   | AbortSignal | Unmounts the template automatically when the signal aborts |
+
+#### Returns
+`Template` - The mounted template instance.
+
+#### Usage
+```javascript
+import { defineComponent } from '@semantic-ui/component';
+
+const UserCard = defineComponent({
+  template: '<div class="card">{name}</div>',
+  defaultSettings: { name: 'Anonymous' },
+});
+
+const el = document.querySelector('#card');
+const card = UserCard.mount(el, {
+  settings: { name: 'Ada' },
+});
+
+el.name = 'Grace';
+```
+
+### unmount
+
+Tears down a mounted template, fires `onDestroyed`, clears the rendered nodes from `target`, and restores `target`'s prototype and properties if it was upgraded in light DOM.
+
+#### Syntax
+```javascript
+template.unmount();
+```
+
+#### Usage
+```javascript
+const card = UserCard.mount(el, {
+  settings: { name: 'Ada' },
+});
+
+card.unmount();
 ```
 
 ### render

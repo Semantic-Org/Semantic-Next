@@ -5,7 +5,7 @@ title: Web Component Base
 icon: box
 description: API reference for the WebComponentBase class in Semantic UI Component system
 package: "@semantic-ui/component"
-methods: ["getProperties", "getPropertySettings", "addRenderCallback", "setDefaultSettings", "getSettingsFromConfig", "createSettingsProxy", "getUIClasses", "isDarkMode", "$", "$$", "call"]
+methods: ["getProperties", "getPropertySettings", "mount", "unmount", "render", "update", "requestUpdate", "addRenderCallback", "setDefaultSettings", "getSettingsFromConfig", "createSettingsProxy", "getUIClasses", "isDarkMode", "$", "$$", "call"]
 ---
 
 `WebComponentBase` is the base web component class used to create web components with `defineComponent`. It handles internal utilities related to component lifecycle and other internals of the framework.
@@ -27,9 +27,22 @@ import { WebComponentBase } from '@semantic-ui/component';
 
 ## Instance Properties
 
-| Name            | Type    | Description                                     |
-|-----------------|---------|--------------------------------------------------|
-| renderCallbacks | Array   | Array of callbacks to be executed after rendering |
+| Name            | Type          | Description                                                                 |
+|-----------------|---------------|-----------------------------------------------------------------------------|
+| template        | Template      | Mounted template instance for this element                                  |
+| component       | Object        | Instance object returned by `createComponent`                               |
+| dataContext     | Object        | Merged data context used for rendering                                      |
+| settings        | Proxy         | Reactive settings proxy                                                     |
+| isMounted       | boolean       | `true` while a template is mounted on this element                          |
+| isRendered      | boolean       | `true` once the template has completed its initial render                   |
+| isLightDOM      | boolean       | `true` when mounted onto a plain element via `mount()`                      |
+| isCustomElement | boolean       | `true` when instantiated as a registered custom element                     |
+| created         | Promise       | Resolves after `onCreated` runs                                             |
+| rendered        | Promise       | Resolves after `onRendered` runs                                            |
+| updated         | Promise       | Resolves after the next `onUpdated`, or immediately if no update is pending |
+| destroyed       | Promise       | Resolves after `onDestroyed` runs                                           |
+| updateComplete  | Promise       | Resolves once any scheduled update has flushed                              |
+| renderCallbacks | Array         | Array of callbacks executed after rendering (`lit` engine only)             |
 
 ## Static Methods
 
@@ -104,6 +117,87 @@ const propConfig = WebComponentBase.getPropertySettings(
 ```
 
 ## Instance Methods
+
+### mount
+
+```javascript
+mount(template, { signal } = {});
+```
+
+Mounts a template into this element's `renderRoot` and returns the mounted `Template` instance.
+
+#### Parameters
+
+| Name     | Type     | Description                          |
+|----------|----------|--------------------------------------|
+| template | Template | Prototype or instance template       |
+| options  | Object   | Optional mount configuration         |
+
+##### Options
+
+| Name   | Type        | Description                                                |
+|--------|-------------|------------------------------------------------------------|
+| signal | AbortSignal | Unmounts the template automatically when the signal aborts |
+
+#### Returns
+
+`Template` - The mounted template instance.
+
+### unmount
+
+```javascript
+unmount();
+```
+
+Tears down the mounted template, fires `onDestroyed`, clears `renderRoot`, and restores the element's original prototype and properties if it was upgraded in light DOM.
+
+#### Usage
+
+```javascript
+const Row = defineComponent({
+  template: '<div class="row">{label}</div>',
+  defaultSettings: { label: 'Hello' },
+});
+
+Row.mount(el, { settings: { label: 'Mounted' } });
+el.unmount();
+```
+
+### render
+
+```javascript
+render(data);
+```
+
+Renders or updates the element's template with optional additional data (defaults to `this.getData()`).
+
+#### Parameters
+
+| Name | Type   | Description                           |
+|------|--------|---------------------------------------|
+| data | Object | Optional data merged into the context |
+
+### update
+
+```javascript
+update(data);
+```
+
+Updates the element's template with optional additional data. Alias for `render(data)`.
+
+#### Parameters
+
+| Name | Type   | Description                           |
+|------|--------|---------------------------------------|
+| data | Object | Optional data merged into the context |
+
+### requestUpdate
+
+```javascript
+requestUpdate();
+```
+
+Schedules a coalesced update on the next microtask.
 
 ### addRenderCallback
 

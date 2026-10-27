@@ -13,6 +13,8 @@ An engine is a plain object with three keys, registered under a name. The framew
 | `factory` | function | `defineComponent`, to build the custom element class |
 | `renderer` | class | `Template.initialize()`, to render on the client |
 | `serverRenderer` | class | `Template.initialize()`, to render to a string. Optional |
+| `mount` | function | `Template.mount()`, to mount into an element or shadow root. Optional |
+| `unmount` | function | `Template.unmount()`, to tear down a mounted template. Optional |
 
 Without a `serverRenderer` an engine falls back to its client renderer on the server, which is why `lit` omits one.
 
