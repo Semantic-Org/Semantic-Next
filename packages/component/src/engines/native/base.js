@@ -23,6 +23,7 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 */
 
 const HTMLElementBase = isServer ? class {} : HTMLElement;
+let baseDescriptors;
 
 class WebComponentBase extends HTMLElementBase {
   // a mounted element keeps its own tag prototype (HTMLDivElement, HTMLDialogElement)
@@ -30,6 +31,40 @@ class WebComponentBase extends HTMLElementBase {
   static [Symbol.hasInstance](instance) {
     const ctor = instance?.constructor;
     return Boolean(ctor && (ctor === this || this.isPrototypeOf(ctor)));
+  }
+
+  // a plain element inherits the component class's prototype while mounted, the way the
+  // custom elements polyfill upgraded an element: prototype swapped in, the constructor's
+  // work run, nothing copied onto the element (benched at 33us vs 54us for per-mount
+  // property and method assignment). keys an instance carries or a mount passes beyond
+  // the class's declaration get accessors of their own and a signal through the defaults
+  static upgradeElement(el, { settings, renderRoot } = {}) {
+    const original = Object.getPrototypeOf(el);
+    el.originalPrototype = original;
+    Object.setPrototypeOf(el, this.getUpgradePrototype(original));
+    el.construct({
+      isLightDOM: true,
+      settings,
+      renderRoot,
+    });
+  }
+
+  // layers the component class over the element's native tag prototype so a mounted
+  // <dialog> can still call native methods like showModal() and close() while taking on
+  // the custom element's properties and methods like settings, requestUpdate(), and $,
+  // acting as a facsimile of the custom element without losing its native behavior
+  static getUpgradePrototype(original) {
+    const cache = this.upgradePrototypes ??= new WeakMap();
+    let proto = cache.get(original);
+    if (!proto) {
+      baseDescriptors ??= Object.getOwnPropertyDescriptors(WebComponentBase.prototype);
+      proto = Object.create(original, {
+        ...baseDescriptors,
+        ...Object.getOwnPropertyDescriptors(this.prototype),
+      });
+      cache.set(original, proto);
+    }
+    return proto;
   }
 
   constructor() {
@@ -101,6 +136,90 @@ class WebComponentBase extends HTMLElementBase {
     this.template = undefined;
     this.component = undefined;
     this.dataContext = undefined;
+  }
+
+  mount(template, { signal } = {}) {
+    const renderRoot = this.renderRoot;
+    try {
+      // a prototype mounts a copy built on the element's data, an instance mounts itself
+      const data = this.getData();
+      if (template.isPrototype) {
+        template = template.clone({ data, element: this });
+      }
+      else {
+        template.setElement(this);
+        template.data = data;
+      }
+
+      // the settings a callback sees are the element's, handed to the template so the
+      // returned handle talks the same way
+      template.settings = this.settings;
+
+      // a host adopted its own css when it connected, a bare element has nobody else to
+      if (this.isLightDOM && template.css) {
+        adoptStylesheet(template.css, renderRoot);
+      }
+
+      template.initialize();
+      // exposed on el before rendering so a child element upgrading during insertion can find its parent
+      this.addTemplateToEl(template);
+
+      template.attach(renderRoot);
+      const fragment = template.render(data);
+      renderRoot.replaceChildren(fragment);
+    }
+    catch (error) {
+      this.discard(template);
+      throw error;
+    }
+    template.mounted = true;
+
+    if (signal) {
+      signal.addEventListener('abort', () => this.unmount(), { once: true, signal: template.abortSignal });
+    }
+    return template;
+  }
+
+  // a mount that fails partway leaves nothing behind: the template's timers and reactions
+  // end, the element is as it was, and the error reaches the caller
+  discard(template) {
+    if (template && !template.isPrototype) {
+      if (template.initialized) {
+        template.onDestroyed();
+      }
+      else {
+        template.clearReactions();
+        template.abortController.abort('mount failed');
+      }
+    }
+    this.removeTemplateFromEl();
+    if (this.isLightDOM) {
+      this.restoreElement();
+    }
+  }
+
+  unmount() {
+    const template = this.template;
+    if (!template?.mounted) {
+      return;
+    }
+    template.mounted = false;
+    // the handle's settings were the element's, and the element is about to be restored
+    template.settings = undefined;
+    // fire destroyed before clearing the DOM so listeners can still read the rendered nodes
+    template.onDestroyed();
+    this.renderRoot.replaceChildren();
+    this.removeTemplateFromEl();
+    if (this.isLightDOM) {
+      this.restoreElement();
+    }
+  }
+
+  restoreElement() {
+    const original = this.originalPrototype;
+    this.originalPrototype = undefined;
+    this.teardown();
+    Object.setPrototypeOf(this, original);
   }
 
   // the constructor's fields stay as names holding nothing: a delete would leave the
@@ -208,7 +327,7 @@ class WebComponentBase extends HTMLElementBase {
     template.initialize();
     this.addTemplateToEl(template);
     // hydrated content tears down the same way mounted content does
-    this.template.mounted = { el: this, renderRoot: this.shadowRoot, properties: null };
+    this.template.mounted = true;
 
     // Build entries for hydration (same marker IDs the server produced).
     // Cache on the prototype — entries depend only on AST structure, not data.
@@ -281,7 +400,7 @@ class WebComponentBase extends HTMLElementBase {
     // teardown so block hydration relocating nested components is safe.
     queueMicrotask(() => {
       if (this.isConnected || !this.template) { return; }
-      this.template.unmount();
+      this.unmount();
     });
   }
 

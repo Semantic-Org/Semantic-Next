@@ -138,8 +138,20 @@ export declare class WebComponentBase extends HTMLElement {
   /** Current property values, backing the accessors the factory installs. */
   properties: Map<string, any>;
 
+  /** True when mounted onto a light DOM element via `Template.mount()`. */
+  isLightDOM?: boolean;
+
+  /** True when instantiated as a registered custom element, `false` when mounted onto a plain element. */
+  isCustomElement?: boolean;
+
   /** True between declarative shadow DOM parsing and the end of `hydrate`. */
   isHydrating?: boolean;
+
+  /** Mounts a template into this element's renderRoot. */
+  mount(template: Template, options?: { signal?: AbortSignal; }): Template;
+
+  /** Tears down the mounted template and restores the element if it was upgraded in light DOM. */
+  unmount(): void;
 
   /** Computes the `{uiClasses}` string. Only present for spec-driven components. */
   uiClasses?: () => string | undefined;

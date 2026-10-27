@@ -373,8 +373,23 @@ describe('Template.mount', () => {
       expect(el.settings).toBeUndefined();
       expect('label' in el).toBe(false);
       expect(row.destroyed).toBe(true);
-      expect(row.mounted).toBeNull();
+      expect(row.mounted).toBe(false);
       expect(() => row.unmount()).not.toThrow();
+    });
+
+    it('unmounts directly from the element', () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      const row = Row.mount(el, { settings: { label: 'gone' } });
+
+      el.unmount();
+
+      expect(el.childNodes.length).toBe(0);
+      expect(el.template).toBeUndefined();
+      expect(el.unmount).toBeUndefined();
+      expect(row.destroyed).toBe(true);
+      expect(row.mounted).toBe(false);
     });
 
     it('reads settings as nothing after unmount instead of throwing', () => {

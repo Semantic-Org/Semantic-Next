@@ -704,19 +704,6 @@ export interface MountSettings {
   anchor?: Node;
 }
 
-/** What the engine put in place for a mounted template, read back by `unmount`. */
-export interface MountRecord {
-  /** The element that carries `template`, `component` and `dataContext`. */
-  el: Element;
-  /** Where the content was rendered: the element itself, or a host's shadow root. */
-  renderRoot: Element | ShadowRoot;
-  /**
-   * What the upgrade of a bare element has to undo: its original prototype, and accessors
-   * for keys the mount declared beyond the class. `null` when the host built itself.
-   */
-  upgrade: { original: object; extras: Record<string, any> | null; } | null;
-}
-
 export class Template {
   /** Static counter for the total number of templates created. */
   static templateCount: number;
@@ -761,8 +748,8 @@ export class Template {
   onThemeChangedCallback: (params: CallParams) => void;
   /** The parent template when nested. Set through `setParent` by the renderer. */
   parentTemplate?: Template;
-  /** Set by the engine while mounted through {@link mount}, `null` once unmounted. */
-  mounted?: MountRecord | null;
+  /** True while mounted through {@link mount}, `false` once unmounted. */
+  mounted?: boolean;
   /** Array of reactive reactions associated with the template. */
   reactions: Reaction[];
   /** Mutation observers watching for theme changes, disconnected on destroy. */
