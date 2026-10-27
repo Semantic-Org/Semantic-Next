@@ -154,9 +154,9 @@ scope.reaction(node, (comp) => {
 
 Delegated to `ExpressionEvaluator` (shared across all engines). Handles Lisp-style expressions (`{formatDate date 'h:mm a'}`), JS expressions (`{value + 1}`), mixed syntax, deep property access, Signal auto-unwrapping, and helper resolution.
 
-### Subtree propagation via `dataDep`
+### The coarse channel
 
-Every renderer holds a `Dependency` (`this.dataDep`) and every `lookupExpression()` call tracks it. `bumpDataVersion()` fires it: every binding re-evaluates and every `{#rerender}` region rebuilds. `Template.update()` fires it when a plain key changed, one with no signal behind it, and `rerender()` fires it on demand. Signals never go through it: a setting or state change wakes only the bindings that read it.
+The renderer owns every binding reaction in its `ReactionScope` tree, so the coarse channel is a walk: `bumpDataVersion()` invalidates every reaction in the tree, every binding re-evaluates, every `{#rerender}` region rebuilds, and a subtemplate block passes the pass down to its child. No binding subscribes to anything for this, so a binding pays nothing per run to be reachable. `Template.update()` fires it when a plain key changed, one with no signal behind it, and `rerender()` fires it on demand. Signals never go through it: a setting or state change wakes only the bindings that read it.
 
 ### `skipFirstWrite` flag
 
@@ -281,7 +281,7 @@ Without recovery, hook throws propagate so failures are loud — the browser log
 | `conditional.js` | `if` | Linear branch match. `matchIndex` = `MAIN_BRANCH_INDEX` (1000) for main body, ≥0 for branches. Server stamps `serverMeta.branchIndex` on the closing marker; mismatch triggers a re-render with a dev warning (env guards `isClient`/`isServer` exempted). |
 | `each.js` | `each` | Keyed reconciliation with per-item `Signal` + Proxy + per-item start/end text-node markers. `WeakSet itemContextProxies` replaces the old `__isItemProxy` flag; `template.js` checks via `isItemContext()` import. Snapshot-based dirty detection avoids full deep-equality on the steady-state path. |
 | `async.js` | `async` | Three states (loading / success / error). Generation counter discards stale promise resolutions. Recovery wraps sync throws and dispatches into `errorContent` via the `error` hook. |
-| `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type and read through `lookupExpression`. rerender rebuilds whenever anything the expression read fires, the value is never compared. guard wraps the read in `guard` and rebuilds only when the key's value changed. |
+| `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type and read through `lookupExpression`. rerender rebuilds on every wake, a signal or the coarse channel, the value is never compared. guard keeps the last key value on the block and rebuilds only when it changed, by deep equality. |
 | `template.js` | `template` | `{>name}` — handles BOTH snippets and subtemplates. Kind detected once on first render (`renderer.snippets[name]` check) and locked on `self.kind`. |
 | `expression.js` | `expression` | Text-position `{expr}` markers. Reactive text node, with unsafeHTML / literal handling. |
 | `raw-text.js` | `rawText` | Raw-text element bodies (`script`/`style`/`textarea`) where comment markers can't live. |
