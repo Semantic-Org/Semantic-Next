@@ -854,7 +854,7 @@ describe('Template.mount', () => {
         'uiClasses',
         'extraProperties',
         'updateScheduled',
-        'pendingRender',
+        'isUpdatePending',
       ];
       for (const name of unwritten) {
         expect(Object.hasOwn(el, name)).toBe(false);
