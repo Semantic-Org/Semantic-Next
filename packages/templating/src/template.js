@@ -33,7 +33,6 @@ import {
   isObject,
   isServer,
   kebabToCamel,
-  keys,
   mapObject,
   noop,
   remove,
@@ -1220,16 +1219,25 @@ export const Template = class Template {
   // syncs declared settings passed to render(additionalData) into the backing settings store
   // without converting untouched defaults into own properties or scheduling a second render
   updateSettings(additionalData = {}) {
-    const settings = this.settings || this.element?.settings;
-    const declared = this.isSubtemplate() ? this.defaultSettings : this.element?.defaultSettings;
-    if (!settings || !declared) {
+    if (this.isSubtemplate()) {
+      if (!this.settings || !this.defaultSettings) {
+        return;
+      }
+      each(this.defaultSettings, (_, name) => {
+        if (name in additionalData) {
+          this.settings[name] = additionalData[name];
+        }
+      });
       return;
     }
-    const el = !this.isSubtemplate() && this.element;
-    const resolvedProperties = el?.constructor?.config?.resolvedProperties;
-    each(keys(declared), (name) => {
-      if (name in additionalData && additionalData[name] !== settings[name]) {
-        if (el?.properties) {
+    const el = this.element;
+    if (!el?.settings || !el.defaultSettings) {
+      return;
+    }
+    const resolvedProperties = el.constructor?.config?.resolvedProperties;
+    each(el.defaultSettings, (_, name) => {
+      if (name in additionalData && additionalData[name] !== el.settings[name]) {
+        if (el.properties) {
           if (resolvedProperties?.[name]?.noAccessor) {
             el[name] = additionalData[name];
           }
@@ -1238,7 +1246,7 @@ export const Template = class Template {
           }
         }
         else {
-          settings[name] = additionalData[name];
+          el.settings[name] = additionalData[name];
         }
       }
     });
