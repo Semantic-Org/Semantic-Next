@@ -760,6 +760,24 @@ describe('Template.mount', () => {
       expect(el.pendingRender).toBeFalsy();
       expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
     });
+
+    it('clears pendingRender when a property is written before append across a task boundary', async () => {
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-pre-write'),
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'initial' },
+      });
+      const el = document.createElement(Tagged.componentTagName);
+      el.label = 'before-append';
+      await tick();
+      document.body.append(el);
+      await el.rendered;
+      expect(el.shadowRoot.textContent).toBe('before-append');
+
+      el.label = 'after-append';
+      await tick();
+      expect(el.shadowRoot.textContent).toBe('after-append');
+    });
   });
 
   describe('reactivity hygiene', () => {

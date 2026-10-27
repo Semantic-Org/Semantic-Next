@@ -454,8 +454,10 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.pendingRender = true;
     queueMicrotask(() => {
-      if (this.template) {
+      if (this.pendingRender) {
         this.pendingRender = false;
+      }
+      if (this.template) {
         this.render();
       }
     });
