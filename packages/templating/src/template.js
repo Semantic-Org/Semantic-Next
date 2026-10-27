@@ -947,7 +947,7 @@ export const Template = class Template {
     }
     const dataContext = extend({}, this.getDataContext(), additionalData);
     this.setDataContext(dataContext, { rerender: false });
-    this.updateSettings(dataContext);
+    this.updateSettings(additionalData);
 
     this.overlaySettingsSignals(dataContext);
     this.renderer.setData(dataContext);
@@ -1224,7 +1224,7 @@ export const Template = class Template {
   // template's own or the element's, so the store stays the one source the overlay reads.
   // only a value the store does not already hold is written: a default stays a default
   // and never becomes a property, and an unchanged render schedules nothing
-  updateSettings(dataContext) {
+  updateSettings(additionalData = {}) {
     // the same split the overlay makes: a nested template declares its own, a root
     // template's element holds the full set, since a tagless definition carries {}
     const settings = this.settings || this.element?.settings;
@@ -1232,9 +1232,21 @@ export const Template = class Template {
     if (!settings || !declared) {
       return;
     }
+    const el = !this.isSubtemplate() && this.element;
+    const resolvedProperties = el?.constructor?.config?.resolvedProperties;
     each(keys(declared), (name) => {
-      if (name in dataContext && dataContext[name] !== settings[name]) {
-        settings[name] = dataContext[name];
+      if (name in additionalData && additionalData[name] !== settings[name]) {
+        if (el?.properties) {
+          if (resolvedProperties?.[name]?.noAccessor) {
+            el[name] = additionalData[name];
+          }
+          else {
+            el.properties.set(name, additionalData[name]);
+          }
+        }
+        else {
+          settings[name] = additionalData[name];
+        }
       }
     });
   }

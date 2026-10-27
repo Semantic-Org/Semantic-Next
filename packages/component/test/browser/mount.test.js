@@ -160,6 +160,7 @@ describe('Template.mount', () => {
       document.body.append(el);
       const row = Row.mount(el, { settings: { label: 'mounted' } });
       row.render({ label: 'carried' });
+      expect(el.pendingRender).toBeFalsy();
       await tick();
       expect(el.textContent).toContain('carried');
       expect(el.settings.label).toBe('carried');
@@ -173,11 +174,13 @@ describe('Template.mount', () => {
       document.body.append(tag);
       await tag.rendered;
       tag.render({ label: 'carried too' });
+      expect(tag.pendingRender).toBeFalsy();
       await tick();
       expect(tag.shadowRoot.textContent).toContain('carried too');
       expect(tag.label).toBe('carried too');
 
       tag.update({ label: 'updated too' });
+      expect(tag.pendingRender).toBeFalsy();
       await tick();
       expect(tag.shadowRoot.textContent).toContain('updated too');
       expect(tag.label).toBe('updated too');
@@ -188,8 +191,21 @@ describe('Template.mount', () => {
       document.body.append(outlet);
       Route.mount(outlet, { settings: { route: 'home' } });
       outlet.update({ route: 'about' });
+      expect(outlet.pendingRender).toBeFalsy();
       await tick();
       expect(outlet.textContent).toContain('about');
+
+      // a state key with the same name as a declared setting does not write its Signal into the property
+      const Colliding = defineComponent({
+        template: '<p>{count}</p>',
+        defaultSettings: { count: 1 },
+        defaultState: { count: 10 },
+      });
+      const host = document.createElement('div');
+      document.body.append(host);
+      Colliding.mount(host);
+      expect(host.count).toBeUndefined();
+      expect(host.settings.count).toBe(1);
     });
 
     it('renders the default again when a setting is cleared, mounted, native tag, and lit tag', async () => {
