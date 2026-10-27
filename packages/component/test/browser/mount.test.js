@@ -120,6 +120,22 @@ describe('Template.mount', () => {
       row.unmount();
     });
 
+    it('keeps a declared noAccessor setting on the element itself, and names noAccessor when refusing', () => {
+      const Row = defineRow();
+      const el = document.createElement('div');
+      document.body.append(el);
+      expect(() => Row.mount(el, { settings: { title: 'Home' } })).toThrow(/noAccessor/);
+      // declared without an accessor, the element's own property is the setting
+      const Titled = defineComponent({
+        template: '<p>{title}</p>',
+        defaultSettings: { title: { type: String, default: '', noAccessor: true } },
+      });
+      const titled = Titled.mount(el, { settings: { title: 'Home' } });
+      expect(el.title).toBe('Home');
+      expect(el.textContent).toBe('Home');
+      titled.unmount();
+    });
+
     it('refuses the same reserved name on a fresh element and on one that was unmounted', () => {
       const Row = defineRow();
       const refused = expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' });

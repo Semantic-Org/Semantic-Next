@@ -133,7 +133,7 @@ class WebComponentBase extends HTMLElementBase {
           if (key in this || inArray(key, WebComponentBase.fields)) {
             throwError('reservedSetting', 'Template.mount', {
               explanation: isDevelopment
-                ? `setting '${key}' is already a property of the element. Pass it under another name`
+                ? `setting '${key}' is already a property of the element. Pass it under another name, or declare it with noAccessor: true to use the element's own`
                 : 0,
             });
           }
@@ -144,8 +144,14 @@ class WebComponentBase extends HTMLElementBase {
           });
           this.defaultSettings[key] = undefined;
         }
-        // write directly to the backing map to avoid scheduling a render before mount
-        this.properties.set(key, value);
+        // a key without an accessor is the element's own property, written there the way
+        // setSetting does; the rest seed the backing map directly so nothing renders before mount
+        if (resolvedProperties?.[key]?.noAccessor) {
+          this[key] = value;
+        }
+        else {
+          this.properties.set(key, value);
+        }
       });
       if (keys(undeclared).length) {
         this.extraProperties = undeclared;
