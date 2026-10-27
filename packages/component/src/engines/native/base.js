@@ -87,8 +87,7 @@ class WebComponentBase extends HTMLElementBase {
 
   // shared constructor logic for custom element upgrades and light DOM mounts
   construct({ isLightDOM = false, settings, renderRoot } = {}) {
-    // the element starts from the zero state teardown defines, so every name it will carry
-    // exists before a setting passed at mount is checked against it
+    // initialize all instance fields via teardown() so `name in this` sees the full field set
     this.teardown();
     this.isLightDOM = isLightDOM;
     this.isCustomElement = !isLightDOM;
@@ -238,8 +237,7 @@ class WebComponentBase extends HTMLElementBase {
     Object.setPrototypeOf(this, original);
   }
 
-  // the element's zero state: no template and every field a name holding nothing. construct
-  // starts from it, and undefined instead of delete keeps the element out of V8 dictionary mode
+  // resets all instance fields to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
   teardown() {
     this.removeTemplateFromEl();
     if (this.extraProperties) {
