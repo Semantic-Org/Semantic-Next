@@ -192,9 +192,9 @@ export interface EngineDefinition {
   serverRenderer?: new(...args: any[]) => any;
   /** Builds the custom element class for a component definition. */
   factory: (options: ComponentFactoryOptions) => ComponentConstructor;
-  /** Mounts a template into an element the caller owns. A prototype mounts a clone and returns it. */
+  /** Mounts a template into a target element or shadow root. Calling on a prototype mounts and returns a clone. */
   mount?: (template: Template, target: Element | ShadowRoot, options?: MountSettings) => Template;
-  /** Tears down what {@link mount} put in place. */
+  /** Unmounts a mounted template and restores the target element. */
   unmount?: (template: Template) => void;
 }
 
@@ -216,10 +216,9 @@ export interface ComponentConstructor<M extends Record<string, any> = Record<str
   toDefinition(): Record<string, any>;
 
   /**
-   * Mounts the prototype template into an element the caller owns, so a `mount` call
-   * site survives adding a tag to its definition. The element is upgraded with this
-   * class while mounted and carries its defaults and spec. Attributes are not observed
-   * on a plain element; settings carry the same values.
+   * Mounts the component's template into a target element or shadow root. Plain elements
+   * are upgraded with this component class while mounted so they inherit its default
+   * settings and component spec.
    */
   mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 

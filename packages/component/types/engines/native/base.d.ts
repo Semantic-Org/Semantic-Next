@@ -64,8 +64,9 @@ export interface GetPropertiesOptions {
  */
 export declare class WebComponentBase extends HTMLElement {
   /**
-   * The constructor's work on its own: the property store, defaults, settings proxy and
-   * `uiClasses`. Mount runs it on a plain element after giving it this class's prototype.
+   * Initializes the element's property store, default settings, reactive settings proxy,
+   * and spec-driven `uiClasses`. Called by the constructor for custom elements and by
+   * `upgradeElement` when mounting onto a plain element.
    */
   construct(): void;
 

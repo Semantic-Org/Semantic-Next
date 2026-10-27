@@ -403,8 +403,6 @@ export const Template = class Template {
     }
   }
 
-  // the engine owns every touch of the target, this template never sees it. neither
-  // call registers on the reaction that made it, the caller tracked its own reads
   mount(target, options) {
     return nonreactive(() => this.resolvedEngine.mount(this, target, options));
   }
@@ -1163,8 +1161,7 @@ export const Template = class Template {
 
   createSubtemplateSettings() {
     const template = this;
-    // the host is the fallback: its element on the client, the root template on the
-    // server where the settings are the data itself
+    // walk up to the root template so server renders (where element is undefined) can read host settings
     let host = this.parentTemplate;
     while (host?.parentTemplate) {
       host = host.parentTemplate;
@@ -1220,13 +1217,9 @@ export const Template = class Template {
     });
   }
 
-  // writes the declared settings a render carries into the settings store, the nested
-  // template's own or the element's, so the store stays the one source the overlay reads.
-  // only a value the store does not already hold is written: a default stays a default
-  // and never becomes a property, and an unchanged render schedules nothing
+  // syncs declared settings passed to render(additionalData) into the backing settings store
+  // without converting untouched defaults into own properties or scheduling a second render
   updateSettings(additionalData = {}) {
-    // the same split the overlay makes: a nested template declares its own, a root
-    // template's element holds the full set, since a tagless definition carries {}
     const settings = this.settings || this.element?.settings;
     const declared = this.isSubtemplate() ? this.defaultSettings : this.element?.defaultSettings;
     if (!settings || !declared) {
@@ -1439,8 +1432,7 @@ export const Template = class Template {
         }
       }
     };
-    // a tag renders into its shadow root and is slotted children in its light dom, a
-    // mounted el renders into itself
+    // traverse both the render root (shadowRoot or light DOM mount target) and slotted light DOM children
     const root = template.element?.renderRoot || template.element?.shadowRoot;
     if (root) {
       traverseChildren(root);

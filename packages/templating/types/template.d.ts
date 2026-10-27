@@ -691,16 +691,15 @@ export interface AttachSettings {
 }
 
 /**
- * Options for {@link Template.mount}. The template's css is adopted onto the target's
- * root. A detached target has no root yet, so its css lands on the document; mount a
- * connected element to scope it to a shadow root.
+ * Options for {@link Template.mount}. Component CSS is adopted onto the target's root
+ * node, or onto `document` if the target is detached at mount time.
  */
 export interface MountSettings {
-  /** Initial settings, declared defaults underneath. A key not declared still reaches the data context. */
+  /** Initial settings merged over declared defaults. Undeclared keys are also added to the data context. */
   settings?: Record<string, any>;
-  /** Ends the mount when aborted. A signal already aborted at mount time throws. */
+  /** Unmounts the template when aborted. Throws if already aborted at mount time. */
   signal?: AbortSignal;
-  /** Reserved for the range form. Refused today: mount replaces the contents of its target. */
+  /** Reserved for future range mounting. Passing `anchor` currently throws `unsupportedAnchor`. */
   anchor?: Node;
 }
 
@@ -895,21 +894,20 @@ export class Template {
   attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): Promise<void>;
 
   /**
-   * Mounts this template into an element the caller owns. A prototype mounts a clone
-   * and returns it; an instance mounts itself once. A plain element is upgraded with the
-   * component's class while mounted, so `el.settings`, property and Query writes,
-   * `findParent` and lifecycle events behave as they do on a tag; attributes are not
-   * observed on it. The engine does every touch of the target, and an engine without a
-   * mount refuses with `unsupportedEngine`.
-   * @param target - The element to take over, or a host's shadow root
-   * @param options - Mount settings
-   * @returns The live instance
+   * Mounts this template into a target element or shadow root. Calling `mount` on a
+   * prototype template clones and mounts a new instance; calling it on an instance mounts
+   * that instance once. Plain elements are upgraded with the component's class while
+   * mounted so `el.settings`, property writes, Query `.settings()`, `findParent`, and
+   * lifecycle events work the same as on a custom element.
+   * @param target - The element or shadow root to mount into
+   * @param options - Mount options
+   * @returns The mounted template instance
    */
   mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 
   /**
-   * Ends a mount: destroys the instance, removes what it rendered, and restores the
-   * element. A second call is a no-op.
+   * Unmounts a mounted template, destroying the instance, removing rendered DOM, and
+   * restoring the target element. Subsequent calls are no-ops.
    */
   unmount(): void;
 
@@ -1119,8 +1117,7 @@ export class Template {
   createSubtemplateSettings(): void;
 
   /**
-   * Writes the declared settings a render carries into the settings store, a nested
-   * template's own or the element's, so the store stays the one source the overlay reads.
+   * Updates settings from additional data passed to `render()`.
    * @param additionalData - The additional data passed to render().
    */
   updateSettings(additionalData?: DataContext): void;

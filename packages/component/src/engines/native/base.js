@@ -43,11 +43,8 @@ class WebComponentBase extends HTMLElementBase {
     return Boolean(ctor && (ctor === this || this.isPrototypeOf(ctor)));
   }
 
-  // a plain element inherits the component class's prototype while mounted, the way the
-  // custom elements polyfill upgraded an element: prototype swapped in, the constructor's
-  // work run, nothing copied onto the element (benched at 33us vs 54us for per-mount
-  // property and method assignment). keys an instance carries or a mount passes beyond
-  // the class's declaration get accessors of their own and a signal through the defaults
+  // swap in the component prototype and run construct() rather than copying properties
+  // onto the element (benched at 33us vs 54us per mount)
   static upgradeElement(el, { settings, renderRoot } = {}) {
     const original = Object.getPrototypeOf(el);
     el.originalPrototype = original;
@@ -60,7 +57,6 @@ class WebComponentBase extends HTMLElementBase {
       });
     }
     catch (error) {
-      // a refused upgrade leaves the element as it was
       el.restoreElement();
       throw error;
     }
@@ -89,16 +85,13 @@ class WebComponentBase extends HTMLElementBase {
     this.construct();
   }
 
-  // the constructor's work on its own: a plain element that mount upgrades with this class
-  // runs it the way the custom elements polyfill ran a definition's constructor after
-  // swapping an element's prototype
+  // shared constructor logic for custom element upgrades and light DOM mounts
   construct({ isLightDOM = false, settings, renderRoot } = {}) {
     this.isLightDOM = isLightDOM;
     this.isCustomElement = !isLightDOM;
     this.properties = new Map();
     this.renderRoot = renderRoot;
-    // the stamps mount writes later start out present, so a setting passed at mount cannot
-    // take their names
+    // initialize template properties on the element so undeclared settings cannot shadow them
     this.removeTemplateFromEl();
 
     // If the element has a declarative shadow root (created by DSD parsing),
@@ -128,8 +121,7 @@ class WebComponentBase extends HTMLElementBase {
       const undeclared = {};
       each(settings, (value, name) => {
         if (!resolvedProperties || !(name in resolvedProperties)) {
-          // an undeclared key gets an own accessor, so it cannot take a name the element
-          // already answers to: a stamp, a method, a native property
+          // refuse undeclared settings that would shadow an existing element property or method
           if (name in this) {
             throwError('reservedSetting', 'Template.mount', {
               explanation: isDevelopment
@@ -144,7 +136,7 @@ class WebComponentBase extends HTMLElementBase {
           });
           this.defaultSettings[name] = undefined;
         }
-        // seeded in the store rather than through the accessors, so nothing renders early
+        // write directly to the backing map to avoid scheduling a render before mount
         this.properties.set(name, value);
       });
       if (keys(undeclared).length) {
@@ -169,7 +161,6 @@ class WebComponentBase extends HTMLElementBase {
   mount(template, { signal } = {}) {
     const renderRoot = this.renderRoot;
     try {
-      // a prototype mounts a copy built on the element's data, an instance mounts itself
       const data = this.getData();
       if (template.isPrototype) {
         template = template.clone({ data, element: this });
@@ -179,17 +170,15 @@ class WebComponentBase extends HTMLElementBase {
         template.data = data;
       }
 
-      // the settings a callback sees are the element's, handed to the template so the
-      // returned handle talks the same way
       template.settings = this.settings;
 
-      // a host adopted its own css when it connected, a bare element has nobody else to
+      // custom elements adopt css in connectedCallback, light DOM mounts adopt it here
       if (this.isLightDOM && template.css) {
         adoptStylesheet(template.css, renderRoot);
       }
 
       template.initialize();
-      // exposed on el before rendering so a child element upgrading during insertion can find its parent
+      // attach template references before rendering so child elements upgrading during insertion can find their parent
       this.addTemplateToEl(template);
 
       template.attach(renderRoot);
@@ -208,8 +197,7 @@ class WebComponentBase extends HTMLElementBase {
     return template;
   }
 
-  // a mount that fails partway leaves nothing behind: the template's timers and reactions
-  // end, the element is as it was, and the error reaches the caller
+  // clean up partial initialization and restore the element when mount() throws
   discard(template) {
     if (template && !template.isPrototype) {
       if (template.initialized) {
@@ -232,9 +220,8 @@ class WebComponentBase extends HTMLElementBase {
       return;
     }
     template.mounted = false;
-    // the handle's settings were the element's, and the element is about to be restored
     template.settings = undefined;
-    // fire destroyed before clearing the DOM so listeners can still read the rendered nodes
+    // fire onDestroyed before clearing the DOM so callbacks can still query rendered nodes
     template.onDestroyed();
     this.renderRoot.replaceChildren();
     this.removeTemplateFromEl();
@@ -250,8 +237,7 @@ class WebComponentBase extends HTMLElementBase {
     Object.setPrototypeOf(this, original);
   }
 
-  // the constructor's fields stay as names holding nothing: a delete would leave the
-  // element in dictionary mode for the rest of its life
+  // assign undefined instead of delete to keep the element out of V8 dictionary mode
   teardown() {
     if (this.extraProperties) {
       each(this.extraProperties, (config, name) => {

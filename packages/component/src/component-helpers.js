@@ -110,9 +110,8 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
 }
 
 /*
-  Accessors over the element's property store. The factory defines them on a class
-  prototype, mount defines them on a bare element, so a setting reads and writes the
-  same way whether its component was defined with a tag or mounted
+  Defines reactive get/set accessors backed by el.properties. Installed on the class
+  prototype for custom elements and on the element instance for undeclared mount settings.
 */
 export function defineAccessors(target, properties) {
   each(properties, (config, propName) => {
@@ -272,7 +271,7 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
       settings[propertyName] = true;
     }
   }
-  // a key a mount declared beyond the class lives only in the store
+  // include undeclared settings passed to mount()
   el.properties?.forEach((value, propertyName) => {
     if (!(propertyName in settings)) {
       settings[propertyName] = value;
@@ -288,8 +287,7 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
 */
 export function createSettingsProxy(el) {
   el.settingsVars = new Map();
-  // the signals map is the proxy's liveness. teardown drops it on unmount, and a proxy a
-  // callback captured before then reads as nothing and ignores writes instead of throwing
+  // teardown clears settingsVars on unmount so a proxy captured by a callback becomes a no-op
   return new Proxy({}, {
     get: (target, property) => {
       if (!el.settingsVars) {

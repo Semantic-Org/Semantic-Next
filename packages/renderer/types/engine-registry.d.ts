@@ -3,12 +3,10 @@
  * the factory that builds its custom element. Engines are hot-swappable, which
  * is how the optional Lit engine replaces the native one.
  *
- * An element an engine hands to a template carries: `settings`, a proxy whose
- * reads track and whose writes notify; `defaultSettings`; `componentSpec` when
- * spec-driven; `getData()`, the data a render reads; `requestUpdate()`;
- * `isDarkMode()`; `renderRoot`; `isHydrating` while adopting server markup; and
- * after mount the stamps `template`, `component` and `dataContext`. A property
- * write that bypasses `settings` is reported through it, `el.settings[name] = value`.
+ * An element managed by an engine provides: `settings` (a reactive settings proxy),
+ * `defaultSettings`, `componentSpec` (when spec-driven), `getData()`, `requestUpdate()`,
+ * `isDarkMode()`, `renderRoot`, `isHydrating` (while hydrating server markup), and
+ * `template`, `component`, and `dataContext` once mounted.
  */
 export interface Engine {
   /** Renderer class, instantiated once per template instance. */
@@ -17,14 +15,14 @@ export interface Engine {
   serverRenderer?: new(settings?: any) => any;
   /** Builds the custom element class for a component definition. */
   factory?: (settings: any) => CustomElementConstructor;
-  /** Mounts a template into an element the caller owns. A prototype mounts a clone and returns it. */
+  /** Mounts a template into a target element or shadow root. Calling on a prototype mounts and returns a clone. */
   mount?: (template: any, target: Element | ShadowRoot, options?: any) => any;
-  /** Tears down what {@link mount} put in place. */
+  /** Unmounts a mounted template and restores the target element. */
   unmount?: (template: any) => void;
 }
 
 /**
- * Registers an engine under a name templates and components can select by
+ * Registers an engine under a name that templates and components can select by
  * string. `@semantic-ui/component` registers `native` on import, and `lit` when
  * the Lit engine is imported.
  * @param name - Engine name, as passed to `renderingEngine`
@@ -33,17 +31,15 @@ export interface Engine {
 export function registerEngine(name: string, engine: Engine): void;
 
 /**
- * Looks up a registered engine, returning `undefined` when nothing claims the
- * name. Callers report the miss themselves, since the fix is an import.
+ * Looks up a registered engine by name, returning `undefined` if not found.
  * @param name - Engine name
  */
 export function getEngine(name: string): Engine | undefined;
 
 /**
- * The engine a template renders through: an engine object as given, or the one
- * registered under a name. Throws `engineNotRegistered` when the name is unknown.
- * A missing `mount` is filled with a function that refuses with `unsupportedEngine`,
- * so engines may leave it out. `unmount` is only ever asked of the engine that mounted.
+ * Resolves a rendering engine from a registered name or an engine object.
+ * Throws `engineNotRegistered` if a named engine is not registered, and supplies
+ * a default `mount` fallback that throws `unsupportedEngine`.
  * @param engine - Engine name or engine object
  */
 export function resolveEngine(engine: string | Engine): Engine;

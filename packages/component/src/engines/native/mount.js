@@ -6,11 +6,8 @@ import { createComponent } from './factory.js';
 const { throwError } = createErrors({ namespace: 'component' });
 
 /*
-  Mounts a template into an element the caller owns. A plain element is upgraded with the
-  component's class for as long as it is mounted, so it carries the accessors, the spec and
-  the methods a tag carries and adding a tag later changes nothing from inside. The walks
-  find it through the element like any host, and the lifetime stays the caller's through
-  unmount or an AbortSignal.
+  Mounts a template into a caller-owned DOM element, upgrading plain elements
+  with the component prototype for the lifetime of the mount.
 */
 
 export function mount(template, target, { settings = {}, anchor, signal } = {}) {
@@ -29,7 +26,6 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
       explanation: isDevelopment ? '`signal` is already aborted' : 0,
     });
   }
-  // an instance mounts once, from fresh: mounted, unmounted, or living elsewhere all refuse
   if (!template.isPrototype && template.initialized) {
     throwError('duplicateMount', 'Template.mount', {
       explanation: isDevelopment
@@ -62,8 +58,7 @@ export function unmount(template) {
   template.element?.unmount?.();
 }
 
-// the class defineComponent would have handed a tag, made on first mount for a template
-// that never got one: the same factory, minus the registration
+// lazily create an unregistered component class for tagless templates
 function createComponentClass(template) {
   return createComponent({
     prototypeTemplate: template,

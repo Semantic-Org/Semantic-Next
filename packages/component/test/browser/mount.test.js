@@ -47,7 +47,7 @@ afterEach(() => {
 
 describe('Template.mount', () => {
   describe('into an element in the document', () => {
-    it('renders, stamps the element, and returns the live instance', async () => {
+    it('renders, attaches component properties to the element, and returns the live instance', async () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
@@ -105,12 +105,12 @@ describe('Template.mount', () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
-      // a stamp, a base method, a native property
+      // an attached template property, a base method, and a native DOM property
       for (const name of ['component', 'render', 'title']) {
         expect(() => Row.mount(el, { settings: { [name]: 'taken' } }))
           .toThrow(expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' }));
       }
-      // the refused mount left the element as it was, and a retry owns it
+      // a refused mount leaves the element untouched so a subsequent mount succeeds
       expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
       expect(el.title).toBe('');
       const row = Row.mount(el, { settings: { label: 'after' } });
@@ -202,7 +202,7 @@ describe('Template.mount', () => {
       expect(tag.shadowRoot.textContent).toContain('updated too');
       expect(tag.label).toBe('updated too');
 
-      // a key only the mount declared is carried too
+      // undeclared settings passed at mount are updated too
       const Route = defineComponent({ template: '<p>{route}</p>' });
       const outlet = document.createElement('div');
       document.body.append(outlet);
@@ -398,7 +398,7 @@ describe('Template.mount', () => {
   });
 
   describe('unmount', () => {
-    it('removes the content, the stamps, and the accessors, and is idempotent', () => {
+    it('removes rendered content, attached properties, and accessors, and is idempotent', () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
@@ -446,7 +446,7 @@ describe('Template.mount', () => {
       expect(captured.label).toBe('gone');
       row.unmount();
       expect(row.settings).toBeUndefined();
-      // a proxy captured in a callback outlives the mount, a late read or write finds nothing
+      // a proxy captured in a callback before unmount returns undefined and ignores writes
       expect(captured.label).toBeUndefined();
       captured.label = 'late';
       expect(captured.label).toBeUndefined();
@@ -534,7 +534,7 @@ describe('Template.mount', () => {
       const row = Row.mount(a);
       expect(() => row.mount(b)).toThrow(expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }));
       row.unmount();
-      // a destroyed instance stays refused, the prototype is what mounts again
+      // a destroyed instance cannot be remounted, only the prototype can mount again
       expect(() => row.mount(b)).toThrow(expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }));
       expect(() => Row.mount(b)).not.toThrow();
     });
@@ -712,7 +712,7 @@ describe('Template.mount', () => {
       const child = el.querySelector(Child.componentTagName);
       await child.rendered;
 
-      // a defined element upgrades during insertion, so the parent must be stamped before render
+      // custom elements upgrade synchronously during DOM insertion, so el.template must be set before rendering
       expect(child.component.parentSeenAtCreate).toBe('mountWrapper');
       expect(child.template.findParent()?.templateName).toBe('mountWrapper');
       expect(wrapper.findChildren().length).toBe(1);
