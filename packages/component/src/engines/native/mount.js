@@ -1,9 +1,11 @@
 import { adoptStylesheet, createErrors, each, isDevelopment, isServer, keys, noop } from '@semantic-ui/utils';
 
 import { defineAccessors, getProperties } from '../../component-helpers.js';
+import { WebComponentBase } from './base.js';
 import { createComponent } from './factory.js';
 
 const { throwError } = createErrors({ namespace: 'component' });
+const baseDescriptors = Object.getOwnPropertyDescriptors(WebComponentBase.prototype);
 
 /*
   Mounts a template into an element the caller owns. A plain element is upgraded with the
@@ -141,8 +143,9 @@ export function unmount(instance) {
 // beyond the class's declaration get accessors of their own and a signal through the defaults
 function upgradeElement(el, template, settings, renderRoot) {
   const ComponentClass = template.componentClass ??= createComponentClass(template);
-  const upgrade = { original: Object.getPrototypeOf(el), extras: null };
-  Object.setPrototypeOf(el, ComponentClass.prototype);
+  const original = Object.getPrototypeOf(el);
+  const upgrade = { original, extras: null };
+  Object.setPrototypeOf(el, getUpgradePrototype(ComponentClass, original));
   el.construct();
   el.renderRoot = renderRoot;
 
@@ -165,6 +168,19 @@ function upgradeElement(el, template, settings, renderRoot) {
     el.properties.set(name, value);
   });
   return upgrade;
+}
+
+function getUpgradePrototype(ComponentClass, original) {
+  const cache = ComponentClass.upgradePrototypes ??= new WeakMap();
+  let proto = cache.get(original);
+  if (!proto) {
+    proto = Object.create(original, {
+      ...baseDescriptors,
+      ...Object.getOwnPropertyDescriptors(ComponentClass.prototype),
+    });
+    cache.set(original, proto);
+  }
+  return proto;
 }
 
 // the class defineComponent would have handed a tag, made on first mount for a template

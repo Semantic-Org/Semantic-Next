@@ -546,15 +546,21 @@ describe('Template.mount', () => {
         template: '<p class="tagged">{label}</p>',
         defaultSettings: { label: 'tagged' },
       });
-      const el = document.createElement('div');
+      const el = document.createElement('dialog');
       document.body.append(el);
       const instance = Tagged.mount(el);
       expect(instance).toBeInstanceOf(Template);
+      expect(el).toBeInstanceOf(HTMLDialogElement);
+      expect(el).toBeInstanceOf(Tagged);
+      expect(typeof el.showModal).toBe('function');
       // the default the class declared applies without being passed
       expect(el.textContent).toContain('tagged');
       instance.settings.label = 'via class';
       return tick().then(() => {
         expect(el.textContent).toContain('via class');
+        instance.unmount();
+        expect(el).toBeInstanceOf(HTMLDialogElement);
+        expect(el).not.toBeInstanceOf(Tagged);
 
         const Primitive = defineComponent({
           tagName: uniqueTag('mount-primitive'),

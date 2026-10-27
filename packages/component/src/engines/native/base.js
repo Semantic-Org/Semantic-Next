@@ -24,6 +24,13 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 const HTMLElementBase = isServer ? class {} : HTMLElement;
 
 class WebComponentBase extends HTMLElementBase {
+  static [Symbol.hasInstance](instance) {
+    const ctor = instance?.constructor;
+    return ctor === this
+      || Object.prototype.isPrototypeOf.call(this, ctor)
+      || Function.prototype[Symbol.hasInstance].call(this, instance);
+  }
+
   constructor() {
     super();
     this.construct();
