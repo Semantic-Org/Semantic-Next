@@ -940,31 +940,33 @@ export const Template = class Template {
   }
 
   render(additionalData = {}) {
-    if (!this.initialized) {
-      this.initialize();
-    }
-    const dataContext = extend({}, this.getDataContext(), additionalData);
-    this.setDataContext(dataContext, { rerender: false });
-    this.updateSettings(additionalData);
-
-    this.overlaySettingsSignals(dataContext);
-    this.renderer.setData(dataContext);
-
-    // render will rerender the AST creating new html
-    if (!this.rendered) {
-      this.html = this.renderer.render();
-      if (!isServer) {
-        setTimeout(this.onRendered, 0);
+    return nonreactive(() => {
+      if (!this.initialized) {
+        this.initialize();
       }
-    }
-    else if (this.dataReplaced) {
-      // Data context was replaced — bump version to propagate changes.
-      // Skip when only Signals changed (they notify Reactions directly).
-      this.dataReplaced = false;
-      this.renderer.bumpDataVersion();
-    }
-    this.markRendered();
-    return this.html;
+      const dataContext = extend({}, this.getDataContext(), additionalData);
+      this.setDataContext(dataContext, { rerender: false });
+      this.updateSettings(additionalData);
+
+      this.overlaySettingsSignals(dataContext);
+      this.renderer.setData(dataContext);
+
+      // render will rerender the AST creating new html
+      if (!this.rendered) {
+        this.html = this.renderer.render();
+        if (!isServer) {
+          setTimeout(this.onRendered, 0);
+        }
+      }
+      else if (this.dataReplaced) {
+        // Data context was replaced — bump version to propagate changes.
+        // Skip when only Signals changed (they notify Reactions directly).
+        this.dataReplaced = false;
+        this.renderer.bumpDataVersion();
+      }
+      this.markRendered();
+      return this.html;
+    });
   }
 
   // Engine-facing: report that this template instance has been rendered to

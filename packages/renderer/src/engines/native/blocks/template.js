@@ -352,19 +352,6 @@ function clearInstance(self, region) {
   }
 }
 
-// Template.render walks the subtemplate's data via assignInPlace during
-// setDataContext / renderer.setData. For reactiveData paths the data is
-// a lazy-getter record whose reads register source-signal deps on the
-// active Reaction. Wrap the call so those reads don't register on the
-// block's outer Reaction — bindings inside the subtemplate register
-// their own deps via the record at evaluation time.
-function renderInstance(instance, node, blobData) {
-  if (node.reactiveData) {
-    return nonreactive(() => instance.render(blobData));
-  }
-  return instance.render(blobData);
-}
-
 const templateBlock = defineBlock({
   name: 'template',
   syntax: (node) => `{> ${node.name}}`,
@@ -410,7 +397,7 @@ const templateBlock = defineBlock({
       node,
     });
     setupSettingsMirror({ node, data, scope, region, self });
-    const fragment = renderInstance(self.currentInstance, node);
+    const fragment = self.currentInstance.render();
     region.setContent(fragment);
     stampScope(region, self.currentInstance.data);
     attachToRenderRoot(self.currentInstance, region, self);
@@ -507,7 +494,7 @@ const templateBlock = defineBlock({
         node,
       });
       setupSettingsMirror({ node, data, scope, region, self });
-      const fragment = renderInstance(self.currentInstance, node);
+      const fragment = self.currentInstance.render();
       region.setContent(fragment);
       stampScope(region, self.currentInstance.data);
       attachToRenderRoot(self.currentInstance, region, self);
@@ -519,7 +506,7 @@ const templateBlock = defineBlock({
       // call here would be a destructive partial sync (small source vs full
       // target → assignInPlace deletes everything not in blobData), only
       // for render() to immediately re-assign the full set.
-      renderInstance(self.currentInstance, node, blobData);
+      self.currentInstance.render(blobData);
     }
   },
 
