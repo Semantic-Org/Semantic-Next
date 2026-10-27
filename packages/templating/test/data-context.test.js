@@ -276,10 +276,12 @@ describe('Template — setDataContext', () => {
   it('leaves a declared setting out of the change report', () => {
     // a setting reaches the DOM through its own signal, so it never fires the coarse channel
     const template = new Template({
+      renderingEngine: realEngine,
       data: {},
       defaultSettings: { label: 'start' },
     });
     template.setParent(new Template({}));
+    template.initialize();
     expect(template.setDataContext({ label: 'next' })).toBe(false);
     expect(template.data.label).toBe('next');
     expect(template.setDataContext({ other: 1 })).toBe(true);
