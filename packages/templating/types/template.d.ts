@@ -695,9 +695,9 @@ export interface AttachSettings {
  * node, or onto `document` if the target is detached at mount time.
  */
 export interface MountSettings {
-  /** Values for the declared settings, merged over their defaults and winning over attributes on the target. A key the settings do not know reaches the template as data. */
+  /** Initial settings for the mounted component, overriding defaults and target HTML attributes. Undeclared keys are passed to the template as data. */
   settings?: Record<string, any>;
-  /** Data for the template beyond its declared settings, such as a value a router passes. No accessor, no attribute. */
+  /** Initial data context merged into the template on mount. */
   data?: Record<string, any>;
   /** Unmounts the template when aborted. Throws if already aborted at mount time. */
   signal?: AbortSignal;

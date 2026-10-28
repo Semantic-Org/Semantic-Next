@@ -163,14 +163,15 @@ class WebComponentBase extends HTMLElementBase {
       const { componentSpec, resolvedProperties } = this.constructor.config || {};
       const data = { ...template.data };
       // declared settings run after the attribute replay so explicit call values win over
-      // markup; undeclared keys are plain data implanted into the template context
+      // markup; undeclared keys are passed to the template as data
       if (mountData) {
         if (componentSpec) {
           resolveAttributeAliases(mountData, componentSpec);
         }
         each(mountData, (value, name) => {
           const key = resolvedProperties?.[name]?.aliasFor ?? name;
-          if (resolvedProperties && Object.hasOwn(resolvedProperties, key)) {
+          const prop = resolvedProperties?.[key];
+          if (prop && !prop.alias) {
             this.setSetting(key, value);
           }
           else {
