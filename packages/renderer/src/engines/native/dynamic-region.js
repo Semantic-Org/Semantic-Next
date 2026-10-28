@@ -29,15 +29,17 @@ export class DynamicRegion {
     this.ownedNodes = [...fragment.childNodes];
     if (scope) { this.childScopes.push(scope); }
     this.anchor.after(fragment);
-    this.placeEndAnchor();
+    // a region that never held content keeps its single anchor; one that is closed
+    // stays closed through an empty fill
+    if (this.ownedNodes.length || this.endAnchor) { this.placeEndAnchor(); }
   }
 
   // isNodeInTemplate uses strict "between" compareDocumentPosition, so a
   // trailing anchor is required for the last content node to fall inside
-  // the range.
+  // the range. on an empty range the end anchor sits right after the start
+  // anchor, which lets a template attach to the region before it is filled
   placeEndAnchor() {
-    const lastNode = this.ownedNodes[this.ownedNodes.length - 1];
-    if (!lastNode) { return; }
+    const lastNode = this.ownedNodes[this.ownedNodes.length - 1] || this.anchor;
     if (!this.endAnchor) {
       this.endAnchor = document.createTextNode('');
       // closed regions are one backward hop for scope resolution — also
