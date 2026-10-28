@@ -114,7 +114,7 @@ class WebComponentBase extends HTMLElementBase {
     }
 
     if (this.isLightDOM) {
-      // a declared key is that setting, anything else is additional data for the template.
+      // what a mount passes is data until a key is confirmed declared, then it is that setting.
       // the property table also lists spellings, the spec's and the kebab ones, as aliases
       const take = (value, key) => {
         const declared = resolvedProperties[key];
@@ -148,8 +148,8 @@ class WebComponentBase extends HTMLElementBase {
         this.attributeObserver.observe(this, { attributes: true, attributeOldValue: true, attributeFilter: observed });
       }
 
-      // settings last, so the call wins over the markup. only settings speak the spec's
-      // dialects and the kebab aliases, which is why only they are resolved
+      // what the call offered as settings last, so it wins over the markup. only that bag is
+      // resolved through the spec's dialects and the kebab aliases, since only a setting has them
       each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
         take(value, resolvedProperties[name]?.aliasFor ?? name);
       });
