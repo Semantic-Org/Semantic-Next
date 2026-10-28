@@ -1085,6 +1085,15 @@ describe('Template.mount', () => {
       expect(host.template._childTemplates).toHaveLength(0);
     });
 
+    it('leaves no update bookkeeping on the container', async () => {
+      const { main, footer } = mainWith();
+      const page = definePage().mount(main, { anchor: footer });
+      main.querySelector('.row').click();
+      await page.lifecyclePromise('updated');
+      expect(main.querySelector('.row').textContent).toBe('a 1');
+      expect(Object.hasOwn(main, 'updateScheduled')).toBe(false);
+    });
+
     it('carries plain data through update', async () => {
       const { main, footer } = mainWith();
       const Note = defineComponent({ template: '<i class="note">{extra}</i>' });

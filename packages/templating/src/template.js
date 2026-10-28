@@ -321,7 +321,7 @@ export const Template = class Template {
       this.updateScheduled = true;
       queueMicrotask(() => {
         this.updateScheduled = false;
-        if (this.element) {
+        if (this.element?.template) {
           this.element.updateScheduled = false;
         }
         this.call(this.onUpdatedCallback);
@@ -374,7 +374,11 @@ export const Template = class Template {
         each(this.state, (signal) => signal.dependency.depend());
         each(settingsVars, (signal) => signal.dependency.depend());
         if (this.rendered && !this.destroyed) {
-          el.updateScheduled = true;
+          // only an element that carries a template waits on updated; a range mount's
+          // container is the caller's and gets no bookkeeping
+          if (el.template) {
+            el.updateScheduled = true;
+          }
           afterFlush(this.onUpdated);
         }
       });
