@@ -35,7 +35,7 @@ class WebComponentBase extends HTMLElementBase {
 
   // swap in the component prototype and run construct() rather than copying properties
   // onto the element (benched at 33us vs 54us per mount)
-  static upgradeElement(el, { settings, renderRoot } = {}) {
+  static upgradeElement(el, { settings, data, renderRoot } = {}) {
     const original = Object.getPrototypeOf(el);
     el.originalPrototype = original;
     Object.setPrototypeOf(el, this.getUpgradePrototype(original));
@@ -43,6 +43,7 @@ class WebComponentBase extends HTMLElementBase {
       el.construct({
         isLightDOM: true,
         settings,
+        data,
         renderRoot,
       });
     }
@@ -83,7 +84,7 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   // shared constructor logic for custom element upgrades and light DOM mounts
-  construct({ isLightDOM = false, settings, renderRoot } = {}) {
+  construct({ isLightDOM = false, settings = {}, data = {}, renderRoot } = {}) {
     this.isLightDOM = isLightDOM;
     this.isCustomElement = !isLightDOM;
     this.properties = new Map();
@@ -112,35 +113,45 @@ class WebComponentBase extends HTMLElementBase {
       this.defaultSettings = {};
     }
 
-    // light DOM mounts lack native custom element callbacks, so replay initial observed
-    // attributes and watch later attribute mutations through attributeChangedCallback
-    const observed = this.isLightDOM ? this.constructor.observedAttributes : undefined;
-    if (observed?.length) {
-      for (const attribute of this.attributes) {
-        if (inArray(attribute.name, observed)) {
-          this.attributeChangedCallback(attribute.name, null, attribute.value);
-        }
-      }
-      this.attributeObserver = new MutationObserver((records) => {
-        for (const { attributeName, oldValue } of records) {
-          this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
-        }
-      });
-      this.attributeObserver.observe(this, { attributes: true, attributeOldValue: true, attributeFilter: observed });
-    }
-
-    // declared settings run after the attribute replay so explicit call settings win over
-    // markup; undeclared keys are plain data implanted into the template context
-    if (this.isLightDOM && settings) {
-      each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
-        const key = resolvedProperties?.[name]?.aliasFor ?? name;
-        if (resolvedProperties && Object.hasOwn(resolvedProperties, key)) {
+    if (this.isLightDOM) {
+      // a declared key is that setting, anything else is additional data for the template.
+      // the property table also lists spellings, the spec's and the kebab ones, as aliases
+      const take = (value, key) => {
+        const declared = resolvedProperties[key];
+        if (declared && !declared.alias) {
           this.setSetting(key, value);
         }
         else {
           this.additionalData ??= {};
           this.additionalData[key] = value;
         }
+      };
+
+      // data comes first: the template's own and what the call passes, taken as written
+      each(data, take);
+
+      // then the markup: a mounted element has no custom element lifecycle, so the attributes
+      // it carries are replayed through the hook the browser fires on a tag, and later changes
+      // are observed into the same hook a microtask later
+      const observed = this.constructor.observedAttributes;
+      if (observed?.length) {
+        for (const attribute of this.attributes) {
+          if (inArray(attribute.name, observed)) {
+            this.attributeChangedCallback(attribute.name, null, attribute.value);
+          }
+        }
+        this.attributeObserver = new MutationObserver((records) => {
+          for (const { attributeName, oldValue } of records) {
+            this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
+          }
+        });
+        this.attributeObserver.observe(this, { attributes: true, attributeOldValue: true, attributeFilter: observed });
+      }
+
+      // settings last, so the call wins over the markup. only settings speak the spec's
+      // dialects and the kebab aliases, which is why only they are resolved
+      each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
+        take(value, resolvedProperties[name]?.aliasFor ?? name);
       });
     }
   }
@@ -161,7 +172,7 @@ class WebComponentBase extends HTMLElementBase {
     const renderRoot = this.renderRoot;
     try {
       // copy getData() via property descriptors so getters like darkMode stay live
-      const data = { ...template.data, ...this.additionalData };
+      const data = { ...this.additionalData };
       Object.defineProperties(data, Object.getOwnPropertyDescriptors(this.getData()));
       if (template.isPrototype) {
         template = template.clone({ data, element: this });
