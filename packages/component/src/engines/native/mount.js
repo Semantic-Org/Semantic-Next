@@ -53,10 +53,8 @@ export function mount(template, target, { settings = {}, data = {}, anchor, sign
 
   const source = template.prototypeTemplate || template;
   const ComponentClass = template.componentClass ??= source.componentClass ??= createComponentClass(source);
-  // settings are the declared contract, data is the template's own and what the call passes
   ComponentClass.upgradeElement(el, {
-    settings,
-    data: { ...template.data, ...data },
+    data: { ...template.data, ...data, ...settings },
     renderRoot,
   });
   return el.mount(template, { signal });

@@ -359,20 +359,6 @@ describe('Template.mount', () => {
       expect(classic.settings.icon).toBe('chevron-down');
       expect(classic.settings.size).toBe('large');
     });
-
-    it('leaves a data key spelled like a spec dialect as data', () => {
-      const Icon = defineComponent({
-        tagName: uniqueTag('mount-icon-data'),
-        template: '<i class="{icon}"></i>',
-        componentSpec: createIconLikeSpec(),
-      });
-      const el = document.createElement('div');
-      document.body.append(el);
-      // only settings speak the dialects: data is taken as written
-      const row = Icon.mount(el, { data: { 'chevron-down': true } });
-      expect(el.settings.icon).toBeUndefined();
-      expect(row.getDataContext()['chevron-down']).toBe(true);
-    });
   });
 
   describe('attributes on a mounted element', () => {

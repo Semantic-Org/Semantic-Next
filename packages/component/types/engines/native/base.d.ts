@@ -70,7 +70,6 @@ export declare class WebComponentBase extends HTMLElement {
    */
   construct(options?: {
     isLightDOM?: boolean;
-    settings?: Record<string, any>;
     data?: Record<string, any>;
     renderRoot?: ShadowRoot | Element;
   }): void;
