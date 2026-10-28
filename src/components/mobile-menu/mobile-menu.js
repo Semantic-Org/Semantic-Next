@@ -224,7 +224,7 @@ const createComponent = ({ tpl, settings, $, state, flush, afterFlush, dispatchE
 });
 
 const events = {
-  'click dialog'({ event, tpl }) {
+  'click dialog'({ event, tpl, $ }) {
     if ($(event.target).is('dialog')) {
       tpl.hide();
     }
