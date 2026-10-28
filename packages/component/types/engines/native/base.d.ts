@@ -80,6 +80,12 @@ export declare class WebComponentBase extends HTMLElement {
   setupAttributeObserver(attributes?: string[], options?: { callImmediately?: boolean; }): void;
 
   /**
+   * Moves properties written before the element upgraded off the instance and into the
+   * property store, so they stop shadowing the prototype accessors. Runs in `construct`.
+   */
+  upgradeProperties(properties?: Record<string, PropertyConfig>): void;
+
+  /**
    * Prototype template every instance clones from.
    * Set by the engine factory on the generated subclass.
    */
