@@ -106,7 +106,7 @@ describe('Template.mount', () => {
       const el = document.createElement('div');
       document.body.append(el);
       // an attached template property, a base method, and a native DOM property
-      for (const name of ['component', 'render', 'title']) {
+      for (const name of ['component', 'update', 'title']) {
         expect(() => Row.mount(el, { settings: { [name]: 'taken' } }))
           .toThrow(expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' }));
       }
@@ -121,14 +121,14 @@ describe('Template.mount', () => {
     it('refuses the same reserved name on a fresh element and on one that was unmounted', () => {
       const Row = defineRow();
       const refused = expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' });
-      // pendingRender is only assigned on update, so construct() must pre-initialize it
+      // isUpdatePending is only assigned on requestUpdate, so construct() must pre-initialize it
       const fresh = document.createElement('div');
       document.body.append(fresh);
-      expect(() => Row.mount(fresh, { settings: { pendingRender: true } })).toThrow(refused);
+      expect(() => Row.mount(fresh, { settings: { isUpdatePending: true } })).toThrow(refused);
       const used = document.createElement('div');
       document.body.append(used);
       Row.mount(used, { settings: { label: 'once' } }).unmount();
-      expect(() => Row.mount(used, { settings: { pendingRender: true } })).toThrow(refused);
+      expect(() => Row.mount(used, { settings: { isUpdatePending: true } })).toThrow(refused);
     });
 
     it('registers in the template registry and leaves it on unmount', () => {
@@ -190,7 +190,7 @@ describe('Template.mount', () => {
       document.body.append(el);
       const row = Row.mount(el, { settings: { label: 'mounted' } });
       row.render({ label: 'carried' });
-      expect(el.pendingRender).toBeFalsy();
+      expect(el.isUpdatePending).toBeFalsy();
       await tick();
       expect(el.textContent).toContain('carried');
       expect(el.settings.label).toBe('carried');
@@ -203,14 +203,14 @@ describe('Template.mount', () => {
       const tag = document.createElement(Tagged.componentTagName);
       document.body.append(tag);
       await tag.rendered;
-      tag.render({ label: 'carried too' });
-      expect(tag.pendingRender).toBeFalsy();
+      tag.update({ label: 'carried too' });
+      expect(tag.isUpdatePending).toBeFalsy();
       await tick();
       expect(tag.shadowRoot.textContent).toContain('carried too');
       expect(tag.label).toBe('carried too');
 
       tag.update({ label: 'updated too' });
-      expect(tag.pendingRender).toBeFalsy();
+      expect(tag.isUpdatePending).toBeFalsy();
       await tick();
       expect(tag.shadowRoot.textContent).toContain('updated too');
       expect(tag.label).toBe('updated too');
@@ -221,7 +221,7 @@ describe('Template.mount', () => {
       document.body.append(outlet);
       Route.mount(outlet, { settings: { route: 'home' } });
       outlet.update({ route: 'about' });
-      expect(outlet.pendingRender).toBeFalsy();
+      expect(outlet.isUpdatePending).toBeFalsy();
       await tick();
       expect(outlet.textContent).toContain('about');
 
@@ -815,11 +815,11 @@ describe('Template.mount', () => {
       await tick();
       expect(el.childNodes.length).toBe(0);
       expect(el.updateScheduled).toBeFalsy();
-      expect(el.pendingRender).toBeFalsy();
+      expect(el.isUpdatePending).toBeFalsy();
       expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
     });
 
-    it('clears pendingRender when a property is written before append across a task boundary', async () => {
+    it('clears isUpdatePending when a property is written before append across a task boundary', async () => {
       const Tagged = defineComponent({
         tagName: uniqueTag('mount-pre-write'),
         template: '<p>{label}</p>',
@@ -854,7 +854,7 @@ describe('Template.mount', () => {
         'uiClasses',
         'extraProperties',
         'updateScheduled',
-        'pendingRender',
+        'isUpdatePending',
       ];
       for (const name of unwritten) {
         expect(Object.hasOwn(el, name)).toBe(false);

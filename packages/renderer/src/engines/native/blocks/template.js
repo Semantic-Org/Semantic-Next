@@ -35,11 +35,10 @@ const { throwError } = createErrors({ namespace: 'renderer' });
   getter descriptors. Each reactiveData entry's getter evaluates its
   expression at access time, so source-signal deps register on whichever
   Reaction is current at that read, the binding's own Reaction. A
-  subtemplate's record under a subtemplate caller also registers the
-  caller's data version, which is how a replacement of the caller's
-  context as a unit (its own data= call) reaches the props it passed on.
-  A snippet's bindings run on the caller's renderer and track that version
-  already. Per-key isolation is structural. A binding that reads
+  plain key changing in the caller's context reaches the props it passed
+  on when the caller's coarse pass re-runs this block and passes down. A
+  snippet's bindings run on the caller's renderer and are reached directly.
+  Per-key isolation is structural. A binding that reads
   record.label registers labelVal, a sibling binding reading record.status
   registers statusVal, and mutating labelVal wakes only the label binding.
 
@@ -122,7 +121,7 @@ function unpackBlobData(node, data, evaluator) {
 
 const ABSORB_SET = () => {};
 
-function buildArgsRecord({ node, parentData, evaluator, target, callerDep = null }) {
+function buildArgsRecord({ node, parentData, evaluator, target }) {
   // Declared-key collection. Two flavors: static (eager value) and
   // expression (lazy lookup). Parallel arrays avoid an object allocation
   // per declared key.
@@ -177,11 +176,6 @@ function buildArgsRecord({ node, parentData, evaluator, target, callerDep = null
       enumerable: true,
       get: kinds[i] === 's'
         ? () => val
-        : callerDep
-        ? () => {
-          callerDep.depend();
-          return evaluator.lookupExpressionValue(val, parentData);
-        }
         : () => evaluator.lookupExpressionValue(val, parentData),
       set: ABSORB_SET,
     });
@@ -256,7 +250,7 @@ function stampScope(region, data) {
 // source-signal deps on the parent's outer Reaction. Reads from later
 // binding-Reaction context still register normally — the wrap only
 // silences the setup path.
-function cloneInstance({ template, templateName, templateData, self, parentData, node }) {
+function cloneInstance({ template, templateName, templateData, self, parentData, node, scope }) {
   const instance = template.clone({
     templateName,
     data: templateData,
@@ -279,7 +273,6 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
       parentData,
       evaluator: self.evaluator,
       target: node.inheritsData ? extend({}, parentData, blob) : blob,
-      callerDep: self.callerDep,
     });
   }
   if (!Object.hasOwn(instance.data, DECLARED_KEYS)) {
@@ -289,6 +282,9 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
   }
 
   nonreactive(() => instance.initialize());
+  // the caller's coarse pass reaches the child's bindings through the tree, and the
+  // child unlinks itself when it is destroyed
+  scope.adopt(instance.renderer.scope);
   return instance;
 }
 
@@ -327,7 +323,6 @@ function setupSettingsMirror({ node, data, scope, region, self }) {
 
   self.settingsScope = scope.child();
   self.settingsScope.reaction(region.anchor, () => {
-    self.callerDep?.depend();
     for (const key of settingsKeys) {
       const expr = node.reactiveData[key];
       settingsProxy[key] = self.evaluator.lookupExpressionValue(expr, data);
@@ -362,9 +357,6 @@ const templateBlock = defineBlock({
       subTemplates: renderer.subTemplates,
       snippets: renderer.snippets,
       parentTemplate: renderer.template,
-      dataDep: renderer.dataDep,
-      // the data version a passed prop follows when the caller is itself a subtemplate
-      callerDep: renderer.receivesData ? renderer.dataDep : null,
       templateType: null,
       currentTemplateId: null,
       currentSnippet: null,
@@ -382,7 +374,6 @@ const templateBlock = defineBlock({
       return;
     }
 
-    self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
@@ -395,6 +386,7 @@ const templateBlock = defineBlock({
       self,
       parentData: data,
       node,
+      scope,
     });
     setupSettingsMirror({ node, data, scope, region, self });
     const fragment = self.currentInstance.render();
@@ -418,7 +410,6 @@ const templateBlock = defineBlock({
       return;
     }
 
-    self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
@@ -431,6 +422,7 @@ const templateBlock = defineBlock({
       self,
       parentData: data,
       node,
+      scope,
     });
     setupSettingsMirror({ node, data, scope, region, self });
 
@@ -472,7 +464,6 @@ const templateBlock = defineBlock({
       return;
     }
 
-    self.dataDep.depend();
     const { template, templateName } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
 
@@ -492,6 +483,7 @@ const templateBlock = defineBlock({
         self,
         parentData: data,
         node,
+        scope,
       });
       setupSettingsMirror({ node, data, scope, region, self });
       const fragment = self.currentInstance.render();
@@ -500,13 +492,7 @@ const templateBlock = defineBlock({
       attachToRenderRoot(self.currentInstance, region, self);
     }
     else {
-      // Same template — `instance.render(blobData)` merges blobData into
-      // the instance's dataContext via additionalData, then setDataContext
-      // assigns the full result onto this.data. A separate setDataContext
-      // call here would be a destructive partial sync (small source vs full
-      // target → assignInPlace deletes everything not in blobData), only
-      // for render() to immediately re-assign the full set.
-      self.currentInstance.render(blobData);
+      self.currentInstance.update(blobData);
     }
   },
 

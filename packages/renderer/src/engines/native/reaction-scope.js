@@ -32,10 +32,22 @@ export class ReactionScope {
   }
 
   child() {
-    const childScope = new ReactionScope();
-    childScope.parent = this;
-    childScope.index = this.children.push(childScope) - 1;
-    return childScope;
+    return this.adopt(new ReactionScope());
+  }
+
+  // a scope built elsewhere, a subtemplate's root, joins the tree so a coarse pass and a
+  // teardown reach it the way they reach a child
+  adopt(scope) {
+    scope.parent = this;
+    scope.index = this.children.push(scope) - 1;
+    return scope;
+  }
+
+  // the coarse channel: every reaction in the tree re-runs on the next flush, a
+  // stopped one is skipped by invalidate itself
+  invalidate() {
+    for (const reaction of this.reactions) { reaction.invalidate(); }
+    for (const child of this.children) { child.invalidate(); }
   }
 
   // Detach in O(1): a standalone dispose swap-pops itself out of `parent.children`

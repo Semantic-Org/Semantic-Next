@@ -1,4 +1,4 @@
-import { Signal } from '@semantic-ui/reactivity';
+import { flush, Signal } from '@semantic-ui/reactivity';
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -171,65 +171,72 @@ describe('Template render — re-call', () => {
     }
   });
 
-  it('calls renderer.setData on every render so the engine sees latest data', async () => {
-    const { template, cleanup } = await mountTemplate({
-      defaultState: { count: 0 },
+  it('updates the rendered DOM in place when called again with data', async () => {
+    const { host, template, cleanup } = await mountTemplate({
+      template: '<p>{title}</p>',
+      data: { title: 'one' },
     });
-    const setDataSpy = vi.spyOn(template.renderer, 'setData');
     try {
-      template.render();
-      template.render();
-      template.render();
-      expect(setDataSpy).toHaveBeenCalledTimes(3);
+      host.append(template.render());
+      const paragraph = host.querySelector('p');
+      template.render({ title: 'two' });
+      flush();
+      expect(host.querySelector('p')).toBe(paragraph);
+      expect(host.textContent).toBe('two');
+    }
+    finally {
+      cleanup();
+    }
+  });
+});
+
+/*******************************
+            update
+*******************************/
+
+describe('Template update', () => {
+  it('reaches an expression that reads a plain key', async () => {
+    const { host, template, cleanup } = await mountTemplate({
+      template: '<p>{title}</p>',
+      data: { title: 'one' },
+    });
+    try {
+      host.append(template.render());
+      template.update({ title: 'two' });
+      flush();
+      expect(host.textContent).toBe('two');
     }
     finally {
       cleanup();
     }
   });
 
-  it('calls bumpDataVersion when dataReplaced is true on re-render', async () => {
-    const { template, cleanup } = await mountTemplate({
-      data: { a: 1 },
+  it('reports whether a plain key changed', async () => {
+    const { host, template, cleanup } = await mountTemplate({
+      template: '<p>{title}</p>',
+      data: { title: 'one' },
     });
-    const bumpSpy = vi.spyOn(template.renderer, 'bumpDataVersion');
     try {
-      template.render();
-      const firstBumps = bumpSpy.mock.calls.length;
-      template.dataReplaced = true;
-      template.render();
-      expect(bumpSpy.mock.calls.length).toBe(firstBumps + 1);
+      host.append(template.render());
+      expect(template.update({ title: 'two' })).toBe(true);
+      expect(template.update({ title: 'two' })).toBe(false);
     }
     finally {
       cleanup();
     }
   });
 
-  it('does not call bumpDataVersion when dataReplaced is false', async () => {
-    const { template, cleanup } = await mountTemplate({
-      data: { a: 1 },
-    });
-    const bumpSpy = vi.spyOn(template.renderer, 'bumpDataVersion');
-    try {
-      template.render();
-      const firstBumps = bumpSpy.mock.calls.length;
-      template.dataReplaced = false;
-      template.render();
-      expect(bumpSpy.mock.calls.length).toBe(firstBumps);
-    }
-    finally {
-      cleanup();
-    }
-  });
-
-  it('clears dataReplaced after using it on re-render', async () => {
-    const { template, cleanup } = await mountTemplate({
-      data: { a: 1 },
+  it('keeps the keys it was not given', async () => {
+    const { host, template, cleanup } = await mountTemplate({
+      template: '<p>{title} {extra}</p>',
+      data: { title: 'one' },
     });
     try {
-      template.render();
-      template.dataReplaced = true;
-      template.render();
-      expect(template.dataReplaced).toBe(false);
+      host.append(template.render());
+      template.update({ extra: 'more' });
+      flush();
+      expect(host.textContent).toBe('one more');
+      expect(template.data.title).toBe('one');
     }
     finally {
       cleanup();
@@ -263,50 +270,6 @@ describe('Template render — additionalData override', () => {
     try {
       template.render({ extra: 'value' });
       expect(template.data.extra).toBe('value');
-    }
-    finally {
-      cleanup();
-    }
-  });
-});
-
-/*******************************
-   setDataContext-driven re-render
-*******************************/
-
-describe('Template — setDataContext + render coordination', () => {
-  it('forces renderer.render again with default rerender:true', async () => {
-    const { template, cleanup } = await mountTemplate({
-      data: { a: 1 },
-    });
-    const renderSpy = vi.spyOn(template.renderer, 'render');
-    try {
-      template.render();
-      expect(renderSpy).toHaveBeenCalledTimes(1);
-      template.setDataContext({ a: 2 });
-      template.render();
-      expect(renderSpy).toHaveBeenCalledTimes(2);
-    }
-    finally {
-      cleanup();
-    }
-  });
-
-  it('skips renderer.render when called with rerender:false but still bumps data version', async () => {
-    const { template, cleanup } = await mountTemplate({
-      data: { a: 1 },
-    });
-    const renderSpy = vi.spyOn(template.renderer, 'render');
-    const bumpSpy = vi.spyOn(template.renderer, 'bumpDataVersion');
-    try {
-      template.render();
-      expect(renderSpy).toHaveBeenCalledTimes(1);
-      template.setDataContext({ a: 2 }, { rerender: false });
-      template.render();
-      // rendered stays true → render() takes the else-if branch
-      expect(renderSpy).toHaveBeenCalledTimes(1);
-      // dataReplaced was set by the setDataContext mutation → bump fires
-      expect(bumpSpy).toHaveBeenCalledTimes(1);
     }
     finally {
       cleanup();

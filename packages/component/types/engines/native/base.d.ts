@@ -184,16 +184,19 @@ export declare class WebComponentBase extends HTMLElement {
   /** Called when an observed attribute changes. */
   attributeChangedCallback(attribute: string, oldValue: string | null, newValue: string | null): void;
 
-  /** Resolves once any scheduled render has flushed. */
+  /** Resolves once any scheduled update has flushed. */
   readonly updateComplete: Promise<void>;
 
-  /** Renders or updates the element's template with optional additional data. */
-  render(data?: Record<string, any>): any;
+  /** `true` while an update requested through {@link requestUpdate} waits for its microtask. */
+  isUpdatePending?: boolean;
 
-  /** Updates the element's template with optional additional data. Alias for {@link render}. */
-  update(data?: Record<string, any>): any;
+  /**
+   * Brings the template to `data`, which defaults to the element's current settings. A declared
+   * setting moves through its signal, every other key reaches the DOM through the coarse channel.
+   */
+  update(data?: Record<string, any>): void;
 
-  /** Schedules a render on the next microtask. Repeated calls in the same task coalesce. */
+  /** Schedules an update from the element's current settings on the next microtask. Repeated calls in the same task coalesce. */
   requestUpdate(): void;
 
   /** Gets the current settings, merging element properties, default settings, and spec defaults. */

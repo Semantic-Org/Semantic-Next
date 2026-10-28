@@ -523,13 +523,18 @@ RENDERING_ENGINES.forEach(engine => {
         expect(bumpCount).toBe(0);
       });
 
-      it('setting change should call bumpDataVersion exactly once', async () => {
+      it('setting change should not call bumpDataVersion — settings are signals', async () => {
+        let marks = 0;
         const el = await renderComponent({
-          template: '<span>{color}</span>',
+          template: '<span>{color}</span><b>{mark}</b>',
           defaultSettings: { color: 'blue' },
           createComponent: ({ settings }) => ({
             setColor(c) {
               settings.color = c;
+            },
+            mark() {
+              marks++;
+              return '';
             },
           }),
         });
@@ -540,12 +545,15 @@ RENDERING_ENGINES.forEach(engine => {
           bumpCount++;
           origBump();
         };
+        const marksAfterRender = marks;
 
         el.component.setColor('red');
         flush();
         await new Promise(r => setTimeout(r, 100));
 
-        expect(bumpCount).toBe(1);
+        expect(shadowHTML(el)).toContain('red');
+        expect(bumpCount).toBe(0);
+        expect(marks).toBe(marksAfterRender);
       });
     });
   }); // describe(engine)

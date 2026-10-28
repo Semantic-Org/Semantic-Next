@@ -1,4 +1,3 @@
-import { Dependency } from '@semantic-ui/reactivity';
 import { assignInPlace, createCache, filterObject, inArray } from '@semantic-ui/utils';
 
 import {
@@ -185,7 +184,6 @@ export class Renderer {
       snippets,
       helpers,
       isSVG = false,
-      receivesData = false,
       protectedKeys,
     } = {},
   ) {
@@ -197,18 +195,15 @@ export class Renderer {
     this.collectSnippets(this.ast);
     this.helpers = helpers || {};
     this.isSVG = isSVG;
-    this.receivesData = receivesData;
     this.protectedKeys = protectedKeys;
     // Sequential debug ID. Subtree caching would key on hashCode(ast+data)
     // but isn't implemented in the native engine.
     this.id = ++Renderer.nextId;
-    this.dataDep = new Dependency();
     this.scope = new ReactionScope();
 
     this.evaluator = new ExpressionEvaluator({
       data: this.data,
       helpers: this.helpers,
-      dataVersion: this.dataDep,
     });
 
     // DOM change notification — coalesced so multiple async resolutions
@@ -234,15 +229,9 @@ export class Renderer {
     }
   }
 
-  // Look up an expression value — only track dataDep for renderers that receive
-  // data from a parent (subtemplates). Top-level component renderers use
-  // fine-grained Signal tracking and don't need coarse invalidation.
-  // Named to mirror ExpressionEvaluator.lookupExpressionValue; 2-arg positional
-  // because it's in hot reactive loops (per-expression, potentially 100× per render).
+  // named to mirror ExpressionEvaluator.lookupExpressionValue, 2-arg positional because
+  // it runs per expression in hot reactive loops
   lookupExpression(expression, data) {
-    if (this.receivesData) {
-      this.dataDep.depend();
-    }
     return this.evaluator.lookupExpressionValue(expression, data);
   }
 
@@ -607,9 +596,11 @@ export class Renderer {
     assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData, preserveGetters: true });
   }
 
-  /* This is used only in coarse data invalidation of subtrees where parent cannot track dependencies */
+  // the coarse channel: every reaction this renderer owns re-runs, so every binding
+  // re-evaluates and every {#rerender} region rebuilds. a walk over the scope tree rather
+  // than a dependency, so a binding pays nothing per run to be reachable
   bumpDataVersion() {
-    this.dataDep.changed();
+    this.scope.invalidate();
     this.notifyUpdate();
   }
 

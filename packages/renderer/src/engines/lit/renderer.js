@@ -67,7 +67,6 @@ export class LitRenderer {
     this.evaluator = new ExpressionEvaluator({
       data: this.data,
       helpers: this.helpers,
-      dataVersion: this.dataVersion,
     });
   }
 
