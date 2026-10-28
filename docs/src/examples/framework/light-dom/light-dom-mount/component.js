@@ -3,18 +3,27 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./component.css');
 const template = await getText('./component.html');
 
+const defaultSettings = {
+  startingNumber: 0,
+  incrementBy: 1,
+};
+
 const defaultState = {
   counter: 0,
 };
 
-const createComponent = ({ state, interval }) => ({
-  initialize: () => interval(() => state.counter.increment(), 1000),
+const createComponent = ({ self, settings, state, interval }) => ({
+  initialize() {
+    state.counter.set(settings.startingNumber);
+    interval(() => state.counter.increment(settings.incrementBy), 1000);
+  },
   isEven: (number) => (number % 2 === 0),
 });
 
 export const Counter = defineComponent({
   template,
   css,
-  defaultState,
   createComponent,
+  defaultSettings,
+  defaultState,
 });
