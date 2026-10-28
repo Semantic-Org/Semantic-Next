@@ -336,6 +336,7 @@ export const Template = class Template {
     }, 10);
 
     this.onDestroyed = () => {
+      this.mounted = false;
       Template.removeTemplate(this);
       this.markDestroyed();
       this.renderer?.destroy?.();
@@ -344,10 +345,16 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
-      each(this.plugins, (plugin) => plugin.onDestroyed());
-      this.call(this.onDestroyedCallback);
-      this.resolveLifecyclePromise('destroyed');
-      dispatchLifecycle('destroyed');
+      // destroyed rises from the rendered nodes, so a range the template owns leaves last
+      try {
+        each(this.plugins, (plugin) => plugin.onDestroyed());
+        this.call(this.onDestroyedCallback);
+        this.resolveLifecyclePromise('destroyed');
+        dispatchLifecycle('destroyed');
+      }
+      finally {
+        this.detach();
+      }
     };
 
     this.initialized = true;
@@ -393,13 +400,20 @@ export const Template = class Template {
 
   attach(
     renderRoot,
-    { parentNode = renderRoot, startNode, endNode } = {},
+    { region, parentNode = renderRoot, startNode, endNode } = {},
   ) {
     if (!this.initialized) {
       this.initialize();
     }
     if (this.renderRoot == renderRoot) {
       return;
+    }
+    // a region handed here is the template's own: its anchors are the range and
+    // detach clears it. a subtemplate renders into its block's region and gets anchors
+    if (region) {
+      this.region = region;
+      startNode = region.anchor;
+      endNode = region.endAnchor;
     }
 
     // to attach styles & events
@@ -415,6 +429,20 @@ export const Template = class Template {
     }
   }
 
+  // the inverse of attach: a region the template owns leaves the tree and the
+  // attachment is forgotten
+  detach() {
+    if (this.region) {
+      this.region.clear();
+      this.region.anchor.remove();
+    }
+    this.region = undefined;
+    this.renderRoot = undefined;
+    this.parentNode = undefined;
+    this.startNode = undefined;
+    this.endNode = undefined;
+  }
+
   mount(target, options) {
     const engine = this.resolvedEngine;
     if (!engine.mount) {
@@ -425,17 +453,18 @@ export const Template = class Template {
     return nonreactive(() => engine.mount(this, target, options));
   }
 
+  // a component element owns the mount it carries and tears down with it; a range is
+  // the template's own, so it tears itself down
   unmount() {
     if (!this.mounted) {
       return;
     }
-    const engine = this.resolvedEngine;
-    if (!engine.unmount) {
-      throwError('unsupportedEngine', 'Template.unmount', {
-        explanation: isDevelopment ? 'the rendering engine does not support `unmount()`' : 0,
-      });
-    }
-    return nonreactive(() => engine.unmount(this));
+    return nonreactive(() => {
+      if (this.element?.template === this) {
+        return this.element.unmount();
+      }
+      this.onDestroyed();
+    });
   }
 
   getDataContext({ overlaySettings = false, additionalData } = {}) {

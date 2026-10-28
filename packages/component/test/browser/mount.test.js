@@ -789,7 +789,8 @@ describe('Template.mount', () => {
       );
     });
 
-    it('refuses unmount through an engine that has no unmount, and leaves the engine object as it was', () => {
+    it('unmounts without an engine verb, and resolution leaves the engine object as it was', () => {
+      // an engine only mounts; tearing down is the template's own or its element's
       const engine = { renderer: Renderer, mount: NativeEngine.mount };
       const Half = defineComponent({
         renderingEngine: engine,
@@ -799,10 +800,9 @@ describe('Template.mount', () => {
       document.body.append(el);
       const half = Half.mount(el);
       expect(el.textContent).toBe('half');
-      expect(() => half.unmount()).toThrow(
-        expect.objectContaining({ code: 'unsupportedEngine', at: 'Template.unmount' }),
-      );
-      el.unmount();
+      half.unmount();
+      expect(el.textContent).toBe('');
+      expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
       // resolution reads the engine, it does not write a fallback onto it
       const bare = { renderer: Renderer };
       const Bare = defineComponent({ renderingEngine: bare, template: '<i>bare</i>' });
@@ -1019,6 +1019,8 @@ describe('Template.mount', () => {
       expect(shapeOf(main)).toEqual(['nav', 'footer']);
       expect(main.childNodes.length).toBe(2);
       expect(page.mounted).toBe(false);
+      expect(page.region).toBeUndefined();
+      expect(page.renderRoot).toBeUndefined();
       page.unmount();
     });
 

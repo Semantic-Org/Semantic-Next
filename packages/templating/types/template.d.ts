@@ -682,6 +682,8 @@ export interface QuerySettings { // extends QueryOptions
 }
 
 export interface AttachSettings {
+  /** A region the template owns. Its anchors become the template's range and `detach` clears it. */
+  region?: DynamicRegion;
   /** The parent node to which the template's content should be attached. Defaults to renderRoot. */
   parentNode?: HTMLElement | ShadowRoot;
   /**  Optional start marker node for insertion. */
@@ -920,11 +922,17 @@ export class Template {
   mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 
   /**
-   * Unmounts a mounted template, destroying the instance, removing rendered DOM, and
-   * restoring the target element. A range mount removes only its own nodes. Subsequent
-   * calls are no-ops.
+   * Unmounts a mounted template. A component element owns the mount it carries and tears
+   * down with it, restoring itself. A range mount is the template's own and removes only
+   * its nodes. Subsequent calls are no-ops.
    */
   unmount(): void;
+
+  /**
+   * The inverse of `attach`: clears a region the template owns and forgets the render root,
+   * parent node and range. Runs at the end of `onDestroyed`.
+   */
+  detach(): void;
 
   /**
    * Gets the combined data context, including settings, plugin data, data, state, and instance properties.

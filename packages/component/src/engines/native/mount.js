@@ -61,28 +61,6 @@ export function mount(template, target, { settings = {}, data = {}, anchor, sign
   });
 }
 
-export function unmount(template) {
-  const { region } = template;
-  if (!region) {
-    template.element?.unmount?.();
-    return;
-  }
-  template.mounted = false;
-  // destroyed fires before the range leaves so callbacks can still query rendered nodes
-  try {
-    template.onDestroyed();
-  }
-  finally {
-    region.clear();
-    region.anchor.remove();
-    template.region = undefined;
-    template.renderRoot = undefined;
-    template.parentNode = undefined;
-    template.startNode = undefined;
-    template.endNode = undefined;
-  }
-}
-
 // the container is the template's element and the enclosing component its parent, the two
 // things the subtemplate block gives, so events, walks and settings take a {>child}'s paths
 function mountRange(template, target, { data, anchor, signal }) {
@@ -116,12 +94,10 @@ function mountRange(template, target, { data, anchor, signal }) {
   }
   try {
     instance.initialize();
-    instance.attach(target, { parentNode: target, startNode: region.anchor, endNode: region.endAnchor });
+    instance.attach(target, { region });
     region.setContent(instance.render());
   }
   catch (error) {
-    region.clear();
-    region.anchor.remove();
     if (instance.initialized) {
       instance.onDestroyed();
     }
@@ -129,9 +105,11 @@ function mountRange(template, target, { data, anchor, signal }) {
       instance.removeParent();
       instance.abortController.abort('mount failed');
     }
+    // a throw before attach leaves the region unowned, and clearing twice is a no-op
+    region.clear();
+    region.anchor.remove();
     throw error;
   }
-  instance.region = region;
   instance.mounted = true;
 
   if (signal) {

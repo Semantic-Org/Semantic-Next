@@ -15,10 +15,8 @@ export interface Engine {
   serverRenderer?: new(settings?: any) => any;
   /** Builds the custom element class for a component definition. */
   factory?: (settings: any) => CustomElementConstructor;
-  /** Mounts a template into a target element or shadow root. Calling on a prototype mounts and returns a clone. */
+  /** Mounts a template into a target element or shadow root, or as a range before an anchor inside it. Calling on a prototype mounts and returns a clone. */
   mount?: (template: any, target: Element | ShadowRoot, options?: any) => any;
-  /** Unmounts a mounted template and restores the target element. */
-  unmount?: (template: any) => void;
 }
 
 /**
@@ -39,7 +37,7 @@ export function getEngine(name: string): Engine | undefined;
 /**
  * Resolves a rendering engine from a registered name or an engine object and
  * returns it as is. Throws `engineNotRegistered` if a named engine is not
- * registered. `Template.mount` and `unmount` refuse an engine without that verb.
+ * registered. `Template.mount` refuses an engine without that verb.
  * @param engine - Engine name or engine object
  */
 export function resolveEngine(engine: string | Engine): Engine;
