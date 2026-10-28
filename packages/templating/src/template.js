@@ -1368,6 +1368,18 @@ export const Template = class Template {
   static getTemplates(templateName) {
     return Template.renderedTemplates.get(templateName) || [];
   }
+  static getTemplateContext(node) {
+    if (node instanceof Template) {
+      return node.getDataContext();
+    }
+    if (node?.template) {
+      return node.template.getDataContext();
+    }
+    return {
+      ...node?.component,
+      ...node?.dataContext,
+    };
+  }
   static findTemplate(templateName) {
     if (templateName == null) { return undefined; }
     templateName = kebabToCamel(templateName);
@@ -1375,10 +1387,7 @@ export const Template = class Template {
     if (!template) {
       return undefined;
     }
-    return {
-      ...template.instance,
-      ...template.data,
-    };
+    return Template.getTemplateContext(template);
   }
   static findParentTemplate(template, templateName) {
     templateName = kebabToCamel(templateName);
@@ -1401,10 +1410,7 @@ export const Template = class Template {
       let parentNode = getParent(template.element);
       while (parentNode) {
         if (isMatch(parentNode.component)) {
-          match = {
-            ...parentNode.component,
-            ...parentNode.dataContext,
-          };
+          match = Template.getTemplateContext(parentNode);
           break;
         }
         parentNode = getParent(parentNode);
@@ -1416,10 +1422,7 @@ export const Template = class Template {
       seen.add(template);
       template = template.parentTemplate;
       if (isMatch(template)) {
-        match = {
-          ...template.instance,
-          ...template.data,
-        };
+        match = Template.getTemplateContext(template);
         break;
       }
     }
@@ -1448,10 +1451,7 @@ export const Template = class Template {
           if (visited.has(childTemplate)) { return; }
           visited.add(childTemplate);
           if (!templateName || (childTemplate.templateName === templateName)) {
-            result.push({
-              ...childTemplate.instance,
-              ...childTemplate.data,
-            });
+            result.push(Template.getTemplateContext(childTemplate));
           }
           search(childTemplate._childTemplates, templateName);
         });
@@ -1462,10 +1462,7 @@ export const Template = class Template {
       if (node?.children) {
         for (const child of node.children) {
           if (child.component && isMatch(child.component)) {
-            result.push({
-              ...child.component,
-              ...child.dataContext,
-            });
+            result.push(Template.getTemplateContext(child));
           }
           search(child.template?._childTemplates, templateName);
           traverseChildren(child);

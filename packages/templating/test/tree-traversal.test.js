@@ -447,11 +447,7 @@ describe('findParent — subtemplate cascade', () => {
       expect(found.secret).toBe('closure-snapshot');
     });
 
-    it('exposes instance methods that close over state', () => {
-      // Subtemplate cascade returns instance + closure data; state Signals
-      // aren't directly spread (the DOM cascade is where state Signals come
-      // through via parentNode.dataContext). For subtemplate consumers, the
-      // canonical pattern is instance methods that close over state.
+    it('exposes state Signals and instance methods through findParent', () => {
       const parent = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
@@ -473,6 +469,8 @@ describe('findParent — subtemplate cascade', () => {
       child.setParent(parent);
 
       const found = child.findParent('parentWithState');
+      expect(typeof found.count?.get).toBe('function');
+      expect(found.count.get()).toBe(7);
       expect(typeof found.getCount).toBe('function');
       expect(found.getCount()).toBe(7);
     });
