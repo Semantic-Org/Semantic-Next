@@ -83,9 +83,8 @@ export function unmount(template) {
   }
 }
 
-// a range mount is the subtemplate block's shape with javascript as the caller: the
-// template's element is the container and its parent is the enclosing component's
-// template, so the walks, events and settings all take the paths a {>child} takes
+// the container is the template's element and the enclosing component its parent, the two
+// things the subtemplate block gives, so events, walks and settings take a {>child}'s paths
 function mountRange(template, target, { data, anchor, signal }) {
   if (template.tagName) {
     throwError('unsupportedAnchor', 'Template.mount', {
@@ -94,6 +93,12 @@ function mountRange(template, target, { data, anchor, signal }) {
         : 0,
     });
   }
+  // both anchors go in first, so a bad anchor fails before anything is cloned or linked
+  // and the range is closed before the template attaches
+  const region = new DynamicRegion(target);
+  target.insertBefore(region.anchor, anchor);
+  region.placeEndAnchor();
+
   let instance = template;
   if (template.isPrototype) {
     instance = template.clone({ data, element: target });
@@ -106,12 +111,6 @@ function mountRange(template, target, { data, anchor, signal }) {
   if (host) {
     instance.setParent(host.template);
   }
-
-  // both anchors are in the tree before the template attaches, so the range is closed
-  // from the first event and a {>child} rendering inside it finds this render root
-  const region = new DynamicRegion(target);
-  target.insertBefore(region.anchor, anchor);
-  region.placeEndAnchor();
   if (instance.css) {
     adoptStylesheet(instance.css, target);
   }
@@ -141,12 +140,12 @@ function mountRange(template, target, { data, anchor, signal }) {
   return instance;
 }
 
-// the container itself or the nearest element above it that carries a mounted template
 function findHost(node) {
-  for (; node; node = node.parentNode || node.host) {
+  while (node) {
     if (node.template) {
       return node;
     }
+    node = node.parentNode || node.host;
   }
 }
 

@@ -1079,6 +1079,21 @@ describe('Template.mount', () => {
       expect(() => Broken.mount(outlet, { anchor: null })).toThrow('setup failed');
       expect(outlet.childNodes.length).toBe(0);
       expect(host.template._childTemplates).toHaveLength(0);
+      // an anchor outside the container fails before anything is cloned or linked
+      expect(() => definePage().mount(outlet, { anchor: document.body })).toThrow(DOMException);
+      expect(outlet.childNodes.length).toBe(0);
+      expect(host.template._childTemplates).toHaveLength(0);
+    });
+
+    it('carries plain data through update', async () => {
+      const { main, footer } = mainWith();
+      const Note = defineComponent({ template: '<i class="note">{extra}</i>' });
+      const note = Note.mount(main, { anchor: footer, data: { extra: 'e' } });
+      expect(main.querySelector('.note').textContent).toBe('e');
+      note.update({ extra: 'e2' });
+      await tick();
+      expect(main.querySelector('.note').textContent).toBe('e2');
+      note.unmount();
     });
 
     it('cascades from an AbortSignal and refuses one that is already aborted', () => {
