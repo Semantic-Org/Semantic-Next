@@ -141,7 +141,7 @@ function mountRange(template, target, { data, anchor, signal }) {
   return instance;
 }
 
-// the nearest element above the container that carries a mounted template
+// the container itself or the nearest element above it that carries a mounted template
 function findHost(node) {
   for (; node; node = node.parentNode || node.host) {
     if (node.template) {

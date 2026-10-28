@@ -261,7 +261,7 @@ export const Template = class Template {
     let instance;
     this.instance = {};
 
-    // a template makes its own settings store when no door handed it one and it has no
+    // a template makes its own settings store when nothing handed it one and it has no
     // element store to read: a subtemplate, a range mount, a bare render() root
     const declaresSettings = this.defaultSettings && Object.keys(this.defaultSettings).length > 0;
     if (!this.settings && declaresSettings && (this.isSubtemplate() || !this.element?.settings)) {
@@ -452,7 +452,8 @@ export const Template = class Template {
     const settings = this.settings || el?.settings;
     const settingsVars = this.settingsVars ?? el?.settingsVars;
     if (settings && settingsVars) {
-      // an own store creates a signal on first read, so every declared key is read before the lay
+      // an own store creates a signal on first read, so every declared key is read before its
+      // signal is overlaid
       if (this.settingsVars) {
         each(this.defaultSettings, (_, name) => {
           settings[name];

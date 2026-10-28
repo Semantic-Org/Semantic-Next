@@ -781,7 +781,7 @@ export class Template {
   region?: DynamicRegion;
   /** The reactive state of the template. */
   state: Record<string, Signal<any>>;
-  /** Settings proxy, present on subtemplates that declare `defaultSettings`. */
+  /** Settings proxy, present on a template with a store of its own: a subtemplate, a range mount, or a bare root that declares `defaultSettings`. */
   settings?: Record<string, any>;
   /** Shadow signals backing `settings`, created as each setting is read or written. */
   settingsVars?: Map<string, Signal<any>>;
@@ -911,7 +911,8 @@ export class Template {
    * prototype template clones and mounts a new instance; calling it on an instance mounts
    * that instance once. Plain elements are upgraded with the component's class while
    * mounted so `el.settings`, property writes, Query `.settings()`, `findParent`, and
-   * lifecycle events work the same as on a custom element.
+   * lifecycle events work the same as on a custom element. With `anchor` the target is a
+   * container instead and the template renders as a range before the anchor.
    * @param target - The element or shadow root to mount into
    * @param options - Mount options
    * @returns The mounted template instance
@@ -920,7 +921,8 @@ export class Template {
 
   /**
    * Unmounts a mounted template, destroying the instance, removing rendered DOM, and
-   * restoring the target element. Subsequent calls are no-ops.
+   * restoring the target element. A range mount removes only its own nodes. Subsequent
+   * calls are no-ops.
    */
   unmount(): void;
 
