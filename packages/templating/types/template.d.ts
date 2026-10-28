@@ -1,7 +1,7 @@
 import { ASTNode } from '@semantic-ui/compiler';
 import { EventHandler, Query, QueryOptions } from '@semantic-ui/query';
 import { Matcher, Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
-import type { Engine } from '@semantic-ui/renderer';
+import type { DynamicRegion, Engine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 /**
@@ -701,8 +701,14 @@ export interface MountSettings {
   data?: Record<string, any>;
   /** Unmounts the template when aborted. Throws if already aborted at mount time. */
   signal?: AbortSignal;
-  /** Reserved for future range mounting. Passing `anchor` currently throws `unsupportedAnchor`. */
-  anchor?: Node;
+  /**
+   * Mounts the template as a range before `anchor` inside `target`, `null` to append. `target`
+   * is then a container: it is not upgraded, keeps its own children, and may hold several
+   * mounts. The mounted template's element is the container and its parent is the enclosing
+   * component's template, if there is one. A tagged component is refused with
+   * `unsupportedAnchor`: create its element and insert that instead.
+   */
+  anchor?: Node | null;
 }
 
 export class Template {
@@ -769,8 +775,10 @@ export class Template {
   html?: any;
   /** Optional start marker node for insertion. */
   startNode?: Node;
-  /** Optional end marker node for insertion.. */
+  /** Optional end marker node for insertion. */
   endNode?: Node;
+  /** The region holding a range mount's nodes and anchors, set by `mount` with `anchor`. */
+  region?: DynamicRegion;
   /** The reactive state of the template. */
   state: Record<string, Signal<any>>;
   /** Settings proxy, present on subtemplates that declare `defaultSettings`. */

@@ -10,6 +10,7 @@ export { lisIndices } from './shared/lis.js';
 export { getEngine, registerEngine, resolveEngine } from './engine-registry.js';
 
 // native renderer
+export { DynamicRegion } from './engines/native/dynamic-region.js';
 export { Renderer } from './engines/native/renderer.js';
 
 // server renderer

@@ -876,15 +876,6 @@ describe('Template.mount', () => {
       row.unmount();
     });
 
-    it('refuses an anchor until the range form exists', () => {
-      const Row = defineRow();
-      const el = document.createElement('div');
-      document.body.append(el);
-      expect(() => Row.mount(el, { anchor: el })).toThrow(
-        expect.objectContaining({ code: 'unsupportedAnchor', at: 'Template.mount' }),
-      );
-    });
-
     it("adopts a tagged component's css once, through mount", async () => {
       const Tagged = defineComponent({
         tagName: uniqueTag('mount-css'),
@@ -945,6 +936,246 @@ describe('Template.mount', () => {
         expect(clonedHost.querySelector('button').className).toBe('secondary button');
         expect(clonedHost.querySelector('button').textContent).toBe('go');
       });
+    });
+  });
+
+  describe('at an anchor', () => {
+    // with anchor the target is a container: nothing is upgraded, the template renders as a
+    // range before the anchor, and the caller's own children stay where they are
+    const definePage = () =>
+      defineComponent({
+        template: '<p class="row">{label} {bumps}</p>{>kid}',
+        css: '.row { color: rgb(1, 2, 3); }',
+        defaultSettings: { label: 'a' },
+        defaultState: { bumps: 0 },
+        subTemplates: {
+          kid: defineComponent({
+            template: '<button class="kid">kid {kicks}</button>',
+            defaultState: { kicks: 0 },
+            events: {
+              'click .kid'({ state }) {
+                state.kicks.increment();
+              },
+            },
+          }),
+        },
+        createComponent: ({ findParent }) => ({ hostAtCreate: findParent()?.templateName, clicks: 0 }),
+        events: {
+          'click .row'({ state }) {
+            state.bumps.increment();
+          },
+          'click'({ self }) {
+            self.clicks += 1;
+          },
+        },
+      });
+    const shapeOf = (container) => [...container.children].map((child) => child.className || child.localName);
+    const mainWith = () => {
+      document.body.innerHTML = '<main><nav>n</nav><footer>f</footer></main>';
+      const main = document.querySelector('main');
+      return { main, footer: main.querySelector('footer') };
+    };
+
+    it("renders before the anchor between the container's own children, and leaves it as it was on unmount", () => {
+      const { main, footer } = mainWith();
+      const page = definePage().mount(main, { anchor: footer, settings: { label: 'x' } });
+      expect(shapeOf(main)).toEqual(['nav', 'row', 'kid', 'footer']);
+      expect(main.querySelector('.row').textContent).toBe('x 0');
+      expect(getComputedStyle(main.querySelector('.row')).color).toBe('rgb(1, 2, 3)');
+      expect(page.element).toBe(main);
+      expect(page.mounted).toBe(true);
+      expect(main.template).toBeUndefined();
+      expect(Object.getPrototypeOf(main)).toBe(HTMLElement.prototype);
+
+      page.unmount();
+      expect(shapeOf(main)).toEqual(['nav', 'footer']);
+      expect(main.childNodes.length).toBe(2);
+      expect(page.mounted).toBe(false);
+      page.unmount();
+    });
+
+    it('appends with a null anchor', () => {
+      const { main } = mainWith();
+      definePage().mount(main, { anchor: null });
+      expect(shapeOf(main)).toEqual(['nav', 'footer', 'row', 'kid']);
+    });
+
+    it('moves a declared setting through its own store and the rest through update', async () => {
+      const { main, footer } = mainWith();
+      const page = definePage().mount(main, { anchor: footer, settings: { label: 'x' }, data: { extra: 'e' } });
+      const text = () => main.querySelector('.row').textContent;
+      expect(page.settings.label).toBe('x');
+      expect(page.getDataContext().extra).toBe('e');
+
+      page.settings.label = 'y';
+      await tick();
+      expect(text()).toBe('y 0');
+
+      page.update({ label: 'z' });
+      await tick();
+      expect(text()).toBe('z 0');
+      expect(page.settings.label).toBe('z');
+    });
+
+    it('delegates events inside the range only, and a {>child} takes its own clicks', async () => {
+      const { main, footer } = mainWith();
+      const page = definePage().mount(main, { anchor: footer });
+      main.querySelector('nav').click();
+      expect(page.instance.clicks).toBe(0);
+      main.querySelector('.row').click();
+      await tick();
+      expect(page.instance.clicks).toBe(1);
+      expect(main.querySelector('.row').textContent).toBe('a 1');
+      main.querySelector('.kid').click();
+      await tick();
+      expect(main.querySelector('.kid').textContent).toBe('kid 1');
+    });
+
+    it('holds two mounts at one anchor, each with its own events and its own unmount', async () => {
+      const { main, footer } = mainWith();
+      const first = definePage().mount(main, { anchor: footer, settings: { label: 'one' } });
+      const second = definePage().mount(main, { anchor: footer, settings: { label: 'two' } });
+      expect(shapeOf(main)).toEqual(['nav', 'row', 'kid', 'row', 'kid', 'footer']);
+      main.querySelectorAll('.row')[1].click();
+      await tick();
+      expect(first.instance.clicks).toBe(0);
+      expect(second.instance.clicks).toBe(1);
+      first.unmount();
+      expect(shapeOf(main)).toEqual(['nav', 'row', 'kid', 'footer']);
+      expect(main.querySelector('.row').textContent).toBe('two 1');
+      second.unmount();
+      expect(shapeOf(main)).toEqual(['nav', 'footer']);
+    });
+
+    it('fires rendered and destroyed from the range, through the container', async () => {
+      const { main, footer } = mainWith();
+      const seen = [];
+      const record = (event) => seen.push([event.type, event.detail.templateName, event.target.className]);
+      main.addEventListener('rendered', record);
+      main.addEventListener('destroyed', record);
+      const page = definePage().mount(main, { anchor: footer });
+      await tick();
+      page.unmount();
+      // the page raises its own from its first element, the {>kid} raises its own from its button
+      const of = (name) =>
+        seen.filter(([, templateName]) => templateName === name).map(([type, , from]) => [type, from]);
+      expect(of(page.templateName)).toEqual([['rendered', 'row'], ['destroyed', 'row']]);
+      expect(of('kid')).toEqual([['rendered', 'kid'], ['destroyed', 'kid']]);
+    });
+
+    it('leaves the container and the host clean when the mount throws', async () => {
+      const Host = defineComponent({ tagName: uniqueTag('anchor-throws'), template: '<div class="outlet"></div>' });
+      document.body.innerHTML = '';
+      const host = document.createElement(Host.componentTagName);
+      document.body.append(host);
+      await host.rendered;
+      const outlet = host.shadowRoot.querySelector('.outlet');
+      const Broken = defineComponent({
+        template: '<p>never</p>',
+        createComponent: () => {
+          throw new Error('setup failed');
+        },
+      });
+      expect(() => Broken.mount(outlet, { anchor: null })).toThrow('setup failed');
+      expect(outlet.childNodes.length).toBe(0);
+      expect(host.template._childTemplates).toHaveLength(0);
+    });
+
+    it('cascades from an AbortSignal and refuses one that is already aborted', () => {
+      const { main, footer } = mainWith();
+      const controller = new AbortController();
+      const page = definePage().mount(main, { anchor: footer, signal: controller.signal });
+      controller.abort();
+      expect(page.mounted).toBe(false);
+      expect(shapeOf(main)).toEqual(['nav', 'footer']);
+      expect(() => definePage().mount(main, { anchor: footer, signal: controller.signal })).toThrow(
+        expect.objectContaining({ code: 'expiredSignal', at: 'Template.mount' }),
+      );
+    });
+
+    it('refuses a second mount of the same instance, a tagged component, and an anchor outside the container', () => {
+      const { main, footer } = mainWith();
+      const page = definePage().mount(main, { anchor: footer });
+      expect(() => page.mount(main, { anchor: footer })).toThrow(
+        expect.objectContaining({ code: 'duplicateMount', at: 'Template.mount' }),
+      );
+      const Tagged = defineComponent({ tagName: uniqueTag('anchor-tagged'), template: '<i></i>' });
+      expect(() => Tagged.mount(main, { anchor: footer })).toThrow(
+        expect.objectContaining({ code: 'unsupportedAnchor', at: 'Template.mount' }),
+      );
+      // the DOM's own refusal, nothing of ours in the way
+      expect(() => definePage().mount(main, { anchor: document.body })).toThrow(DOMException);
+      expect(shapeOf(main)).toEqual(['nav', 'row', 'kid', 'footer']);
+    });
+
+    it('inside a sui host: finds it from createComponent on, is found by it, adopts css onto its shadow root', async () => {
+      const Host = defineComponent({
+        tagName: uniqueTag('anchor-host'),
+        template: '<div class="outlet"><span class="static">s</span></div>',
+      });
+      document.body.innerHTML = '';
+      const host = document.createElement(Host.componentTagName);
+      document.body.append(host);
+      await host.rendered;
+      const outlet = host.shadowRoot.querySelector('.outlet');
+      const sheetsBefore = document.adoptedStyleSheets.length;
+
+      const page = definePage().mount(outlet, { anchor: null });
+      expect(page.element).toBe(outlet);
+      expect(outlet.template).toBeUndefined();
+      expect(page.instance.hostAtCreate).toBe(host.template.templateName);
+      expect(page.findParent()?.templateName).toBe(host.template.templateName);
+      expect(host.template.findChildren().map((child) => child.templateName)).toContain(page.templateName);
+      expect(getComputedStyle(outlet.querySelector('.row')).color).toBe('rgb(1, 2, 3)');
+      expect(document.adoptedStyleSheets.length).toBe(sheetsBefore);
+
+      outlet.querySelector('.static').click();
+      expect(page.instance.clicks).toBe(0);
+      outlet.querySelector('.row').click();
+      await tick();
+      expect(page.instance.clicks).toBe(1);
+
+      page.unmount();
+      expect(host.template.findChildren()).toHaveLength(0);
+      expect([...outlet.childNodes].map((node) => node.nodeType)).toEqual([Node.ELEMENT_NODE]);
+    });
+
+    it('inside nested hosts, an unnamed findParent names the host the range sits in', async () => {
+      const innerTag = uniqueTag('anchor-inner');
+      defineComponent({ tagName: innerTag, template: '<div class="outlet"></div>' });
+      const Outer = defineComponent({ tagName: uniqueTag('anchor-outer'), template: `<${innerTag}></${innerTag}>` });
+      document.body.innerHTML = '';
+      const outer = document.createElement(Outer.componentTagName);
+      document.body.append(outer);
+      await outer.rendered;
+      const inner = outer.shadowRoot.querySelector(innerTag);
+      await inner.rendered;
+
+      const page = definePage().mount(inner.shadowRoot.querySelector('.outlet'), { anchor: null });
+      expect(page.findParent()?.templateName).toBe(inner.template.templateName);
+      expect(page.findParent(outer.template.templateName)?.templateName).toBe(outer.template.templateName);
+      page.unmount();
+    });
+
+    it('takes a defined custom element and a shadow root as containers', async () => {
+      const Host = defineComponent({ tagName: uniqueTag('anchor-container'), template: '<slot></slot>' });
+      document.body.innerHTML = '';
+      const host = document.createElement(Host.componentTagName);
+      document.body.append(host);
+      await host.rendered;
+
+      const light = definePage().mount(host, { anchor: null, settings: { label: 'light' } });
+      expect(shapeOf(host)).toEqual(['row', 'kid']);
+      expect(host.querySelector('.row').textContent).toBe('light 0');
+
+      const shadow = definePage().mount(host.shadowRoot, { anchor: null, settings: { label: 'shadow' } });
+      expect(host.shadowRoot.querySelector('.row').textContent).toBe('shadow 0');
+      expect(getComputedStyle(host.shadowRoot.querySelector('.row')).color).toBe('rgb(1, 2, 3)');
+
+      light.unmount();
+      shadow.unmount();
+      expect(host.childNodes.length).toBe(0);
+      expect(host.shadowRoot.querySelector('.row')).toBeNull();
     });
   });
 
