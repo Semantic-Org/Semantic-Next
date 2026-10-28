@@ -10,12 +10,14 @@
 // shares it.
 
 import { flush, reaction } from '@semantic-ui/reactivity';
-import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
+import { registerEngine, Renderer, ServerRenderer } from '@semantic-ui/renderer';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { Template } from '../../src/template.js';
 
 const realEngine = { renderer: Renderer, serverRenderer: ServerRenderer };
+// the template block clones a {>child} by the engine's name
+registerEngine('native', realEngine);
 
 afterEach(() => {
   Template.renderedTemplates.clear();
@@ -291,5 +293,36 @@ describe('Subtemplate composition — clone + wire + initialize sequence', () =>
       catch (_) {}
       parentFixture.cleanup();
     }
+  });
+});
+
+describe('a {>child} under a root with no element', () => {
+  it('binds its events through the render root the root template was attached to', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const kid = new Template({
+      templateName: 'kid',
+      template: '<button class="kid">{kicks}</button>',
+      renderingEngine: realEngine,
+      defaultState: { kicks: 0 },
+      events: {
+        'click .kid'({ state }) {
+          state.kicks.increment();
+        },
+      },
+    });
+    const root = new Template({
+      template: '{>kid}',
+      renderingEngine: realEngine,
+      subTemplates: { kid },
+    });
+    root.initialize();
+    root.attach(container);
+    container.append(root.render());
+
+    container.querySelector('.kid').click();
+    flush();
+    expect(container.querySelector('.kid').textContent).toBe('1');
+    root.onDestroyed();
   });
 });
