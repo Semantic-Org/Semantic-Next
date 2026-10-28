@@ -141,8 +141,8 @@ class WebComponentBase extends HTMLElementBase {
           this.setSetting(key, value);
         }
         else {
-          this.otherData ??= {};
-          this.otherData[key] = value;
+          this.additionalData ??= {};
+          this.additionalData[key] = value;
         }
       });
     }
@@ -165,7 +165,7 @@ class WebComponentBase extends HTMLElementBase {
     try {
       // the template's own data, then what the mount carried beyond the declaration, then the
       // settings the store holds, copied as descriptors so getData's getters survive
-      const data = { ...template.data, ...this.otherData };
+      const data = { ...template.data, ...this.additionalData };
       Object.defineProperties(data, Object.getOwnPropertyDescriptors(this.getData()));
       if (template.isPrototype) {
         template = template.clone({ data, element: this });
@@ -267,7 +267,7 @@ class WebComponentBase extends HTMLElementBase {
     'settingsVars',
     'uiClasses',
     'defaultSettings',
-    'otherData',
+    'additionalData',
     'attributeObserver',
     'updateScheduled',
     'isUpdatePending',

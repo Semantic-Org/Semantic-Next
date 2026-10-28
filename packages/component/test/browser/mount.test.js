@@ -407,7 +407,7 @@ describe('Template.mount', () => {
       Row.mount(fromMarkup);
       expect(fromMarkup.querySelector('i').textContent).toBe('5');
       // nothing undeclared was passed, so nothing undeclared sits on the element
-      expect(Object.hasOwn(fromMarkup, 'otherData')).toBe(false);
+      expect(Object.hasOwn(fromMarkup, 'additionalData')).toBe(false);
 
       const fromCall = document.createElement('unregistered-card');
       fromCall.setAttribute('max-items', '5');
@@ -1145,7 +1145,7 @@ describe('Template.mount', () => {
         'dataContext',
         'isHydrating',
         'uiClasses',
-        'otherData',
+        'additionalData',
         'attributeObserver',
         'updateScheduled',
         'isUpdatePending',
@@ -1155,7 +1155,7 @@ describe('Template.mount', () => {
       }
       document.body.append(el);
       await el.rendered;
-      for (const name of ['isHydrating', 'uiClasses', 'otherData', 'attributeObserver']) {
+      for (const name of ['isHydrating', 'uiClasses', 'additionalData', 'attributeObserver']) {
         expect(Object.hasOwn(el, name)).toBe(false);
       }
     });
