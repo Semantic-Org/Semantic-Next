@@ -10,7 +10,7 @@ const { throwError } = createErrors({ namespace: 'component' });
   with the component prototype for the lifetime of the mount.
 */
 
-export function mount(template, target, { settings = {}, anchor, signal } = {}) {
+export function mount(template, target, { settings = {}, data = {}, anchor, signal } = {}) {
   if (isServer) {
     throwError('unsupportedServerMount', 'Template.mount', {
       explanation: isDevelopment ? '`mount()` requires a DOM environment. Use `renderToString()` on the server' : 0,
@@ -53,8 +53,9 @@ export function mount(template, target, { settings = {}, anchor, signal } = {}) 
 
   const source = template.prototypeTemplate || template;
   const ComponentClass = template.componentClass ??= source.componentClass ??= createComponentClass(source);
+  // one bag, settings and data alike, split by declaration in construct
   ComponentClass.upgradeElement(el, {
-    settings: { ...template.data, ...settings },
+    settings: { ...template.data, ...data, ...settings },
     renderRoot,
   });
   return el.mount(template, { signal });

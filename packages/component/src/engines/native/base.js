@@ -1,19 +1,8 @@
 import { MARKER_VERSION } from '@semantic-ui/renderer';
-import {
-  adoptStylesheet,
-  createErrors,
-  each,
-  inArray,
-  isDevelopment,
-  isFunction,
-  isServer,
-  kebabToCamel,
-  keys,
-} from '@semantic-ui/utils';
+import { adoptStylesheet, each, inArray, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
 import {
   createSettingsProxy,
-  defineAccessors,
   getProperties,
   getPropertySettings,
   getSettingsFromConfig,
@@ -34,7 +23,6 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 */
 
 const HTMLElementBase = isServer ? class {} : HTMLElement;
-const { throwError } = createErrors({ namespace: 'component' });
 
 class WebComponentBase extends HTMLElementBase {
   // a mounted element keeps its own tag prototype (HTMLDivElement, HTMLDialogElement)
@@ -141,40 +129,22 @@ class WebComponentBase extends HTMLElementBase {
       this.attributeObserver.observe(this, { attributes: true, attributeOldValue: true, attributeFilter: observed });
     }
 
+    // the bag a mount carries splits by declaration: a declared key is a setting, with an
+    // accessor and an attribute, written after the replay so the call wins over markup. the
+    // rest is data the settings do not know, handed to the template the way a subtemplate
+    // takes an arg nobody declared
     if (this.isLightDOM && settings) {
-      const undeclared = {};
-      // resolve spec attribute aliases and kebab-case setting keys to their canonical property names
+      const otherData = {};
       each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
         const key = resolvedProperties?.[name]?.aliasFor ?? name;
-        if (!resolvedProperties || !(key in resolvedProperties)) {
-          // refuse undeclared settings that would shadow an existing element property or method
-          if (key in this || inArray(key, WebComponentBase.fields)) {
-            throwError('reservedSetting', 'Template.mount', {
-              explanation: isDevelopment
-                ? `setting '${key}' is already a property of the element. Pass it under another name, or declare it with noAccessor: true to use the element's own`
-                : 0,
-            });
-          }
-          undeclared[key] = this.constructor.getPropertySettings({
-            name: key,
-            type: value?.constructor,
-            propertyOnly: true,
-          });
-          this.defaultSettings[key] = undefined;
-        }
-        // a key without an accessor is the element's own property, written there the way
-        // setSetting does; the rest seed the backing map directly so nothing renders before mount
-        if (resolvedProperties?.[key]?.noAccessor) {
-          this[key] = value;
+        if (resolvedProperties && Object.hasOwn(resolvedProperties, key)) {
+          this.setSetting(key, value);
         }
         else {
-          this.properties.set(key, value);
+          otherData[key] = value;
         }
       });
-      if (keys(undeclared).length) {
-        this.extraProperties = undeclared;
-        defineAccessors(this, undeclared);
-      }
+      this.otherData = otherData;
     }
   }
 
@@ -193,7 +163,10 @@ class WebComponentBase extends HTMLElementBase {
   mount(template, { signal } = {}) {
     const renderRoot = this.renderRoot;
     try {
-      const data = this.getData();
+      // the template's own data, then what the mount carried beyond the declaration, then the
+      // settings the store holds, copied as descriptors so getData's getters survive
+      const data = { ...template.data, ...this.otherData };
+      Object.defineProperties(data, Object.getOwnPropertyDescriptors(this.getData()));
       if (template.isPrototype) {
         template = template.clone({ data, element: this });
       }
@@ -294,7 +267,7 @@ class WebComponentBase extends HTMLElementBase {
     'settingsVars',
     'uiClasses',
     'defaultSettings',
-    'extraProperties',
+    'otherData',
     'attributeObserver',
     'updateScheduled',
     'pendingRender',
@@ -303,13 +276,6 @@ class WebComponentBase extends HTMLElementBase {
   // resets every instance field to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
   teardown() {
     this.attributeObserver?.disconnect();
-    if (this.extraProperties) {
-      each(this.extraProperties, (config, name) => {
-        if (!config.noAccessor) {
-          delete this[name];
-        }
-      });
-    }
     each(WebComponentBase.fields, (name) => {
       this[name] = undefined;
     });
@@ -516,9 +482,7 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   requestUpdate() {
-    // nothing to render before a template is mounted: a write that lands then, an attribute
-    // the browser delivers before connectedCallback or a setting seeded at mount, is read by
-    // the first render, and queuing one here would render a second time after it
+    // nothing to render before a template is mounted, its first render reads these writes
     if (!this.template) {
       return;
     }

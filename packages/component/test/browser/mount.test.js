@@ -1,5 +1,5 @@
 import { $ } from '@semantic-ui/query';
-import { reaction } from '@semantic-ui/reactivity';
+import { reaction, signal } from '@semantic-ui/reactivity';
 import { Renderer } from '@semantic-ui/renderer';
 import { Template } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -90,41 +90,34 @@ describe('Template.mount', () => {
       row.unmount();
     });
 
-    it('falls back to declared defaults and accepts undeclared settings', () => {
+    it('falls back to declared defaults and passes undeclared keys to the template as data', () => {
       const Row = defineRow();
       const el = document.createElement('div');
       document.body.append(el);
-      const item = { type: 'invoice', noAccessor: true };
+      const item = { type: 'invoice' };
       const row = Row.mount(el, { settings: { extra: 'yes', item } });
       expect(el.textContent).toContain('default');
+      // data lands in the template's context and nowhere else: no accessor, no setting
       expect(row.getDataContext().extra).toBe('yes');
-      expect(el.extra).toBe('yes');
-      expect(el.item).toBe(item);
-      expect(row.settings.item).toBe(item);
+      expect(row.getDataContext().item).toBe(item);
+      expect(el.extra).toBeUndefined();
+      expect(row.settings.extra).toBeUndefined();
     });
 
-    it('refuses an undeclared setting named like something the element already has', () => {
-      const Row = defineRow();
+    it('passes a key named like an element property as data, touching neither the element nor its stamps', () => {
+      const Titled = defineComponent({ template: '<p>{title}</p>' });
       const el = document.createElement('div');
       document.body.append(el);
-      // an attached template property, a base method, and a native DOM property
-      for (const name of ['component', 'render', 'title']) {
-        expect(() => Row.mount(el, { settings: { [name]: 'taken' } }))
-          .toThrow(expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' }));
-      }
-      // a refused mount leaves the element untouched so a subsequent mount succeeds
-      expect(Object.getPrototypeOf(el)).toBe(HTMLDivElement.prototype);
+      const row = Titled.mount(el, { settings: { title: 'Home', component: 'other' } });
+      expect(el.textContent).toBe('Home');
       expect(el.title).toBe('');
-      const row = Row.mount(el, { settings: { label: 'after' } });
-      expect(el.textContent).toContain('after');
-      row.unmount();
+      expect(el.component).toBe(row.instance);
+      expect(row.getDataContext().component).toBe('other');
     });
 
-    it('keeps a declared noAccessor setting on the element itself, and names noAccessor when refusing', () => {
-      const Row = defineRow();
+    it('keeps a declared noAccessor setting on the element itself', () => {
       const el = document.createElement('div');
       document.body.append(el);
-      expect(() => Row.mount(el, { settings: { title: 'Home' } })).toThrow(/noAccessor/);
       // declared without an accessor, the element's own property is the setting
       const Titled = defineComponent({
         template: '<p>{title}</p>',
@@ -134,19 +127,6 @@ describe('Template.mount', () => {
       expect(el.title).toBe('Home');
       expect(el.textContent).toBe('Home');
       titled.unmount();
-    });
-
-    it('refuses the same reserved name on a fresh element and on one that was unmounted', () => {
-      const Row = defineRow();
-      const refused = expect.objectContaining({ code: 'reservedSetting', at: 'Template.mount' });
-      // pendingRender is only assigned on update, so construct() must pre-initialize it
-      const fresh = document.createElement('div');
-      document.body.append(fresh);
-      expect(() => Row.mount(fresh, { settings: { pendingRender: true } })).toThrow(refused);
-      const used = document.createElement('div');
-      document.body.append(used);
-      Row.mount(used, { settings: { label: 'once' } }).unmount();
-      expect(() => Row.mount(used, { settings: { pendingRender: true } })).toThrow(refused);
     });
 
     it('registers in the template registry and leaves it on unmount', () => {
@@ -183,23 +163,25 @@ describe('Template.mount', () => {
       expect(row.settings.label).toBe('three');
     });
 
-    it('updates an undeclared setting passed at mount, through the proxy and through Query', async () => {
+    it('hands undeclared data to the template once, and a signal passed as data reacts on its own', async () => {
       const Row = defineComponent({
         template: '<p class="row">{route}</p>',
         defaultSettings: { label: 'declared' },
       });
       const el = document.createElement('div');
       document.body.append(el);
-      const row = Row.mount(el, { settings: { route: 'home' } });
+      Row.mount(el, { settings: { route: 'home' } });
       expect(el.textContent).toContain('home');
 
-      row.settings.route = 'about';
+      // a value that must move is a signal, the way any data moves
+      const other = document.createElement('div');
+      document.body.append(other);
+      const route = signal('x');
+      Row.mount(other, { data: { route } });
+      expect(other.textContent).toContain('x');
+      route.set('y');
       await tick();
-      expect(el.textContent).toContain('about');
-
-      $(el).settings({ route: 'contact' });
-      await tick();
-      expect(el.textContent).toContain('contact');
+      expect(other.textContent).toContain('y');
     });
 
     it('renders the data a render call carries, on a mounted template and on a tag', async () => {
@@ -233,13 +215,14 @@ describe('Template.mount', () => {
       expect(tag.shadowRoot.textContent).toContain('updated too');
       expect(tag.label).toBe('updated too');
 
-      // undeclared settings passed at mount are updated too
+      // data a router passes moves through a signal, the way any data moves
       const Route = defineComponent({ template: '<p>{route}</p>' });
       const outlet = document.createElement('div');
       document.body.append(outlet);
-      Route.mount(outlet, { settings: { route: 'home' } });
-      outlet.update({ route: 'about' });
-      expect(outlet.pendingRender).toBeFalsy();
+      const route = signal('home');
+      Route.mount(outlet, { data: { route } });
+      expect(outlet.textContent).toContain('home');
+      route.set('about');
       await tick();
       expect(outlet.textContent).toContain('about');
 
@@ -410,6 +393,19 @@ describe('Template.mount', () => {
       el.setAttribute('max-items', '3');
       await tick();
       expect(el.maxItems).toBeUndefined();
+    });
+
+    it('lets a setting passed to mount win over the attribute the element carries', () => {
+      const Row = defineComponent({
+        tagName: uniqueTag('mount-precedence'),
+        template: '<i>{maxItems}</i>',
+        defaultSettings: { maxItems: 10 },
+      });
+      const el = document.createElement('unregistered-card');
+      el.setAttribute('max-items', '5');
+      document.body.append(el);
+      Row.mount(el, { settings: { maxItems: 7 } });
+      expect(el.querySelector('i').textContent).toBe('7');
     });
   });
 
@@ -1128,7 +1124,8 @@ describe('Template.mount', () => {
         'dataContext',
         'isHydrating',
         'uiClasses',
-        'extraProperties',
+        'otherData',
+        'attributeObserver',
         'updateScheduled',
         'pendingRender',
       ];
@@ -1137,7 +1134,7 @@ describe('Template.mount', () => {
       }
       document.body.append(el);
       await el.rendered;
-      for (const name of ['isHydrating', 'uiClasses', 'extraProperties']) {
+      for (const name of ['isHydrating', 'uiClasses', 'otherData', 'attributeObserver']) {
         expect(Object.hasOwn(el, name)).toBe(false);
       }
     });

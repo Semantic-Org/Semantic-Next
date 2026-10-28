@@ -274,12 +274,6 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
       settings[propertyName] = true;
     }
   }
-  // include undeclared settings passed to mount()
-  el.properties?.forEach((value, propertyName) => {
-    if (!(propertyName in settings)) {
-      settings[propertyName] = value;
-    }
-  });
   return settings;
 }
 
