@@ -26,6 +26,30 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 const HTMLElementBase = isServer ? class {} : HTMLElement;
 
 class WebComponentBase extends HTMLElementBase {
+  // the base's own prototype descriptors, read once and shared by every upgrade prototype
+  static baseDescriptors;
+
+  // instance fields managed by the base class and cleared on teardown
+  static fields = [
+    'template',
+    'component',
+    'dataContext',
+    'isLightDOM',
+    'isCustomElement',
+    'properties',
+    'renderRoot',
+    'isHydrating',
+    'css',
+    'componentSpec',
+    'settings',
+    'settingsVars',
+    'uiClasses',
+    'defaultSettings',
+    'attributeObserver',
+    'updateScheduled',
+    'isUpdatePending',
+  ];
+
   // a mounted element keeps its own tag prototype (HTMLDivElement, HTMLDialogElement)
   // and carries ComponentClass as its constructor, so instanceof matches both
   static [Symbol.hasInstance](instance) {
@@ -50,9 +74,6 @@ class WebComponentBase extends HTMLElementBase {
       throw error;
     }
   }
-
-  // the base's own prototype descriptors, read once and shared by every upgrade prototype
-  static baseDescriptors;
 
   // layers the component class over the element's native tag prototype so a mounted
   // <dialog> can still call native methods like showModal() and close() while taking on
@@ -257,27 +278,6 @@ class WebComponentBase extends HTMLElementBase {
     this.teardown();
     Object.setPrototypeOf(this, original);
   }
-
-  // instance fields managed by the base class and cleared on teardown
-  static fields = [
-    'template',
-    'component',
-    'dataContext',
-    'isLightDOM',
-    'isCustomElement',
-    'properties',
-    'renderRoot',
-    'isHydrating',
-    'css',
-    'componentSpec',
-    'settings',
-    'settingsVars',
-    'uiClasses',
-    'defaultSettings',
-    'attributeObserver',
-    'updateScheduled',
-    'isUpdatePending',
-  ];
 
   // resets every instance field to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
   teardown() {
