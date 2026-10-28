@@ -53,11 +53,11 @@ export function mount(template, target, { settings = {}, data = {}, anchor, sign
 
   const source = template.prototypeTemplate || template;
   const ComponentClass = template.componentClass ??= source.componentClass ??= createComponentClass(source);
-  ComponentClass.upgradeElement(el, {
+  ComponentClass.upgradeElement(el, { renderRoot });
+  return el.mount(template, {
     data: { ...template.data, ...data, ...settings },
-    renderRoot,
+    signal,
   });
-  return el.mount(template, { signal });
 }
 
 export function unmount(template) {

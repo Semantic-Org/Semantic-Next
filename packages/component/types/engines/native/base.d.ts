@@ -70,9 +70,14 @@ export declare class WebComponentBase extends HTMLElement {
    */
   construct(options?: {
     isLightDOM?: boolean;
-    data?: Record<string, any>;
     renderRoot?: ShadowRoot | Element;
   }): void;
+
+  /**
+   * Replays initial observed attributes through `attributeChangedCallback` and starts a
+   * `MutationObserver` for subsequent attribute changes on light DOM elements.
+   */
+  setupAttributeObserver(attributes?: string[], options?: { callImmediately?: boolean; }): void;
 
   /**
    * Prototype template every instance clones from.
@@ -153,7 +158,7 @@ export declare class WebComponentBase extends HTMLElement {
   isHydrating?: boolean;
 
   /** Mounts a template into this element's renderRoot. */
-  mount(template: Template, options?: { signal?: AbortSignal; }): Template;
+  mount(template: Template, options?: { data?: Record<string, any>; signal?: AbortSignal; }): Template;
 
   /** Tears down the mounted template and restores the element if it borrowed its prototype from `upgradeElement`. */
   unmount(): void;

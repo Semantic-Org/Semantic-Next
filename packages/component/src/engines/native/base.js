@@ -35,14 +35,13 @@ class WebComponentBase extends HTMLElementBase {
 
   // swap in the component prototype and run construct() rather than copying properties
   // onto the element (benched at 33us vs 54us per mount)
-  static upgradeElement(el, { data, renderRoot } = {}) {
+  static upgradeElement(el, { renderRoot } = {}) {
     const original = Object.getPrototypeOf(el);
     el.originalPrototype = original;
     Object.setPrototypeOf(el, this.getUpgradePrototype(original));
     try {
       el.construct({
         isLightDOM: true,
-        data,
         renderRoot,
       });
     }
@@ -83,7 +82,7 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   // shared constructor logic for custom element upgrades and light DOM mounts
-  construct({ isLightDOM = false, data, renderRoot } = {}) {
+  construct({ isLightDOM = false, renderRoot } = {}) {
     this.isLightDOM = isLightDOM;
     this.isCustomElement = !isLightDOM;
     this.properties = new Map();
@@ -112,40 +111,34 @@ class WebComponentBase extends HTMLElementBase {
       this.defaultSettings = {};
     }
 
-    // light DOM mounts lack native custom element callbacks, so replay initial observed
-    // attributes and watch later attribute mutations through attributeChangedCallback
-    const observed = this.isLightDOM ? this.constructor.observedAttributes : undefined;
-    if (observed?.length) {
+    if (this.isLightDOM) {
+      this.setupAttributeObserver();
+    }
+  }
+
+  // light DOM mounts lack native custom element callbacks, so replay initial observed
+  // attributes and watch later attribute mutations through attributeChangedCallback
+  setupAttributeObserver(attributes = this.constructor?.observedAttributes, { callImmediately = true } = {}) {
+    if (!attributes?.length) {
+      return;
+    }
+    if (callImmediately) {
       for (const attribute of this.attributes) {
-        if (inArray(attribute.name, observed)) {
+        if (inArray(attribute.name, attributes)) {
           this.attributeChangedCallback(attribute.name, null, attribute.value);
         }
       }
-      this.attributeObserver = new MutationObserver((records) => {
-        for (const { attributeName, oldValue } of records) {
-          this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
-        }
-      });
-      this.attributeObserver.observe(this, { attributes: true, attributeOldValue: true, attributeFilter: observed });
     }
-
-    // declared settings run after the attribute replay so explicit call values win over
-    // markup; undeclared keys are plain data implanted into the template context
-    if (this.isLightDOM && data) {
-      if (componentSpec) {
-        resolveAttributeAliases(data, componentSpec);
+    this.attributeObserver = new MutationObserver((records) => {
+      for (const { attributeName, oldValue } of records) {
+        this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
       }
-      each(data, (value, name) => {
-        const key = resolvedProperties?.[name]?.aliasFor ?? name;
-        if (resolvedProperties && Object.hasOwn(resolvedProperties, key)) {
-          this.setSetting(key, value);
-        }
-        else {
-          this.additionalData ??= {};
-          this.additionalData[key] = value;
-        }
-      });
-    }
+    });
+    this.attributeObserver.observe(this, {
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: attributes,
+    });
   }
 
   addTemplateToEl(template) {
@@ -160,11 +153,28 @@ class WebComponentBase extends HTMLElementBase {
     this.dataContext = undefined;
   }
 
-  mount(template, { signal } = {}) {
+  mount(template, { data: mountData, signal } = {}) {
     const renderRoot = this.renderRoot;
     try {
+      const { componentSpec, resolvedProperties } = this.constructor.config || {};
+      const data = { ...template.data };
+      // declared settings run after the attribute replay so explicit call values win over
+      // markup; undeclared keys are plain data implanted into the template context
+      if (mountData) {
+        if (componentSpec) {
+          resolveAttributeAliases(mountData, componentSpec);
+        }
+        each(mountData, (value, name) => {
+          const key = resolvedProperties?.[name]?.aliasFor ?? name;
+          if (resolvedProperties && Object.hasOwn(resolvedProperties, key)) {
+            this.setSetting(key, value);
+          }
+          else {
+            data[key] = value;
+          }
+        });
+      }
       // copy getData() via property descriptors so getters like darkMode stay live
-      const data = { ...template.data, ...this.additionalData };
       Object.defineProperties(data, Object.getOwnPropertyDescriptors(this.getData()));
       if (template.isPrototype) {
         template = template.clone({ data, element: this });
@@ -265,7 +275,6 @@ class WebComponentBase extends HTMLElementBase {
     'settingsVars',
     'uiClasses',
     'defaultSettings',
-    'additionalData',
     'attributeObserver',
     'updateScheduled',
     'isUpdatePending',
