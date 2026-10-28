@@ -97,6 +97,10 @@ class WebComponentBase extends HTMLElementBase {
     return proto;
   }
 
+  /*******************************
+            Construction
+  *******************************/
+
   constructor() {
     super();
     this.construct();
@@ -137,30 +141,9 @@ class WebComponentBase extends HTMLElementBase {
     }
   }
 
-  // light DOM mounts lack native custom element callbacks, so replay initial observed
-  // attributes and watch later attribute mutations through attributeChangedCallback
-  setupAttributeObserver(attributes = this.constructor?.observedAttributes, { callImmediately = true } = {}) {
-    if (!attributes?.length) {
-      return;
-    }
-    if (callImmediately) {
-      for (const attribute of this.attributes) {
-        if (inArray(attribute.name, attributes)) {
-          this.attributeChangedCallback(attribute.name, null, attribute.value);
-        }
-      }
-    }
-    this.attributeObserver = new MutationObserver((records) => {
-      for (const { attributeName, oldValue } of records) {
-        this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
-      }
-    });
-    this.attributeObserver.observe(this, {
-      attributes: true,
-      attributeOldValue: true,
-      attributeFilter: attributes,
-    });
-  }
+  /*******************************
+          Mount / Unmount
+  *******************************/
 
   addTemplateToEl(template) {
     this.template = template;
@@ -286,6 +269,10 @@ class WebComponentBase extends HTMLElementBase {
       this[name] = undefined;
     });
   }
+
+  /*******************************
+      Custom Element Lifecycle
+  *******************************/
 
   connectedCallback() {
     if (this.template) {
@@ -433,6 +420,35 @@ class WebComponentBase extends HTMLElementBase {
     queueMicrotask(() => {
       if (this.isConnected || !this.template) { return; }
       this.unmount();
+    });
+  }
+
+  /*******************************
+        Attributes & Updates
+  *******************************/
+
+  // light DOM mounts lack native custom element callbacks, so replay initial observed
+  // attributes and watch later attribute mutations through attributeChangedCallback
+  setupAttributeObserver(attributes = this.constructor?.observedAttributes, { callImmediately = true } = {}) {
+    if (!attributes?.length) {
+      return;
+    }
+    if (callImmediately) {
+      for (const attribute of this.attributes) {
+        if (inArray(attribute.name, attributes)) {
+          this.attributeChangedCallback(attribute.name, null, attribute.value);
+        }
+      }
+    }
+    this.attributeObserver = new MutationObserver((records) => {
+      for (const { attributeName, oldValue } of records) {
+        this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
+      }
+    });
+    this.attributeObserver.observe(this, {
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: attributes,
     });
   }
 
