@@ -1,7 +1,6 @@
-/* each page node and the footer get a box, so a page reads as siblings of the menu and the footer */
-main > :not(ui-menu) {
-  margin-top: var(--margin-xs);
-  padding: var(--padding-xs);
-  border: var(--border);
-  border-radius: var(--border-radius);
+footer {
+  margin-top: var(--margin-m);
+  padding-top: var(--padding-s);
+  border-top: var(--internal-border);
+  color: var(--muted-text-color);
 }
