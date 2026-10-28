@@ -1,7 +1,7 @@
 ---
 title: What's Novel in Semantic UI
 description: Design departures from mainstream frameworks that an agent would miss without being told. Read before reviewing examples or writing code — calibrates attention toward the non-obvious decisions.
-keywords: [novel, departures, design, lisp, flat context, expressions, natural language, signals, async, template language, what to notice, runtime, no compile, proxy, reactivity granularity, mutation helpers]
+keywords: [novel, departures, design, lisp, flat context, expressions, natural language, signals, async, template language, what to notice, runtime, no compile, proxy, reactivity granularity, mutation helpers, light dom, mount]
 audience: essentials
 skill: novel-patterns
 type: skill
@@ -155,6 +155,41 @@ Functions with no required arguments auto-invoke when they're the terminal token
 
 **What to notice:** The template doesn't distinguish between a value and a zero-arg function. You can refactor from a static prop to a computed method (or vice versa) without changing the template. Same philosophy as the flat data context — the template describes *what* it wants, not *how* to get it.
 
+### 9. Prototype-Layered Light DOM Mounting — The Web Component Contract on Any Element
+
+Omitting `tagName` in `defineComponent` skips `customElements.define` and returns a `Template` you can mount onto any existing DOM element via `.mount(el)`. Instead of treating `el` as an inert container box, `.mount(el)` layers the component prototype directly over `Object.getPrototypeOf(el)` for the lifetime of the mount:
+
+```js
+const Dialog = defineComponent({
+  template,
+  css,
+  defaultSettings: { heading: 'Confirm', maxItems: 10 },
+  createComponent: ({ el }) => ({
+    close: () => el.close(), // native HTMLDialogElement method on el
+  }),
+});
+
+const dialog = document.querySelector('dialog[heading="Delete"][max-items="5"]');
+const instance = Dialog.mount(dialog);
+
+dialog.heading;                        // 'Delete' — reactive property accessor on <dialog>
+dialog.maxItems;                       // 5 — coerced from attribute via property converter
+dialog.showModal();                    // native HTMLDialogElement.prototype.showModal() still works
+dialog instanceof HTMLDialogElement;   // true
+dialog instanceof Dialog;              // true
+```
+
+```
+❌ React / Vue mount(el): el is a dead wrapper div; attributes on el aren't reactive props, el has no component API
+❌ Custom Elements is="": customized built-in elements (<dialog is="my-dialog">) are unsupported in Safari
+✅ SUI .mount(el): layers component accessors, settings, and attribute observation over el's native prototype
+```
+
+**What to notice:**
+- **Full element contract without Shadow DOM:** The target element gets reactive property getters/setters, `el.settings`, `el.component`, `el.dataContext`, `el.update()`, `el.rendered`/`el.updated`, spec attribute dialects, and `MutationObserver`-driven `attributeChangedCallback`. Component CSS is adopted onto the enclosing document or shadow root.
+- **Native prototype preservation:** Because the upgrade prototype inherits from `el`'s original prototype (`HTMLDialogElement.prototype`, `HTMLTableRowElement.prototype`, etc.), native methods (`dialog.showModal()`, `dialog.close()`, `form.requestSubmit()`) and `instanceof` checks work unmodified alongside the component's own properties.
+- **Reversible:** Calling `instance.unmount()` (or `el.unmount()`) disconnects reactions and observers, clears rendered content, and restores `el`'s original prototype.
+
 ---
 
 ## Quick Reference
@@ -170,6 +205,7 @@ Functions with no required arguments auto-invoke when they're the terminal token
 | Boolean attributes need conditional rendering | Unquoted `attr={expr}` removes attribute when falsy |
 | State mutation requires get-mutate-set | Signals have type-aware helpers: `.push()`, `.toggle()`, `.increment()` |
 | Functions need `()` to be called | Zero-arg functions auto-invoke in templates |
+| Mounting into an element treats it as an inert container | `.mount(el)` layers the web component contract over `el`'s native prototype |
 
 ---
 
