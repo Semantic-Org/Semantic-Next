@@ -221,24 +221,35 @@ export function getPropertySettings({ name, type = String, propertyOnly = false,
 *******************************/
 
 /*
-  Sets default settings for a component instance.
-  Call as: setDefaultSettings(el, { defaultSettings, componentSpec })
+  Default settings for a definition: declared defaults with expert `{ default }`
+  forms unwrapped, over the spec's default values keyed by property name. The
+  server builds its settings from the same rule, so both sides read one shape.
+  Call as: getDefaultSettings({ defaultSettings, componentSpec })
 */
-export function setDefaultSettings(el, { defaultSettings = {}, componentSpec }) {
-  el.defaultSettings = { ...defaultSettings };
-  each(el.defaultSettings, (setting, name) => {
+export function getDefaultSettings({ defaultSettings = {}, componentSpec } = {}) {
+  const settings = { ...defaultSettings };
+  each(settings, (setting, name) => {
     if (setting?.default !== undefined) {
-      el.defaultSettings[name] = setting.default;
+      settings[name] = setting.default;
     }
   });
   if (componentSpec?.defaultValues) {
     each(componentSpec.defaultValues, (value, name) => {
       const prop = kebabToCamel(name);
-      if (el.defaultSettings[prop] === undefined) {
-        el.defaultSettings[prop] = value;
+      if (settings[prop] === undefined) {
+        settings[prop] = value;
       }
     });
   }
+  return settings;
+}
+
+/*
+  Sets default settings for a component instance.
+  Call as: setDefaultSettings(el, { defaultSettings, componentSpec })
+*/
+export function setDefaultSettings(el, options) {
+  el.defaultSettings = getDefaultSettings(options);
 }
 
 /*

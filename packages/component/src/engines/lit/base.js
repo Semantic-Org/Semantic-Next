@@ -32,14 +32,14 @@ class LitWebComponentBase extends LitElement {
     const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
     this.css = css;
     this.componentSpec = componentSpec;
-    if (resolvedProperties) {
-      this.settings = this.createSettingsProxy();
-    }
     if (defaultSettings) {
       this.setDefaultSettings({ defaultSettings, componentSpec });
     }
     else {
       this.defaultSettings = {};
+    }
+    if (resolvedProperties) {
+      this.settings = this.createSettingsProxy();
     }
   }
 

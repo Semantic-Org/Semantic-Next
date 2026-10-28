@@ -2,7 +2,7 @@
 import { Template } from '@semantic-ui/templating/template';
 import { each, kebabToCamel } from '@semantic-ui/utils';
 
-import { getUIClasses, resolveAttributeAliases } from '../component-helpers.js';
+import { getDefaultSettings, getUIClasses, resolveAttributeAliases } from '../component-helpers.js';
 
 /*
   The server instance of a definition, the class a tagged defineComponent returns
@@ -32,8 +32,7 @@ export function createServerTemplate(definition, attrs = {}, { renderOptions } =
   });
   resolveAttributeAliases(normalizedAttrs, componentSpec);
 
-  const specDefaults = componentSpec?.defaultValues || {};
-  const data = { ...specDefaults, ...defaultSettings, ...normalizedAttrs };
+  const data = { ...getDefaultSettings({ defaultSettings, componentSpec }), ...normalizedAttrs };
   const template = proto.clone({ data, renderingEngine: 'native' });
   // no host element on the server, so the settings are the data itself, and the
   // render options sit on the instance for its renderer to read

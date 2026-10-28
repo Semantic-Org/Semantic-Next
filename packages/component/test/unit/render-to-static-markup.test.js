@@ -66,6 +66,22 @@ const Icon = defineComponent({
   },
 });
 
+// a hyphenated spec default and an expert-form default, which the client reads by property name
+const Debounced = defineComponent({
+  tagName: 'static-debounced',
+  template: '<i>{debounceInterval} {retries}</i>',
+  defaultSettings: { retries: { type: Number, default: 3 } },
+  componentSpec: {
+    attributes: ['debounce-interval'],
+    properties: [],
+    optionAttributes: {},
+    propertyTypes: { 'debounce-interval': Number },
+    allowedValues: {},
+    attributeClasses: [],
+    defaultValues: { 'debounce-interval': 150 },
+  },
+});
+
 const shadowContent = (html) => html.match(/<template shadowrootmode="open">([\s\S]*)<\/template>/)[1];
 const withoutMarkers = (html) => html.replace(/<!--[\s\S]*?-->/g, '').replace(/\s+data-sui-bind="[^"]*"/g, '');
 
@@ -251,5 +267,14 @@ describe('renderToStaticMarkup slot content', () => {
   it('renders non-string content as text, the way renderToString does', () => {
     expect(renderToStaticMarkup(Slotted, {}, { slots: { default: 42 } })).toBe('<header></header><main>42</main>');
     expect(renderToString(Slotted, {}, { slots: { default: 42 } })).toContain('42');
+  });
+});
+
+describe('defaults on the server', () => {
+  it('reach the template by property name, the same shape the client reads', () => {
+    expect(withoutMarkers(shadowContent(renderToString(Debounced, {})))).toBe('<i>150 3</i>');
+    expect(withoutMarkers(shadowContent(renderToString(Debounced, { 'debounce-interval': 300, retries: 5 })))).toBe(
+      '<i>300 5</i>',
+    );
   });
 });

@@ -176,7 +176,6 @@ dialog.heading;                        // 'Delete' — reactive property accesso
 dialog.maxItems;                       // 5 — coerced from attribute via property converter
 dialog.showModal();                    // native HTMLDialogElement.prototype.showModal() still works
 dialog instanceof HTMLDialogElement;   // true
-dialog instanceof Dialog;              // true
 ```
 
 ```
