@@ -146,3 +146,53 @@ describe('rerender', () => {
     expect(result).toBe('resolved');
   });
 });
+
+// getData() carries darkMode as a getter so a template reads the theme only when a
+// binding asks. a data sync that reads it pays a getComputedStyle per update
+describe('darkMode', () => {
+  it('syncs a setting, plain data, and a rerender without reading isDarkMode', async () => {
+    const el = await mountTag({
+      template: '<p>{label}</p>',
+      defaultSettings: { label: 'start' },
+    });
+    let reads = 0;
+    el.isDarkMode = () => {
+      reads++;
+      return false;
+    };
+
+    el.label = 'next';
+    await tick();
+    expect(el.shadowRoot.querySelector('p').textContent).toBe('next');
+
+    el.update({ aside: 1 });
+    await tick();
+
+    el.template.rerender();
+    await tick();
+
+    expect(reads).toBe(0);
+  });
+
+  it('reads isDarkMode each time a binding evaluates it', async () => {
+    const tag = uniqueTag();
+    defineComponent({ tagName: tag, template: '{#if darkMode}dark{else}light{/if}' });
+    const el = document.createElement(tag);
+    let dark = true;
+    let reads = 0;
+    el.isDarkMode = () => {
+      reads++;
+      return dark;
+    };
+    document.body.append(el);
+    await el.rendered;
+    expect(text(el)).toBe('dark');
+    expect(reads).toBe(1);
+
+    dark = false;
+    el.template.rerender();
+    await tick();
+    expect(text(el)).toBe('light');
+    expect(reads).toBe(2);
+  });
+});
