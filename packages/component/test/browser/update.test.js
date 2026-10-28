@@ -162,13 +162,45 @@ describe('el.update', () => {
     child.component.setValue('second');
     await tick();
     expect(child.value).toBe('second');
+    expect(child.settingsVars.get('value').peek()).toBe('second');
     expect(child.shadowRoot.querySelector('p').textContent).toBe('second');
 
     child.component.setValue('first');
     await tick();
     expect(child.value).toBe('first');
+    expect(child.settingsVars.get('value').peek()).toBe('first');
     expect(child.shadowRoot.querySelector('p').textContent).toBe('first');
     expect(Object.hasOwn(child, 'value')).toBe(false);
+  });
+
+  it('absorbs a property written before the definition exists', async () => {
+    const tag = uniqueTag();
+    const el = document.createElement(tag);
+    el.value = 'pre';
+    document.body.append(el);
+    expect(Object.hasOwn(el, 'value')).toBe(true);
+
+    defineComponent({
+      tagName: tag,
+      template: '<p>{value}</p>',
+      defaultSettings: { value: '' },
+      createComponent: ({ settings }) => ({
+        setValue(val) {
+          settings.value = val;
+        },
+      }),
+    });
+    await el.rendered;
+    expect(Object.hasOwn(el, 'value')).toBe(false);
+    expect(el.value).toBe('pre');
+    expect(el.settingsVars.get('value').peek()).toBe('pre');
+    expect(el.shadowRoot.querySelector('p').textContent).toBe('pre');
+
+    el.component.setValue('next');
+    await tick();
+    expect(el.value).toBe('next');
+    expect(el.settingsVars.get('value').peek()).toBe('next');
+    expect(el.shadowRoot.querySelector('p').textContent).toBe('next');
   });
 
   it('absorbs .prop bindings set before custom element upgrade so later updates re-render', async () => {
