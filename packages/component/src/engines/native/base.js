@@ -1,4 +1,4 @@
-import { flush } from '@semantic-ui/reactivity';
+import { afterFlush } from '@semantic-ui/reactivity';
 import { MARKER_VERSION } from '@semantic-ui/renderer';
 import { adoptStylesheet, each, extend, inArray, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
@@ -519,11 +519,12 @@ class WebComponentBase extends HTMLElementBase {
         return;
       }
       this.update();
-      flush();
-      // nothing moved, so nothing reaches onUpdated for the waiters this update collected
-      if (!this.updateScheduled && !this.template.updateScheduled) {
-        this.template.resolveLifecyclePromise('updated');
-      }
+      afterFlush(() => {
+        // nothing moved, so nothing reaches onUpdated for the waiters this update collected
+        if (!this.updateScheduled && !this.template?.updateScheduled) {
+          this.template?.resolveLifecyclePromise('updated');
+        }
+      });
     });
   }
 
