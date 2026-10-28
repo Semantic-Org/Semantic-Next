@@ -139,9 +139,9 @@ describe('Template — createReactiveState', () => {
        getDataContext
 *******************************/
 
-// The data context is a flat merge: `extend({}, data, state, instance)`.
-// Last-source-wins gives instance > state > data precedence. Settings are
-// NOT included here — they enter via overlaySettings.
+// The data context is a flat merge: `extend({}, defaultSettings, customData, data, state, instance)`.
+// Last-source-wins gives instance > state > data > customData > defaultSettings precedence.
+// Settings signals are not part of it unless asked for with `{ overlaySettings: true }`.
 
 describe('Template — getDataContext merge order', () => {
   it('returns data only when only data is set', () => {
