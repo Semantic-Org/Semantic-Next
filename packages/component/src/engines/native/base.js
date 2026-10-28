@@ -496,6 +496,12 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   requestUpdate() {
+    // nothing to render before a template is mounted: a write that lands then, an attribute
+    // the browser delivers before connectedCallback or a setting seeded at mount, is read by
+    // the first render, and queuing one here would render a second time after it
+    if (!this.template) {
+      return;
+    }
     this.updateScheduled = true;
     if (this.pendingRender) {
       return;

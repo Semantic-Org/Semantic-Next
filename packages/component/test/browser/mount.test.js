@@ -1057,6 +1057,28 @@ describe('Template.mount', () => {
       expect(el.shadowRoot.textContent).toBe('after-append');
     });
 
+    it('renders a tag created with attributes once, not again for the writes before it connected', async () => {
+      const Tagged = defineComponent({
+        tagName: uniqueTag('mount-pre-attr'),
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'initial' },
+      });
+      const el = document.createElement(Tagged.componentTagName);
+      // the browser delivers attributes before connectedCallback, so these writes land on an
+      // element with no template yet and must not queue a render for after the first one
+      el.setAttribute('label', 'from-attribute');
+      const render = vi.spyOn(Template.prototype, 'render');
+      try {
+        document.body.append(el);
+        await tick();
+        expect(el.shadowRoot.textContent).toBe('from-attribute');
+        expect(render.mock.contexts.filter((template) => template.element === el).length).toBe(1);
+      }
+      finally {
+        render.mockRestore();
+      }
+    });
+
     it('leaves a fresh element without the fields it has not written yet', async () => {
       const Tagged = defineComponent({
         tagName: uniqueTag('mount-fresh'),
