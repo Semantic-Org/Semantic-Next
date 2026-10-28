@@ -5,7 +5,7 @@ title: Query - Components
 icon: box
 description: API reference for interacting with Semantic UI components
 package: "@semantic-ui/query"
-methods: ["component", "initialize", "settings", "setting", "dataContext"]
+methods: ["component", "initialize", "settings", "setting", "dataContext", "update"]
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -118,3 +118,25 @@ Data context object, or `undefined` if not found.
 #### Example
 
 <PlaygroundExample id="query-datacontext" direction="horizontal"></PlaygroundExample>
+
+### update
+
+```javascript
+$('selector').update(data)
+```
+
+Brings each matched component's template to `data`, which defaults to the element's current settings. A declared setting moves through its signal. Every other key is plain data, re-evaluated wherever the template reads it.
+
+#### Parameters
+
+| Name | Type   | Description                                               |
+|------|--------|-----------------------------------------------------------|
+| data | object | Keys to merge into each component's template data context |
+
+#### Returns
+
+Query object for chaining.
+
+#### Example
+
+<PlaygroundExample id="query-update" direction="horizontal"></PlaygroundExample>

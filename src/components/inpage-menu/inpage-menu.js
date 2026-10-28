@@ -298,7 +298,7 @@ const onRendered = function({ self, isServer, settings }) {
     return;
   }
   self.bindPageEvents();
-  self.calculateScrollHeight();
+  requestIdleCallback(() => self.calculateScrollHeight());
 };
 
 const onDestroyed = function({ self, isServer }) {

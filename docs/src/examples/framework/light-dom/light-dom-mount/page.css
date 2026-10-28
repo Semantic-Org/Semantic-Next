@@ -1,0 +1,4 @@
+/* light DOM mounts have no shadow boundary, so page styles reach inside */
+.target .counter {
+  border-color: var(--red-border-color);
+}

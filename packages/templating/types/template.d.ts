@@ -1,6 +1,7 @@
 import { ASTNode } from '@semantic-ui/compiler';
 import { EventHandler, Query, QueryOptions } from '@semantic-ui/query';
 import { Matcher, Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
+import type { Engine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 /**
@@ -68,7 +69,7 @@ export interface TemplateSettings {
   subTemplates?: Record<string, Template>;
   /** A function to create a component instance associated with the template. */
   createComponent?: (params: FactoryParams) => Record<string, any>;
-  /** The parent template (if this is a nested template). */
+  /** The parent template when nested. Set through `setParent` by the renderer. */
   parentTemplate?: Template;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine?: string | object;
@@ -628,7 +629,7 @@ export interface CallParams<
   darkMode: boolean;
 
   /**
-   * Forces a re-render of the component.
+   * Re-evaluates every expression in place and rebuilds every `{#rerender}` block.
    *
    * @example
    * rerender();
@@ -689,6 +690,21 @@ export interface AttachSettings {
   endNode?: Node;
 }
 
+/**
+ * Options for {@link Template.mount}. Component CSS is adopted onto the target's root
+ * node, or onto `document` if the target is detached at mount time.
+ */
+export interface MountSettings {
+  /** Initial settings for the mounted component, overriding defaults and target HTML attributes. Undeclared keys are passed to the template as data. */
+  settings?: Record<string, any>;
+  /** Initial data context merged into the template on mount. */
+  data?: Record<string, any>;
+  /** Unmounts the template when aborted. Throws if already aborted at mount time. */
+  signal?: AbortSignal;
+  /** Reserved for future range mounting. Passing `anchor` currently throws `unsupportedAnchor`. */
+  anchor?: Node;
+}
+
 export class Template {
   /** Static counter for the total number of templates created. */
   static templateCount: number;
@@ -731,8 +747,10 @@ export class Template {
   onUpdatedCallback: (params: CallParams) => void;
   /** Callback function invoked when the theme changes. */
   onThemeChangedCallback: (params: CallParams) => void;
-  /** The parent template (if this is a nested template). */
+  /** The parent template when nested. Set through `setParent` by the renderer. */
   parentTemplate?: Template;
+  /** True while mounted through {@link mount}, `false` once unmounted. */
+  mounted?: boolean;
   /** Array of reactive reactions associated with the template. */
   reactions: Reaction[];
   /** Mutation observers watching for theme changes, disconnected on destroy. */
@@ -741,6 +759,10 @@ export class Template {
   renderRoot?: ShadowRoot | HTMLElement;
   /** The rendering engine — 'native' (default), 'lit', or an engine object. */
   renderingEngine: string | object;
+  /** The engine, resolved on first `initialize()` or `mount()` through `resolvedEngine`. Undefined before then. */
+  engine?: Engine;
+  /** Resolves and caches `engine` from `renderingEngine`. Throws `engineNotRegistered` when nothing is registered under the name. */
+  readonly resolvedEngine: Engine;
   /** The renderer instance for the active engine. Engines supply their own class, so this stays open. */
   renderer: any;
   /** The most recent `render()` result: a DocumentFragment on the client, markup on the server. */
@@ -829,12 +851,13 @@ export class Template {
   createReactiveState(defaultState?: Record<string, any>, data?: DataContext): Record<string, Signal<any>>;
 
   /**
-   * Sets the data context for the template.
-   * @param data - The new data context.
-   * @param options - Options.
-   * @param options.rerender - whether to force a rerender. default true
+   * Merges a partial context into `data` and reports whether a key with nothing reactive
+   * behind it changed. A declared setting moves through its own signal and a getter is
+   * the caller's live value, so neither counts.
+   * @param data - Keys to merge.
+   * @returns Whether a plain key changed.
    */
-  setDataContext(data: DataContext, options?: { rerender?: boolean; }): void;
+  setDataContext(data?: DataContext): boolean;
 
   /**
    * Whether this template is rendered inside another template rather than as a component.
@@ -873,13 +896,34 @@ export class Template {
    * @param renderRoot - The root element (ShadowRoot or HTMLElement) to attach to.
    * @param options - Attach settings
    */
-  attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): Promise<void>;
+  attach(renderRoot: ShadowRoot | HTMLElement, options?: AttachSettings): void;
 
   /**
-   * Gets the combined data context, including data, state, and instance properties.
+   * Mounts this template into a target element or shadow root. Calling `mount` on a
+   * prototype template clones and mounts a new instance; calling it on an instance mounts
+   * that instance once. Plain elements are upgraded with the component's class while
+   * mounted so `el.settings`, property writes, Query `.settings()`, `findParent`, and
+   * lifecycle events work the same as on a custom element.
+   * @param target - The element or shadow root to mount into
+   * @param options - Mount options
+   * @returns The mounted template instance
+   */
+  mount(target: Element | ShadowRoot, options?: MountSettings): Template;
+
+  /**
+   * Unmounts a mounted template, destroying the instance, removing rendered DOM, and
+   * restoring the target element. Subsequent calls are no-ops.
+   */
+  unmount(): void;
+
+  /**
+   * Gets the combined data context, including settings, plugin data, data, state, and instance properties.
+   * @param options - Options for building the context.
+   * @param options.overlaySettings - Whether to overlay settings shadow signals onto the context.
+   * @param options.additionalData - Additional data to merge on top of the context.
    * @returns The data context object.
    */
-  getDataContext(): DataContext;
+  getDataContext(options?: { overlaySettings?: boolean; additionalData?: DataContext; }): DataContext;
 
   /**
    * Overlays settings signals onto a data context so the renderer tracks settings
@@ -887,12 +931,12 @@ export class Template {
    * @param context - The data context to overlay onto. Mutated in place.
    * @returns The same context.
    */
-  overlaySettingsSignals(context: DataContext): DataContext;
+  overlaySettings(context: DataContext): DataContext;
 
   /**
    * Adopts the template's stylesheet to the renderRoot (if using a ShadowRoot).
    */
-  adoptStylesheet(): Promise<void>;
+  adoptStylesheet(): void;
 
   /**
    * Creates a clone of the template with optional overrides.
@@ -967,12 +1011,34 @@ export class Template {
   getEventOrigin(): Element | undefined;
 
   /**
-   * Renders the template through the active engine.
-   * @param additionalData - Additional data to be merged into the template's data context.
+   * Brings the template to `data` and builds it once. A later call updates in place and
+   * hands back what the engine produced the first time.
+   * @param data - Keys to merge before building.
    * @returns Whatever the engine's renderer produces: a DocumentFragment on the client,
    * markup on the server.
    */
-  render(additionalData?: DataContext): any;
+  render(data?: DataContext): any;
+
+  /**
+   * Brings the template to `data`. A declared setting moves through its signal, every
+   * other key is plain data that reaches the DOM through the coarse channel.
+   * @param data - Keys to merge.
+   * @returns Whether a plain key changed.
+   */
+  update(data?: DataContext): boolean;
+
+  /**
+   * Hands the renderer the full context with settings overlaid as signals and the keys
+   * `data` carries on top.
+   * @param data - Keys that override the context for this pass.
+   */
+  syncRenderer(data?: DataContext): void;
+
+  /**
+   * The escape valve: every binding re-evaluates and every `{#rerender}` region rebuilds.
+   * A component element's properties are read first so a write behind an accessor counts.
+   */
+  rerender(): void;
 
   /**
    * Engine-facing flag setter: marks the template as rendered and clears the destroyed flag.
@@ -1081,10 +1147,10 @@ export class Template {
   createSubtemplateSettings(): void;
 
   /**
-   * Pushes matching values from a data context into the subtemplate's settings.
-   * @param dataContext - The data context to read from.
+   * Updates settings from the data passed to `update()` or `render()`.
+   * @param additionalData - The keys an update carries.
    */
-  updateSubtemplateSettings(dataContext: DataContext): void;
+  updateSettings(additionalData?: DataContext): void;
 
   /**
    * `setInterval` scoped to the template, cleared when the template is destroyed.

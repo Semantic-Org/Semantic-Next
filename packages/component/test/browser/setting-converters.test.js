@@ -312,6 +312,62 @@ RENDERING_ENGINES.forEach((engine) => {
     /*******************************
         Defaults preserved (no attr)
     *******************************/
+    describe('Expert form', () => {
+      it('converts a numeric attribute on an expert-form Number', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<i></i>',
+          defaultSettings: { count: { type: Number, default: 0 } },
+        });
+        const el = document.createElement(tag);
+        el.setAttribute('count', '5');
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(el.settings.count).toBe(5);
+      });
+
+      it('parses a JSON attribute on an expert-form Object', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<i></i>',
+          defaultSettings: { config: { type: Object, default: {} } },
+        });
+        const el = document.createElement(tag);
+        el.setAttribute('config', '{"a":1}');
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(el.settings.config).toEqual({ a: 1 });
+      });
+
+      it('honors a converter declared in expert form over the one its type implies', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template: '<i></i>',
+          defaultSettings: {
+            tags: {
+              type: String,
+              default: '',
+              converter: {
+                fromAttribute: (value) => value.split(','),
+                toAttribute: (value) => value.join(','),
+              },
+            },
+          },
+        });
+        const el = document.createElement(tag);
+        el.setAttribute('tags', 'a,b');
+        document.body.appendChild(el);
+        await el.updateComplete;
+        expect(el.settings.tags).toEqual(['a', 'b']);
+      });
+    });
+
     describe('Default preservation', () => {
       it('keeps default Boolean true when no attribute is set', async () => {
         const tag = uniqueTag();

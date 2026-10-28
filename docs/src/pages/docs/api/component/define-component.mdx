@@ -63,8 +63,8 @@ defineComponent(options)
 
 ### Return Value
 
-* If `tagName` is provided: Returns the defined web component class.
-* If `tagName` is omitted: Returns a `Template` instance for use as a subtemplate.
+* If `tagName` is provided: Returns the defined web component class (which also exposes `Component.mount(target, options)` to mount onto an existing element).
+* If `tagName` is omitted: Returns a prototype `Template` instance for use as a subtemplate or for mounting directly into an element with [`template.mount(target, options)`](/docs/api/templating/template#mount).
 
 ## Examples
 

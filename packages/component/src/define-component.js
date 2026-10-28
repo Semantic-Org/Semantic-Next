@@ -1,14 +1,12 @@
-import { getEngine } from '@semantic-ui/renderer';
+import { resolveEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 // direct import avoids circular chunk dependency between component and templating
 import { Template } from '@semantic-ui/templating/template';
-import { adoptStylesheet, createErrors, each, isClient, isDevelopment, isObject, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, each, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
 import { registerComponent } from './component-registry.js';
 import { availablePlugins, extendedData, extendedParams } from './plugins/index.js';
-
-const { throwError } = createErrors({ namespace: 'component' });
 
 // user css can make whitespace significant, keep the template intact when it might
 const WHITESPACE_SENSITIVE_CSS = /white-space(?:-collapse)?\s*:\s*(?:pre|preserve|break-spaces)/;
@@ -50,19 +48,7 @@ export const defineComponent = ({
 
 } = {}) => {
 
-  // Resolve engine: accepts an engine object or a string name from the registry
-  const engine = isObject(renderingEngine)
-    ? renderingEngine
-    : getEngine(renderingEngine);
-
-  if (!engine) {
-    throwError('engineNotRegistered', String(renderingEngine), {
-      explanation: isDevelopment
-        ? `Rendering engine "${renderingEngine}" not registered.`
-          + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`
-        : 0,
-    });
-  }
+  const engine = resolveEngine(renderingEngine);
 
   if (!ast) {
     if (preserveWhitespace === 'auto') {
@@ -128,7 +114,10 @@ export const defineComponent = ({
 
     // Store tagName on the class for SSR renderToString
     webComponent.componentTagName = tagName;
+    // a mounted element inherits this class's prototype
+    prototypeTemplate.componentClass = webComponent;
     webComponent.toDefinition = () => prototypeTemplate.toDefinition();
+    webComponent.mount = (target, options) => prototypeTemplate.mount(target, options);
     registerComponent(tagName, webComponent);
 
     if (isClient && customElements.get(tagName)) {

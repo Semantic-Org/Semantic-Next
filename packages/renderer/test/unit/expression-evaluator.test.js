@@ -691,32 +691,6 @@ describe('evaluate', () => {
   it('uses default data when none provided', () => {
     expect(ee.evaluate('count')).toBe(42);
   });
-
-  it('calls dataVersion.depend() when dataVersion is set', () => {
-    let depended = false;
-    const ee2 = make({
-      dataVersion: {
-        depend: () => {
-          depended = true;
-        },
-      },
-    });
-    ee2.evaluate('count', data);
-    expect(depended).toBe(true);
-  });
-
-  it('does not call depend for non-string input', () => {
-    let depended = false;
-    const ee2 = make({
-      dataVersion: {
-        depend: () => {
-          depended = true;
-        },
-      },
-    });
-    ee2.evaluate(42);
-    expect(depended).toBe(false);
-  });
 });
 
 /*******************************

@@ -208,12 +208,12 @@ describe('Subtemplate without defaultSettings', () => {
     expect(ctx.name).toBe('Alice');
   });
 
-  it('makes updateSubtemplateSettings a no-op when the Proxy was never created', () => {
+  it('makes updateSettings a no-op when the Proxy was never created', () => {
     const { child } = makeSubtemplatePair({
       childData: { foo: 1 },
     });
     child.initialize();
-    expect(() => child.updateSubtemplateSettings({ foo: 2 })).not.toThrow();
+    expect(() => child.updateSettings({ foo: 2 })).not.toThrow();
     expect(child.settings).toBeUndefined();
   });
 });
@@ -280,7 +280,7 @@ describe('Subtemplate with defaultSettings', () => {
 
   it('creates a Signal in settingsVars on first read', () => {
     // Use createSubtemplateSettings directly to observe the lazy-create path.
-    // initialize() walks all defaultSettings keys via overlaySettingsSignals
+    // initialize() walks all defaultSettings keys via overlaySettings
     // before tests can observe the pre-read state.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
@@ -313,7 +313,7 @@ describe('Subtemplate with defaultSettings', () => {
   });
 
   it('creates a Signal on first write to a key never read before', () => {
-    // Use the Proxy directly without initialize() so overlaySettingsSignals
+    // Use the Proxy directly without initialize() so overlaySettings
     // priming doesn't pre-create the signal.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
@@ -479,7 +479,7 @@ describe('Subtemplate settings reactivity', () => {
     }
   });
 
-  it('re-runs the Reaction when updateSubtemplateSettings writes a declared key', () => {
+  it('re-runs the Reaction when updateSettings writes a declared key', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
@@ -493,7 +493,7 @@ describe('Subtemplate settings reactivity', () => {
       });
       expect(runs).toBe(1);
 
-      child.updateSubtemplateSettings({ theme: 'dark' });
+      child.updateSettings({ theme: 'dark' });
       flush();
       expect(runs).toBe(2);
     }
@@ -537,16 +537,16 @@ describe('Subtemplate settings reactivity', () => {
 });
 
 /*******************************
-      updateSubtemplateSettings
+      updateSettings
 *******************************/
 
-describe('Template.updateSubtemplateSettings', () => {
+describe('Template.updateSettings', () => {
   it('writes only keys declared in defaultSettings, ignoring extras', () => {
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { declared: 'init' },
     });
     child.initialize();
-    child.updateSubtemplateSettings({ declared: 'updated', undeclared: 'ignored' });
+    child.updateSettings({ declared: 'updated', undeclared: 'ignored' });
     expect(child.settings.declared).toBe('updated');
     expect(child.settingsVars.has('undeclared')).toBe(false);
   });
@@ -560,7 +560,7 @@ describe('Template.updateSubtemplateSettings', () => {
     const sig = child.settingsVars.get('theme');
     const setSpy = vi.spyOn(sig, 'set');
 
-    child.updateSubtemplateSettings({ theme: 'dark' });
+    child.updateSettings({ theme: 'dark' });
     expect(setSpy).toHaveBeenCalledWith('dark');
   });
 
@@ -569,7 +569,7 @@ describe('Template.updateSubtemplateSettings', () => {
       childData: { foo: 1 },
     });
     child.initialize();
-    child.updateSubtemplateSettings({ foo: 2 });
+    child.updateSettings({ foo: 2 });
     expect(child.settings).toBeUndefined();
     expect(child.settingsVars).toBeUndefined();
   });
@@ -579,7 +579,7 @@ describe('Template.updateSubtemplateSettings', () => {
       childDefaultSettings: { theme: 'light', size: 'md' },
     });
     child.initialize();
-    child.updateSubtemplateSettings({ theme: 'dark' });
+    child.updateSettings({ theme: 'dark' });
     expect(child.settings.theme).toBe('dark');
     expect(child.settings.size).toBe('md');
   });

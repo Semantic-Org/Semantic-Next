@@ -1,5 +1,5 @@
 import { ASTNode } from '@semantic-ui/compiler';
-import { CallParams, FactoryParams, Template } from '@semantic-ui/templating';
+import { CallParams, FactoryParams, MountSettings, Template } from '@semantic-ui/templating';
 import { ComponentConfig, PropertyConfig, WebComponentBase } from './engines/native/base.js';
 
 /**
@@ -192,6 +192,10 @@ export interface EngineDefinition {
   serverRenderer?: new(...args: any[]) => any;
   /** Builds the custom element class for a component definition. */
   factory: (options: ComponentFactoryOptions) => ComponentConstructor;
+  /** Mounts a template into a target element or shadow root. Calling on a prototype mounts and returns a clone. */
+  mount?: (template: Template, target: Element | ShadowRoot, options?: MountSettings) => Template;
+  /** Unmounts a mounted template and restores the target element. */
+  unmount?: (template: Template) => void;
 }
 
 /**
@@ -210,6 +214,13 @@ export interface ComponentConstructor<M extends Record<string, any> = Record<str
 
   /** Serializable form of the component's template definition. */
   toDefinition(): Record<string, any>;
+
+  /**
+   * Mounts the component's template into a target element or shadow root. Plain elements
+   * are upgraded with this component class while mounted so they inherit its default
+   * settings and component spec.
+   */
+  mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 
   /** Whether the shadow root is created with `delegatesFocus`. */
   delegatesFocus: boolean;

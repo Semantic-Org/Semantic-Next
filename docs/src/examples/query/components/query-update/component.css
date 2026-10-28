@@ -1,0 +1,17 @@
+.card {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  margin: var(--vertically-spaced);
+  padding: var(--padding-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-2xs);
+
+  &.red b {
+    color: var(--red-text-color);
+  }
+  &.blue b {
+    color: var(--blue-text-color);
+  }
+}

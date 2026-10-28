@@ -1,5 +1,5 @@
 // Pure-logic tests for createReactiveState, getDataContext, setDataContext,
-// overlaySettingsSignals, and markRendered. Render coordination (engine call
+// overlaySettings, and markRendered. Render coordination (engine call
 // counts) lives in test/browser/data-context-render.test.js.
 
 import { afterEach, describe, expect, it } from 'vitest';
@@ -139,9 +139,9 @@ describe('Template — createReactiveState', () => {
        getDataContext
 *******************************/
 
-// The data context is a flat merge: `extend({}, data, state, instance)`.
-// Last-source-wins gives instance > state > data precedence. Settings are
-// NOT included here — they enter via overlaySettingsSignals.
+// The data context is a flat merge: `extend({}, defaultSettings, customData, data, state, instance)`.
+// Last-source-wins gives instance > state > data > customData > defaultSettings precedence.
+// Settings signals are not part of it unless asked for with `{ overlaySettings: true }`.
 
 describe('Template — getDataContext merge order', () => {
   it('returns data only when only data is set', () => {
@@ -256,59 +256,67 @@ describe('Template — setDataContext', () => {
     expect(template.data).toEqual({ a: 1, b: 2 });
   });
 
-  it('sets dataReplaced=true when something changes', () => {
+  it('reports whether a plain key changed', () => {
     const template = new Template({
       data: { a: 1 },
     });
-    template.dataReplaced = false;
-    template.setDataContext({ a: 1, b: 2 });
-    expect(template.dataReplaced).toBe(true);
+    expect(template.setDataContext({ a: 1 })).toBe(false);
+    expect(template.setDataContext({ a: 2 })).toBe(true);
+    expect(template.setDataContext({ b: 2 })).toBe(true);
   });
 
-  it('does not set dataReplaced when nothing changes', () => {
+  it('keeps the keys it was not given', () => {
     const template = new Template({
       data: { a: 1, b: 2 },
     });
-    template.dataReplaced = false;
-    template.setDataContext({ a: 1, b: 2 });
-    expect(template.dataReplaced).toBe(false);
+    template.setDataContext({ a: 3 });
+    expect(template.data).toEqual({ a: 3, b: 2 });
   });
 
-  it('default { rerender: true } resets this.rendered to false', () => {
+  it('leaves a declared setting out of the change report', () => {
+    // a setting reaches the DOM through its own signal, so it never fires the coarse channel
     const template = new Template({
-      data: { a: 1 },
+      renderingEngine: realEngine,
+      data: {},
+      defaultSettings: { label: 'start' },
     });
-    template.rendered = true;
-    template.setDataContext({ a: 2 });
-    expect(template.rendered).toBe(false);
+    template.setParent(new Template({}));
+    template.initialize();
+    expect(template.update({ label: 'next' })).toBe(false);
+    expect(template.data.label).toBe('next');
+    expect(template.update({ other: 1 })).toBe(true);
   });
 
-  it('{ rerender: false } preserves this.rendered', () => {
+  it('leaves a getter on this.data in place without invoking a source getter', () => {
     const template = new Template({
-      data: { a: 1 },
+      data: {},
     });
-    template.rendered = true;
-    template.setDataContext({ a: 2 }, { rerender: false });
-    expect(template.rendered).toBe(true);
-  });
-
-  it('deletes orphaned keys silently', () => {
-    // assignInPlace strips keys not in the source unless preserveExistingKeys
-    // is set; setDataContext does not pass it, so missing keys disappear.
-    const template = new Template({
-      data: { a: 1, b: 2 },
+    Object.defineProperty(template.data, 'live', {
+      get: () => 'live',
+      configurable: true,
+      enumerable: true,
     });
-    template.setDataContext({ a: 1 });
-    expect(template.data).toEqual({ a: 1 });
-    expect('b' in template.data).toBe(false);
+    let sourceInvoked = false;
+    const incoming = {};
+    Object.defineProperty(incoming, 'live', {
+      get: () => {
+        sourceInvoked = true;
+        return 'replaced';
+      },
+      configurable: true,
+      enumerable: true,
+    });
+    expect(template.setDataContext(incoming)).toBe(false);
+    expect(sourceInvoked).toBe(false);
+    expect(template.data.live).toBe('live');
   });
 });
 
 /*******************************
-       overlaySettingsSignals
+       overlaySettings
 *******************************/
 
-describe('Template — overlaySettingsSignals (subtemplate path)', () => {
+describe('Template — overlaySettings (subtemplate path)', () => {
   it('is a no-op when settingsVars is not set', () => {
     const parent = new Template();
     const child = new Template({
@@ -316,7 +324,7 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     });
     child.setParent(parent);
     const ctx = { existing: 'value' };
-    const result = child.overlaySettingsSignals(ctx);
+    const result = child.overlaySettings(ctx);
     expect(result).toBe(ctx);
     expect(result.color).toBeUndefined();
   });
@@ -327,7 +335,7 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     child.setParent(parent);
     child.settingsVars = new Map([['color', new Signal('red')]]);
     const ctx = {};
-    child.overlaySettingsSignals(ctx);
+    child.overlaySettings(ctx);
     expect(ctx.color).toBeUndefined();
   });
 
@@ -343,7 +351,7 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     child.settingsVars = new Map([['color', colorSignal]]);
     child.settings = { color: 'red' };
     const ctx = {};
-    child.overlaySettingsSignals(ctx);
+    child.overlaySettings(ctx);
     expect(ctx.color).toBe(colorSignal);
     expect(ctx.color.peek()).toBe('red');
   });
@@ -358,19 +366,19 @@ describe('Template — overlaySettingsSignals (subtemplate path)', () => {
     child.settingsVars = new Map([['color', colorSignal]]);
     child.settings = { color: 'red' };
     const ctx = { color: 'plain-string' };
-    child.overlaySettingsSignals(ctx);
+    child.overlaySettings(ctx);
     expect(ctx.color).toBe(colorSignal);
   });
 });
 
-describe('Template — overlaySettingsSignals (web component path)', () => {
+describe('Template — overlaySettings (web component path)', () => {
   it('is a no-op when element has no settingsVars', () => {
     const fakeElement = { settings: {} };
     const template = new Template({
       element: fakeElement,
     });
     const ctx = {};
-    template.overlaySettingsSignals(ctx);
+    template.overlaySettings(ctx);
     expect(ctx).toEqual({});
   });
 
@@ -389,14 +397,12 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
       element: fakeElement,
     });
     const ctx = {};
-    template.overlaySettingsSignals(ctx);
+    template.overlaySettings(ctx);
     expect(ctx.color).toBe(colorSignal);
     expect(ctx.size).toBe(sizeSignal);
   });
 
-  it('touches each defaultSettings key to drive shadow Signal creation', () => {
-    // Reading element.settings[name] for each defaultSettings key triggers
-    // the settings proxy getter, which lazy-creates Signals in production.
+  it('touches each settingsVars key on element.settings to sync current property values', () => {
     const reads = [];
     const fakeElement = {
       settings: new Proxy({ color: 'blue', size: 'small' }, {
@@ -407,39 +413,16 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
           return target[prop];
         },
       }),
-      settingsVars: new Map([['color', new Signal('blue')]]),
-      defaultSettings: { color: 'blue', size: 'small' },
+      settingsVars: new Map([
+        ['color', new Signal('blue')],
+        ['size', new Signal('small')],
+      ]),
     };
     const template = new Template({
       element: fakeElement,
     });
-    template.overlaySettingsSignals({});
+    template.overlaySettings({});
     expect(reads).toContain('color');
-    expect(reads).toContain('size');
-  });
-
-  it('touches each componentSpec.attributes key to drive spec-attribute Signals', () => {
-    const reads = [];
-    const fakeElement = {
-      settings: new Proxy({ color: 'blue', active: false, size: 'm' }, {
-        get: (target, prop) => {
-          if (typeof prop === 'string') {
-            reads.push(prop);
-          }
-          return target[prop];
-        },
-      }),
-      settingsVars: new Map([['color', new Signal('blue')]]),
-      defaultSettings: { color: 'blue' },
-      componentSpec: {
-        attributes: ['active', 'size'],
-      },
-    };
-    const template = new Template({
-      element: fakeElement,
-    });
-    template.overlaySettingsSignals({});
-    expect(reads).toContain('active');
     expect(reads).toContain('size');
   });
 
@@ -453,7 +436,7 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
       element: fakeElement,
     });
     const ctx = { existing: 1 };
-    const result = template.overlaySettingsSignals(ctx);
+    const result = template.overlaySettings(ctx);
     expect(result).toBe(ctx);
   });
 });
@@ -464,7 +447,7 @@ describe('Template — overlaySettingsSignals (web component path)', () => {
 
 // State wins over data within getDataContext, but a setting backed by a
 // Signal in element.settingsVars overrides state with the same name because
-// overlaySettingsSignals runs after the spread.
+// overlaySettings runs after the spread.
 
 describe('Template — settings overlay vs state precedence', () => {
   it('settings Signal in settingsVars overrides state Signal of same name', () => {
@@ -482,7 +465,7 @@ describe('Template — settings overlay vs state precedence', () => {
     expect(ctx.color).toBeInstanceOf(Signal);
     expect(ctx.color.peek()).toBe('state-red');
 
-    template.overlaySettingsSignals(ctx);
+    template.overlaySettings(ctx);
     expect(ctx.color).toBe(settingsColorSignal);
     expect(ctx.color.peek()).toBe('settings-blue');
   });
@@ -549,27 +532,6 @@ describe('Template — markRendered', () => {
     template.markRendered();
     expect(template.rendered).toBe(true);
     expect(template.destroyed).toBe(false);
-  });
-});
-
-/*-------------------
-   dataReplaced flag
---------------------*/
-
-// The first-render branch in render() never clears dataReplaced — only the
-// follow-up else-if branch does. After the initial walk-through the flag
-// remains stuck-true; pin the current behavior so changes are visible.
-
-describe('Template — dataReplaced flag is sticky on first render', () => {
-  it('first-render walk-through leaves dataReplaced true', () => {
-    const template = new Template({
-      data: { a: 1 },
-    });
-    template.dataReplaced = false;
-    template.setDataContext({ a: 1, b: 2 }, { rerender: false });
-    expect(template.dataReplaced).toBe(true);
-    template.rendered = true;
-    expect(template.dataReplaced).toBe(true);
   });
 });
 

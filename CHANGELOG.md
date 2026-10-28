@@ -86,6 +86,7 @@ xx.xx.xxxx
 * **Feature** - `scroll` and `resize` events are now passive by default for better performance. Override with `{ passive: false }`.
 * **Feature** - Event handlers can `return false` to call `stopPropagation()` or `return 'cancel'` to call `preventDefault()`.
 * **Feature** - Added [`intercept()`](https://next.semantic-ui.com/docs/api/query/events#intercept) for capture-phase event listeners. Events fire top-down, letting parents handle events before children. Supports delegation.
+* **Feature** - Added [`update(data)`](https://next.semantic-ui.com/docs/api/query/components#update) for calling `el.update(data)` on every matched component element.
 
 ### Utils
 * **Feature** - Added [`isClassConstructor`](https://next.semantic-ui.com/docs/api/utils/types#isclassconstructor) — checks if a value is an ES `class` constructor, returning `false` for plain functions, arrow functions, and built-in constructors like `Date` or `Array`

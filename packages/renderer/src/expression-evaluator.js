@@ -49,10 +49,9 @@ export class ExpressionEvaluator {
     },
   };
 
-  constructor({ data, helpers, dataVersion } = {}) {
+  constructor({ data, helpers } = {}) {
     this.data = data;
     this.helpers = helpers || {};
-    this.dataVersion = dataVersion;
 
     // Reusable Proxy for JS expression evaluation — avoids per-eval spread + new Proxy
     this.jsContext = null;
@@ -89,9 +88,6 @@ export class ExpressionEvaluator {
 
   evaluate(expression, data = this.data) {
     if (typeof expression === 'string') {
-      if (this.dataVersion) {
-        this.dataVersion.depend();
-      }
       return this.lookupExpressionValue(expression, data);
     }
     return expression;

@@ -154,9 +154,9 @@ scope.reaction(node, (comp) => {
 
 Delegated to `ExpressionEvaluator` (shared across all engines). Handles Lisp-style expressions (`{formatDate date 'h:mm a'}`), JS expressions (`{value + 1}`), mixed syntax, deep property access, Signal auto-unwrapping, and helper resolution.
 
-### Subtree propagation via `dataDep`
+### The coarse channel
 
-Every renderer holds a `Dependency` (`this.dataDep`). When a parent updates a subtemplate's data and calls `bumpDataVersion()`, the subtemplate's Reactions re-fire because `lookupExpression()` calls `this.dataDep.depend()` — but **only when `receivesData` is true** (subtemplates). Top-level component renderers skip this dep — Signal-level reactivity is enough — and the `bumpDataVersion` call becomes the explicit "I replaced the data context, re-evaluate everything" signal.
+The renderer owns every binding reaction in its `ReactionScope` tree, so the coarse channel is a walk: `bumpDataVersion()` invalidates every reaction in the tree, every binding re-evaluates, every `{#rerender}` region rebuilds, and a subtemplate block passes the pass down to its child. No binding subscribes to anything for this, so a binding pays nothing per run to be reachable. `Template.update()` fires it when a plain key changed, one with no signal behind it, and `rerender()` fires it on demand. Signals never go through it: a setting or state change wakes only the bindings that read it.
 
 ### `skipFirstWrite` flag
 
@@ -281,7 +281,7 @@ Without recovery, hook throws propagate so failures are loud — the browser log
 | `conditional.js` | `if` | Linear branch match. `matchIndex` = `MAIN_BRANCH_INDEX` (1000) for main body, ≥0 for branches. Server stamps `serverMeta.branchIndex` on the closing marker; mismatch triggers a re-render with a dev warning (env guards `isClient`/`isServer` exempted). |
 | `each.js` | `each` | Keyed reconciliation with per-item `Signal` + Proxy + per-item start/end text-node markers. `WeakSet itemContextProxies` replaces the old `__isItemProxy` flag; `template.js` checks via `isItemContext()` import. Snapshot-based dirty detection avoids full deep-equality on the steady-state path. |
 | `async.js` | `async` | Three states (loading / success / error). Generation counter discards stale promise resolutions. Recovery wraps sync throws and dispatches into `errorContent` via the `error` hook. |
-| `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type. Guard wraps tracking in `guard` (deep-equality gate); rerender uses plain `lookupExpression`. |
+| `rerender.js` | `rerender` | Both `{#rerender expr}` and `{#guard key}` compile to the same node type and read through `lookupExpression`. rerender rebuilds on every wake, a signal or the coarse channel, the value is never compared. guard keeps the last key value on the block and rebuilds only when it changed, by deep equality. |
 | `template.js` | `template` | `{>name}` — handles BOTH snippets and subtemplates. Kind detected once on first render (`renderer.snippets[name]` check) and locked on `self.kind`. |
 | `expression.js` | `expression` | Text-position `{expr}` markers. Reactive text node, with unsafeHTML / literal handling. |
 | `raw-text.js` | `rawText` | Raw-text element bodies (`script`/`style`/`textarea`) where comment markers can't live. |
@@ -291,7 +291,7 @@ Without recovery, hook throws propagate so failures are loud — the browser log
 `template.js` resolves once at first render:
 
 - **Snippet** — inline expansion via `renderAST` with a snippet-arg overlay Proxy. Args become lazy getters that re-evaluate against parent data, tracking the same Signal deps a fresh-render snippet would. `update` is a no-op (snippets are one-shot at mount; inner expression reactivity is handled by per-marker Reactions wired during render).
-- **Subtemplate** — full `Template.clone()` + `initialize()` + `render()` + `attach()`. Updates re-evaluate the name; if the template identity changed, swap the instance, otherwise call `setDataContext(data, { rerender: false })` + `render(data)`. **`rerender: false`** is critical — the default `rerender: true` clears `Template.rendered`, forcing a from-scratch re-render. `false` preserves it, so updates flow through `bumpDataVersion()` and existing Reactions re-fire in place.
+- **Subtemplate** — full `Template.clone()` + `initialize()` + `render()` + `attach()`. Updates re-evaluate the name; if the template identity changed, swap the instance, otherwise call `update(blobData)`, which writes declared settings through their signals and fires the data version when a plain key changed, so existing Reactions re-fire in place.
 
 Static `data={...}` reads inside a `{#each}` should be reactive (so item-signal mutations propagate), but outside `{#each}` should stay non-reactive. `unpackNodeData` checks `isItemContext(data)` to switch — inside, plain `lookupExpressionValue`; outside, wrapped in `nonreactive`.
 
@@ -392,5 +392,5 @@ Single-file: `npm test -- attribute-bindings`. Note: `-t` filters report non-mat
 | **Native SSR** (`ai/plans/archive/native-ssr.md`) | Server-side rendering and hydration changes |
 | **Renderer Refinement** (`ai/plans/archive/native-renderer-refinement.md`) | Performance, code quality, architectural purity |
 | **Native Renderer Blocks** (`ai/plans/archive/native-renderer-blocks.md`) | Block-level concerns (drove the `defineBlock` decomposition) |
-| **Fine-Grained Reactivity** (`ai/plans/active/fine-grained-reactivity.md`) | Selective `dataDep` tracking, cutting subscription overhead |
+| **Fine-Grained Reactivity** (`ai/plans/archive/fine-grained-reactivity.md`) | Per-key signals for each items, subtemplate props, and snippet args |
 | **Lit Removal** (archived) | Historical context — `ComponentBase` extends `HTMLElement` is shipped |

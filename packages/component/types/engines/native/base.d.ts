@@ -64,6 +64,28 @@ export interface GetPropertiesOptions {
  */
 export declare class WebComponentBase extends HTMLElement {
   /**
+   * Initializes the element's property store, default settings, reactive settings proxy,
+   * and spec-driven `uiClasses`. Called by the constructor for custom elements and by
+   * `upgradeElement` when mounting onto a plain element.
+   */
+  construct(options?: {
+    isLightDOM?: boolean;
+    renderRoot?: ShadowRoot | Element;
+  }): void;
+
+  /**
+   * Replays initial observed attributes through `attributeChangedCallback` and starts a
+   * `MutationObserver` for subsequent attribute changes on light DOM elements.
+   */
+  setupAttributeObserver(attributes?: string[], options?: { callImmediately?: boolean; }): void;
+
+  /**
+   * Moves properties written before the element upgraded off the instance and into the
+   * property store, so they stop shadowing the prototype accessors. Runs in `construct`.
+   */
+  upgradeProperties(properties?: Record<string, PropertyConfig>): void;
+
+  /**
    * Prototype template every instance clones from.
    * Set by the engine factory on the generated subclass.
    */
@@ -126,23 +148,32 @@ export declare class WebComponentBase extends HTMLElement {
    */
   settings: Record<string, any>;
 
-  /** The root the template renders into. Assigned from `shadowRoot` in `connectedCallback`. */
-  renderRoot?: ShadowRoot;
+  /** The root the template renders into: `shadowRoot` for a custom element, the mount target for a light DOM mount. */
+  renderRoot?: ShadowRoot | Element;
 
   /** Current property values, backing the accessors the factory installs. */
   properties: Map<string, any>;
 
+  /** True when mounted onto a light DOM element via `Template.mount()`. */
+  isLightDOM?: boolean;
+
+  /** True when instantiated as a registered custom element, `false` when mounted onto a plain element. */
+  isCustomElement?: boolean;
+
   /** True between declarative shadow DOM parsing and the end of `hydrate`. */
   isHydrating?: boolean;
+
+  /** Mounts a template into this element's renderRoot. */
+  mount(template: Template, options?: { data?: Record<string, any>; signal?: AbortSignal; }): Template;
+
+  /** Tears down the mounted template and restores the element if it borrowed its prototype from `upgradeElement`. */
+  unmount(): void;
 
   /** Computes the `{uiClasses}` string. Only present for spec-driven components. */
   uiClasses?: () => string | undefined;
 
   /** Default settings storage, merged from `defaultSettings` and spec default values. */
   protected defaultSettings: Record<string, any>;
-
-  /** Callbacks to run after rendering. */
-  protected renderCallbacks: Array<() => void>;
 
   /** Signals backing the settings proxy, keyed by setting name. */
   protected settingsVars: Map<string, Signal<any>>;
@@ -162,19 +193,25 @@ export declare class WebComponentBase extends HTMLElement {
   /** Removes hydration markers and `data-sui-bind` hints from the shadow root. */
   removeMarkers(): void;
 
-  /** Renders the template from scratch and appends it to the shadow root. */
-  fullRender(prototypeTemplate: Template): void;
-
   /** Called when the element is removed from the document. Teardown is deferred so moves are not treated as removals. */
   disconnectedCallback(): void;
 
   /** Called when an observed attribute changes. */
   attributeChangedCallback(attribute: string, oldValue: string | null, newValue: string | null): void;
 
-  /** Resolves once any scheduled render has flushed. */
+  /** Resolves once any scheduled update has flushed. */
   readonly updateComplete: Promise<void>;
 
-  /** Schedules a render on the next microtask. Repeated calls in the same task coalesce. */
+  /** `true` while an update requested through {@link requestUpdate} waits for its microtask. */
+  isUpdatePending?: boolean;
+
+  /**
+   * Brings the template to `data`, which defaults to the element's current settings. A declared
+   * setting moves through its signal, every other key reaches the DOM through the coarse channel.
+   */
+  update(data?: Record<string, any>): void;
+
+  /** Schedules an update from the element's current settings on the next microtask. Repeated calls in the same task coalesce. */
   requestUpdate(): void;
 
   /** Gets the current settings, merging element properties, default settings, and spec defaults. */
@@ -209,6 +246,12 @@ export declare class WebComponentBase extends HTMLElement {
 
   /** Whether dark mode is active. Returns `undefined` on the server. */
   isDarkMode(): boolean | undefined;
+
+  /** True while the element has a mounted template. */
+  readonly isMounted: boolean;
+
+  /** True once the element's template has completed its initial render. */
+  readonly isRendered: boolean;
 
   /** Resolves after `onCreated` runs. `undefined` before the template exists. */
   readonly created: Promise<void> | undefined;

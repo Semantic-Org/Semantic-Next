@@ -54,7 +54,7 @@ If the answer is "the server reimplements what the client does via a different c
 | `{uiClasses}` class computation | `getUIClasses` in `component-helpers.js` | `renderToString`, `WebComponentBase.getData()` |
 | Expression evaluation | `ExpressionEvaluator` | `ServerRenderer`, `Renderer` (client) |
 | AST compilation | `TemplateCompiler` | Shared — compiled once, used everywhere |
-| Settings signal overlay | `overlaySettingsSignals` in `template.js` | `Template.initialize()` (both environments) |
+| Settings signal overlay | `overlaySettings` in `template.js` | `Template.initialize()` (both environments) |
 
 When adding new attribute processing, type coercion, or data transformation, check whether the client already has a helper. If it does, import and use it. If it doesn't, create a shared one in `component-helpers.js` and use it from both paths.
 
@@ -126,7 +126,7 @@ The hydration system must treat `initialize()` output as potentially different f
 1. `initialize()` runs inside `Template.clone()`, before hydration wiring
 2. Settings mutations go through the Proxy → create Signals
 3. Those Signals must be in the data context so Reactions can depend on them
-4. `overlaySettingsSignals` must overlay ALL settings Signals, not just those with default values
+4. `overlaySettings` must overlay ALL settings Signals, not just those with default values
 
 ---
 
@@ -144,7 +144,7 @@ SHARED HELPERS
   fromAttribute converters    → attribute string → typed value
   resolveAttributeAliases     → tiny → size="tiny"
   getUIClasses                → spec attrs → class string
-  overlaySettingsSignals      → settings → reactive data context
+  overlaySettings             → settings → reactive data context
 
 HYDRATION WRITES
   Text/attributes: always write (browser no-ops when unchanged)

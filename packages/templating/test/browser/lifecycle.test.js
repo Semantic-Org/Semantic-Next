@@ -866,3 +866,22 @@ describe('Template — lifecycle', () => {
     });
   });
 });
+
+describe('attach', () => {
+  it('binds synchronously and a throw while binding reaches the caller', () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const tpl = new Template({ template: '<div></div>', renderingEngine: realEngine, element: host });
+    tpl.initialize();
+    expect(tpl.attach(host)).toBeUndefined();
+
+    // nothing in attach waits on anything, so a binder that throws must throw here, not
+    // reject a promise nobody holds
+    const broken = new Template({ template: '<div></div>', renderingEngine: realEngine, element: host });
+    broken.initialize();
+    broken.attachEvents = () => {
+      throw new Error('bind boom');
+    };
+    expect(() => broken.attach(host)).toThrow('bind boom');
+  });
+});

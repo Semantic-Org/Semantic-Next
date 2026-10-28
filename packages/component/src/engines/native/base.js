@@ -1,5 +1,6 @@
+import { afterFlush } from '@semantic-ui/reactivity';
 import { MARKER_VERSION } from '@semantic-ui/renderer';
-import { adoptStylesheet, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { adoptStylesheet, each, extend, inArray, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
 import {
   createSettingsProxy,
@@ -8,6 +9,7 @@ import {
   getSettingsFromConfig,
   getUIClasses,
   isDarkMode,
+  resolveAttributeAliases,
   setDefaultSettings,
 } from '../../component-helpers.js';
 import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
@@ -24,34 +26,266 @@ import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-
 const HTMLElementBase = isServer ? class {} : HTMLElement;
 
 class WebComponentBase extends HTMLElementBase {
+  // the base's own prototype descriptors, read once and shared by every upgrade prototype
+  static baseDescriptors;
+
+  // instance fields managed by the base class and cleared on teardown
+  static fields = [
+    'template',
+    'component',
+    'dataContext',
+    'isLightDOM',
+    'isCustomElement',
+    'properties',
+    'renderRoot',
+    'isHydrating',
+    'css',
+    'componentSpec',
+    'settings',
+    'settingsVars',
+    'uiClasses',
+    'defaultSettings',
+    'attributeObserver',
+    'updateScheduled',
+    'isUpdatePending',
+  ];
+
+  // a mounted element keeps its own tag prototype (HTMLDivElement, HTMLDialogElement)
+  // and carries ComponentClass as its constructor, so instanceof matches both
+  static [Symbol.hasInstance](instance) {
+    const ctor = instance?.constructor;
+    return Boolean(ctor && (ctor === this || this.isPrototypeOf(ctor)));
+  }
+
+  // swap in the component prototype and run construct() rather than copying properties
+  // onto the element (benched at 33us vs 54us per mount)
+  static upgradeElement(el, { renderRoot } = {}) {
+    const original = Object.getPrototypeOf(el);
+    el.originalPrototype = original;
+    Object.setPrototypeOf(el, this.getUpgradePrototype(original));
+    try {
+      el.construct({
+        isLightDOM: true,
+        renderRoot,
+      });
+    }
+    catch (error) {
+      el.restoreElement();
+      throw error;
+    }
+  }
+
+  // layers the component class over the element's native tag prototype so a mounted
+  // <dialog> can still call native methods like showModal() and close() while taking on
+  // the custom element's properties and methods like settings, requestUpdate(), and $,
+  // acting as a facsimile of the custom element without losing its native behavior
+  static getUpgradePrototype(original) {
+    // keep a separate cache per component subclass rather than inheriting the parent's
+    if (!Object.hasOwn(this, 'upgradePrototypes')) {
+      this.upgradePrototypes = new WeakMap();
+    }
+    const cache = this.upgradePrototypes;
+    let proto = cache.get(original);
+    if (!proto) {
+      WebComponentBase.baseDescriptors ??= Object.getOwnPropertyDescriptors(WebComponentBase.prototype);
+      proto = Object.create(original, {
+        ...WebComponentBase.baseDescriptors,
+        ...Object.getOwnPropertyDescriptors(this.prototype),
+      });
+      cache.set(original, proto);
+    }
+    return proto;
+  }
+
+  /*******************************
+            Construction
+  *******************************/
+
   constructor() {
     super();
-    this.renderCallbacks = [];
+    this.construct();
+  }
+
+  // shared constructor logic for custom element upgrades and light DOM mounts
+  construct({ isLightDOM = false, renderRoot } = {}) {
+    this.isLightDOM = isLightDOM;
+    this.isCustomElement = !isLightDOM;
     this.properties = new Map();
+    this.renderRoot = renderRoot;
 
     // If the element has a declarative shadow root (created by DSD parsing),
     // suppress requestUpdate until hydration completes — attribute parsing
     // fires before connectedCallback and would schedule a render cascade
-    if (this.shadowRoot) {
+    if (this.isCustomElement && this.shadowRoot) {
       this.isHydrating = true;
     }
 
     const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
     this.css = css;
     this.componentSpec = componentSpec;
-    if (resolvedProperties) {
-      this.settings = this.createSettingsProxy();
-    }
-    if (componentSpec) {
-      this.uiClasses = () => this.getUIClasses({ componentSpec, properties: resolvedProperties });
-    }
     if (defaultSettings) {
       this.setDefaultSettings({ defaultSettings, componentSpec });
     }
     else {
       this.defaultSettings = {};
     }
+    if (resolvedProperties) {
+      this.upgradeProperties(resolvedProperties);
+      this.settings = this.createSettingsProxy();
+    }
+    if (componentSpec) {
+      this.uiClasses = () => this.getUIClasses({ componentSpec, properties: resolvedProperties });
+    }
+
+    if (this.isLightDOM) {
+      this.setupAttributeObserver();
+    }
   }
+
+  // properties written before custom element upgrade sit on the instance and shadow prototype accessors
+  upgradeProperties(properties = this.constructor.config?.resolvedProperties) {
+    each(properties, (config, name) => {
+      if (!config.noAccessor && Object.hasOwn(this, name)) {
+        const value = this[name];
+        delete this[name];
+        this.properties.set(name, value);
+      }
+    });
+  }
+
+  /*******************************
+          Mount / Unmount
+  *******************************/
+
+  addTemplateToEl(template) {
+    this.template = template;
+    this.component = template.instance;
+    this.dataContext = template.getDataContext();
+  }
+
+  removeTemplateFromEl() {
+    this.template = undefined;
+    this.component = undefined;
+    this.dataContext = undefined;
+  }
+
+  mount(template, { data: mountData, signal } = {}) {
+    const renderRoot = this.renderRoot;
+    try {
+      const { componentSpec, resolvedProperties } = this.constructor.config || {};
+      const data = { ...template.data };
+      // declared settings run after the attribute replay so explicit call values win over
+      // markup; undeclared keys are passed to the template as data
+      if (mountData) {
+        if (componentSpec) {
+          resolveAttributeAliases(mountData, componentSpec);
+        }
+        each(mountData, (value, name) => {
+          const key = resolvedProperties?.[name]?.aliasFor ?? name;
+          const prop = resolvedProperties?.[key];
+          if (prop && !prop.alias) {
+            this.setSetting(key, value);
+          }
+          else {
+            data[key] = value;
+          }
+        });
+      }
+      extend(data, this.getData());
+      if (template.isPrototype) {
+        template = template.clone({ data, element: this });
+      }
+      else {
+        template.setElement(this);
+        template.data = data;
+      }
+
+      template.settings = this.settings;
+
+      // custom elements adopt css in connectedCallback, light DOM mounts adopt it here
+      if (this.isLightDOM && template.css) {
+        adoptStylesheet(template.css, renderRoot);
+      }
+
+      template.initialize();
+      // attach template references before rendering so child elements upgrading during insertion can find their parent
+      this.addTemplateToEl(template);
+
+      template.attach(renderRoot);
+      const fragment = template.render(data);
+      renderRoot.replaceChildren(fragment);
+    }
+    catch (error) {
+      this.discard(template);
+      throw error;
+    }
+    template.mounted = true;
+
+    if (signal) {
+      signal.addEventListener('abort', () => this.unmount(), { once: true, signal: template.abortSignal });
+    }
+    return template;
+  }
+
+  // clean up partial initialization and restore the element when mount() throws
+  discard(template) {
+    try {
+      if (template && !template.isPrototype) {
+        if (template.initialized) {
+          template.onDestroyed();
+        }
+        else {
+          template.clearReactions();
+          template.abortController.abort('mount failed');
+        }
+      }
+    }
+    finally {
+      this.removeTemplateFromEl();
+      this.restoreElement();
+    }
+  }
+
+  unmount() {
+    const template = this.template;
+    if (!template?.mounted) {
+      return;
+    }
+    template.mounted = false;
+    template.settings = undefined;
+    // fire onDestroyed before clearing the DOM so callbacks can still query rendered nodes
+    try {
+      template.onDestroyed();
+    }
+    finally {
+      this.renderRoot.replaceChildren();
+      this.removeTemplateFromEl();
+      this.restoreElement();
+    }
+  }
+
+  // only restore the prototype if the element was upgraded by upgradeElement
+  restoreElement() {
+    const original = this.originalPrototype;
+    if (!original) {
+      return;
+    }
+    this.originalPrototype = undefined;
+    this.teardown();
+    Object.setPrototypeOf(this, original);
+  }
+
+  // resets every instance field to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
+  teardown() {
+    this.attributeObserver?.disconnect();
+    each(WebComponentBase.fields, (name) => {
+      this[name] = undefined;
+    });
+  }
+
+  /*******************************
+      Custom Element Lifecycle
+  *******************************/
 
   connectedCallback() {
     if (this.template) {
@@ -93,7 +327,7 @@ class WebComponentBase extends HTMLElementBase {
         // Version mismatch — discard server content
         this.shadowRoot.innerHTML = '';
       }
-      this.fullRender(prototypeTemplate);
+      this.mount(prototypeTemplate);
     }
   }
 
@@ -122,15 +356,16 @@ class WebComponentBase extends HTMLElementBase {
 
     // Don't pass renderRoot — avoids triggering attach() from the constructor.
     // Matches the subtemplate pattern: explicit initialize() → work → attach().
-    this.template = prototypeTemplate.clone({
+    const template = prototypeTemplate.clone({
       data,
       element: this,
     });
 
-    this.template.isHydrating = true;
-    this.template.initialize();
-    this.component = this.template.instance;
-    this.dataContext = this.template.getDataContext();
+    template.isHydrating = true;
+    template.initialize();
+    this.addTemplateToEl(template);
+    // hydrated content tears down the same way mounted content does
+    this.template.mounted = true;
 
     // Build entries for hydration (same marker IDs the server produced).
     // Cache on the prototype — entries depend only on AST structure, not data.
@@ -191,32 +426,42 @@ class WebComponentBase extends HTMLElementBase {
     removeDataSuiBind(this.shadowRoot);
   }
 
-  fullRender(prototypeTemplate) {
-    this.template = prototypeTemplate.clone({
-      data: this.getData(),
-      element: this,
-      renderRoot: this.renderRoot,
-    });
-    if (!this.template.initialized) {
-      this.template.initialize();
-    }
-    this.component = this.template.instance;
-    this.dataContext = this.template.getDataContext();
-
-    const fragment = this.template.render(this.getData());
-    this.shadowRoot.append(fragment);
-  }
-
   disconnectedCallback() {
     if (!this.template) { return; }
     // disconnect+connect in one task is a move, not a removal. defer
     // teardown so block hydration relocating nested components is safe.
     queueMicrotask(() => {
       if (this.isConnected || !this.template) { return; }
-      this.template.onDestroyed();
-      delete this.template;
-      delete this.component;
-      delete this.dataContext;
+      this.unmount();
+    });
+  }
+
+  /*******************************
+        Attributes & Updates
+  *******************************/
+
+  // light DOM mounts lack native custom element callbacks, so replay initial observed
+  // attributes and watch later attribute mutations through attributeChangedCallback
+  setupAttributeObserver(attributes = this.constructor?.observedAttributes, { callImmediately = true } = {}) {
+    if (!attributes?.length) {
+      return;
+    }
+    if (callImmediately) {
+      for (const attribute of this.attributes) {
+        if (inArray(attribute.name, attributes)) {
+          this.attributeChangedCallback(attribute.name, null, attribute.value);
+        }
+      }
+    }
+    this.attributeObserver = new MutationObserver((records) => {
+      for (const { attributeName, oldValue } of records) {
+        this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
+      }
+    });
+    this.attributeObserver.observe(this, {
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: attributes,
     });
   }
 
@@ -257,23 +502,41 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   get updateComplete() {
-    if (!this.updateScheduled) {
+    if (!this.updateScheduled && !this.isUpdatePending) {
       return Promise.resolve();
     }
     return new Promise(resolve => setTimeout(resolve, 0));
   }
 
+  // a plain key fires the coarse channel, which ends in onUpdated, so that is the
+  // update the lifecycle waits on. a setting reaches onUpdated through its own signal
+  update(data = this.getData()) {
+    if (this.template?.update(data)) {
+      this.updateScheduled = true;
+    }
+  }
+
   requestUpdate() {
-    this.updateScheduled = true;
-    if (this._pendingRender) {
+    // nothing to render before a template is mounted, its first render reads these writes
+    if (!this.template) {
       return;
     }
-    this._pendingRender = true;
+    if (this.isUpdatePending) {
+      return;
+    }
+    this.isUpdatePending = true;
     queueMicrotask(() => {
-      this._pendingRender = false;
-      if (this.template) {
-        this.template.render(this.getData());
+      this.isUpdatePending = false;
+      if (!this.template) {
+        return;
       }
+      this.update();
+      afterFlush(() => {
+        // nothing moved, so nothing reaches onUpdated for the waiters this update collected
+        if (!this.updateScheduled && !this.template?.updateScheduled) {
+          this.template?.resolveLifecyclePromise('updated');
+        }
+      });
     });
   }
 
@@ -287,7 +550,20 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   setSetting(name, value) {
-    this[name] = value;
+    const { resolvedProperties } = this.constructor.config || {};
+    if (this.properties && resolvedProperties?.[name] && !resolvedProperties[name].noAccessor) {
+      this.properties.set(name, value);
+    }
+    else {
+      this[name] = value;
+    }
+    const resolved = this[name] ?? this.defaultSettings?.[name];
+    if (this.template?.data) {
+      this.template.data[name] = resolved;
+    }
+    if (this.dataContext) {
+      this.dataContext[name] = resolved;
+    }
   }
 
   getData() {
@@ -351,9 +627,15 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   /*******************************
-      Lifecycle Promises
+      Lifecycle State & Promises
   *******************************/
 
+  get isMounted() {
+    return Boolean(this.template?.mounted);
+  }
+  get isRendered() {
+    return Boolean(this.template?.rendered);
+  }
   get created() {
     return this.template?.lifecyclePromise('created');
   }
@@ -361,7 +643,7 @@ class WebComponentBase extends HTMLElementBase {
     return this.template?.lifecyclePromise('rendered');
   }
   get updated() {
-    if (!this.updateScheduled) {
+    if (!this.updateScheduled && !this.isUpdatePending) {
       return Promise.resolve();
     }
     return this.template?.lifecyclePromise('updated');

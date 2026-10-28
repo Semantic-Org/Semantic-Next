@@ -168,7 +168,7 @@ describe('Subtemplate settings — parent fallback through real element', () => 
 *******************************/
 
 describe('Subtemplate settings — reactivity in browser context', () => {
-  it('a Reaction reading through the Proxy fires when updateSubtemplateSettings updates the same key', async () => {
+  it('a Reaction reading through the Proxy fires when updateSettings updates the same key', async () => {
     const fixture = await mountSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
     });
@@ -183,7 +183,7 @@ describe('Subtemplate settings — reactivity in browser context', () => {
       expect(runs).toBe(1);
       expect(observed).toBe('light');
 
-      fixture.child.updateSubtemplateSettings({ theme: 'dark' });
+      fixture.child.updateSettings({ theme: 'dark' });
       flush();
       expect(runs).toBe(2);
       expect(observed).toBe('dark');

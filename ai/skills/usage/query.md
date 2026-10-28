@@ -318,6 +318,14 @@ const ctx = $('ui-form').dataContext();
 console.log(ctx);  // { state, settings, self, el, ... }
 ```
 
+### .update()
+
+Update matched components with new data (declared settings move through their signals, plain keys re-evaluate where read):
+
+```js
+$('ui-card').update({ title: 'Updated', count: 5 });
+```
+
 ---
 
 ## Shadow DOM Slots
@@ -422,7 +430,7 @@ $('.selector')  $$('.selector')  $('<div>html</div>')
 .getSlot()  .setSlot()
 
 // Components
-.settings()  .setting()  .initialize()  .component()  .dataContext()
+.settings()  .setting()  .initialize()  .component()  .dataContext()  .update()
 ```
 
 ---

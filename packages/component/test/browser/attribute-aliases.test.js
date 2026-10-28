@@ -1,6 +1,7 @@
 import { Template } from '@semantic-ui/templating';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { defineComponent } from '../../src/index.js';
+import { createIconLikeSpec } from './fixtures.js';
 
 /*******************************
       Attribute Alias Resolution
@@ -24,39 +25,6 @@ import { defineComponent } from '../../src/index.js';
 let tagCounter = 0;
 function uniqueTag() {
   return `test-alias-${++tagCounter}`;
-}
-
-// Minimal spec that mirrors the icon component's structure:
-// - "icon" is an open vocabulary, so its names claim bare forms where nothing else has one
-// - "link" is both an icon name and a boolean variation, so the variation keeps the bare
-//   form and the icon stays reachable through its compound alias
-function createIconLikeSpec() {
-  return {
-    attributes: ['icon', 'link', 'size'],
-    properties: [],
-    optionAttributes: {
-      // bare values
-      'chevron-down': 'icon',
-      'chevron-up': 'icon',
-      'arrow-right': 'icon',
-      'home': 'icon',
-      // compound alias for the name the link variation already owns
-      'link-icon': 'icon',
-      // size values
-      'small': 'size',
-      'large': 'size',
-    },
-    propertyTypes: {
-      icon: String,
-      link: Boolean,
-      size: String,
-    },
-    allowedValues: {
-      icon: ['chevron-down', 'chevron-up', 'arrow-right', 'home', 'link'],
-      size: ['small', 'large'],
-    },
-    attributeClasses: [],
-  };
 }
 
 describe('Attribute Alias Resolution', () => {
@@ -336,6 +304,25 @@ describe('Attribute Alias Resolution', () => {
   *******************************/
 
   describe('converters', () => {
+    it('should give an expert-form setting the converter its type implies', async () => {
+      const tag = uniqueTag();
+      defineComponent({
+        tagName: tag,
+        template: '<div></div>',
+        defaultSettings: {
+          active: { type: Boolean, default: false },
+        },
+      });
+
+      const el = document.createElement(tag);
+      el.setAttribute('active', '');
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      // presence reads as true through the Boolean converter, the same as a plain default
+      expect(el.settings.active).toBe(true);
+    });
+
     it('should apply Boolean fromAttribute converter on kebab alias', async () => {
       const tag = uniqueTag();
       defineComponent({

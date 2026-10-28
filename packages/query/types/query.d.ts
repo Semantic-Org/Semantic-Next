@@ -1355,6 +1355,16 @@ export class Query {
   dataContext(): any;
 
   /**
+   * Calls `update(data)` on each component element in the current set, bringing its template
+   * to `data` (or re-syncing from its current settings when omitted). Elements without an
+   * `update` method are skipped.
+   * @see https://next.semantic-ui.com/docs/api/query/components#update
+   * @param data - Keys to merge into each component's template context.
+   * @returns The Query instance for chaining.
+   */
+  update(data?: PlainObject, ...args: any[]): this;
+
+  /**
    * Gets the inner width (content + padding) of the elements in the current set.
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#innerWidth
    * @returns The inner width of the *first* element, or an array of widths when the set holds more than one element.

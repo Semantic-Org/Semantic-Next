@@ -72,13 +72,15 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
       // this can either be a settings object or a default value
       // i.e. { foo: 'baz' } // basic
       // or { foo: { type: String, defaultValue: 'baz' } // expert
-      properties[propertyName] = (defaultValue?.type)
-        ? defaultValue
-        : getPropertySettings({
-          name: propertyName,
-          type: defaultValue?.constructor,
-          propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
-        });
+      properties[propertyName] = getPropertySettings(
+        (defaultValue?.type)
+          ? { name: propertyName, ...defaultValue }
+          : {
+            name: propertyName,
+            type: defaultValue?.constructor,
+            propertyOnly: isClassInstance(defaultValue), // cant serialize custom classes
+          },
+      );
     });
   }
 
@@ -109,7 +111,32 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
   return properties;
 }
 
-export function getPropertySettings({ name, type = String, propertyOnly = false } = {}) {
+/*
+  Defines reactive get/set accessors on the component prototype backed by el.properties.
+*/
+export function defineAccessors(target, properties) {
+  each(properties, (config, propName) => {
+    if (config.noAccessor) {
+      return;
+    }
+    Object.defineProperty(target, propName, {
+      get() {
+        return this.properties.get(propName);
+      },
+      set(value) {
+        const old = this.properties.get(propName);
+        this.properties.set(propName, value);
+        if (!config.hasChanged || config.hasChanged(value, old)) {
+          this.requestUpdate();
+        }
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  });
+}
+
+export function getPropertySettings({ name, type = String, propertyOnly = false, ...declared } = {}) {
   // converts type = 'string' -> String
   // this is because component spec cannot serialize prototypes in JSON
   if (isString(type)) {
@@ -185,7 +212,8 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
       },
     };
   }
-  return property;
+  // an expert declaration keeps what it said over the defaults its type implies
+  return { ...property, ...declared, type };
 }
 
 /*******************************
@@ -204,10 +232,12 @@ export function setDefaultSettings(el, { defaultSettings = {}, componentSpec }) 
     }
   });
   if (componentSpec?.defaultValues) {
-    el.defaultSettings = {
-      ...componentSpec.defaultValues,
-      ...el.defaultSettings,
-    };
+    each(componentSpec.defaultValues, (value, name) => {
+      const prop = kebabToCamel(name);
+      if (el.defaultSettings[prop] === undefined) {
+        el.defaultSettings[prop] = value;
+      }
+    });
   }
 }
 
@@ -219,7 +249,7 @@ export function setDefaultSettings(el, { defaultSettings = {}, componentSpec }) 
 // Cache of non-alias property names per properties object, built on first access
 const settingsKeysCache = new WeakMap();
 
-export function getSettingsFromConfig(el, { componentSpec, properties }) {
+function getSettingsKeys(properties) {
   let settingsKeys = settingsKeysCache.get(properties);
   if (!settingsKeys) {
     settingsKeys = [];
@@ -230,6 +260,11 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
     });
     settingsKeysCache.set(properties, settingsKeys);
   }
+  return settingsKeys;
+}
+
+export function getSettingsFromConfig(el, { componentSpec, properties }) {
+  const settingsKeys = getSettingsKeys(properties);
 
   let settings = {};
   for (let i = 0; i < settingsKeys.length; i++) {
@@ -238,7 +273,7 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
     const setting = elementProp
       ?? el.defaultSettings[propertyName]
       ?? (componentSpec?.defaultSettings || {})[propertyName];
-    if (setting !== undefined) {
+    if (setting !== undefined || el.properties?.has(propertyName)) {
       settings[propertyName] = setting;
     }
     if (componentSpec && settings[elementProp] !== undefined) {
@@ -255,8 +290,23 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
 */
 export function createSettingsProxy(el) {
   el.settingsVars = new Map();
+  const properties = el.constructor?.config?.resolvedProperties;
+  if (properties) {
+    each(getSettingsKeys(properties), (name) => {
+      el.settingsVars.set(name, signal(el[name] ?? el.defaultSettings?.[name]));
+    });
+  }
+  each(el.defaultSettings, (value, name) => {
+    if (!el.settingsVars.has(name)) {
+      el.settingsVars.set(name, signal(el[name] ?? value));
+    }
+  });
+  // teardown clears settingsVars on unmount so a proxy captured by a callback becomes a no-op
   return new Proxy({}, {
     get: (target, property) => {
+      if (!el.settingsVars) {
+        return undefined;
+      }
       const setting = el[property] ?? el.defaultSettings[property];
       let settingSignal = el.settingsVars.get(property);
       if (!settingSignal) {
@@ -270,13 +320,17 @@ export function createSettingsProxy(el) {
       return setting;
     },
     set: (target, property, value, receiver) => {
+      if (!el.settingsVars) {
+        return true;
+      }
       el.setSetting(property, value);
+      const setting = el[property] ?? el.defaultSettings[property];
       let settingSignal = el.settingsVars.get(property);
       if (settingSignal) {
-        settingSignal.set(value);
+        settingSignal.set(setting);
       }
       else {
-        settingSignal = signal(value);
+        settingSignal = signal(setting);
         el.settingsVars.set(property, settingSignal);
       }
       return true;

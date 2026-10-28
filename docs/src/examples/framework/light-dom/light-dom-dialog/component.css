@@ -1,0 +1,28 @@
+dialog {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-solid-5);
+  color: var(--text-color);
+  padding: var(--padding);
+  max-width: 320px;
+
+  &::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .header {
+    font-weight: var(--bold);
+    color: var(--header-color);
+    margin-bottom: var(--margin-xs);
+  }
+
+  p {
+    margin: 0 0 var(--margin) 0;
+    line-height: var(--line-height);
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

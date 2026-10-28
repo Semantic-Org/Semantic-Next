@@ -48,6 +48,7 @@ const subCategorySortOrder = {
   'Framework': [
     'Intro',
     'CDN',
+    'Light DOM',
     'Lifecycle',
     'Settings',
     'Events',

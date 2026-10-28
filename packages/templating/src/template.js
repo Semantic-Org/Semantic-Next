@@ -42,7 +42,7 @@ import {
 const { throwError } = createErrors({ namespace: 'templating' });
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
-import { getEngine } from '@semantic-ui/renderer';
+import { resolveEngine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
@@ -85,7 +85,7 @@ export const Template = class Template {
     defaultSettings,
     subTemplates,
     createComponent,
-    parentTemplate, // the parent template when nested
+    parentTemplate, // the parent template when nested, only setParent writes it
     renderingEngine = 'native',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
@@ -142,6 +142,13 @@ export const Template = class Template {
     }
   }
 
+  // resolved on first initialize() or mount() so constructing a Template before
+  // registering an engine does not throw, while writing this.engine as a plain own
+  // property so el.template.engine is directly inspectable in DevTools without _engine
+  get resolvedEngine() {
+    return (this.engine ??= resolveEngine(this.renderingEngine));
+  }
+
   toDefinition() {
     return {
       ...this.pluginConfig,
@@ -193,17 +200,21 @@ export const Template = class Template {
     return reactiveState;
   }
 
-  setDataContext(data, { rerender = true } = {}) {
-    // preserveGetters keeps computed properties on this.data intact —
-    // both component-level getters (e.g. darkMode) and the lazy-getter
-    // record installed by buildArgsRecord for reactiveData subtemplates.
-    const changed = assignInPlace(this.data, data, { preserveGetters: true, returnChanged: true });
-    if (changed) {
-      this.dataReplaced = true;
+  // merges a partial context in place and reports whether a key with nothing reactive
+  // behind it changed. a declared setting moves through its own signal and a getter is
+  // the caller's live value, so neither fires the coarse channel
+  setDataContext(data = {}) {
+    if (!this.isSubtemplate() && this.element?.dataContext) {
+      assignInPlace(this.element.dataContext, data, {
+        preserveExistingKeys: true,
+        preserveGetters: true,
+      });
     }
-    if (rerender) {
-      this.rendered = false;
-    }
+    return assignInPlace(this.data, data, {
+      preserveExistingKeys: true,
+      preserveGetters: true,
+      returnChanged: true,
+    });
   }
 
   isSubtemplate() {
@@ -339,53 +350,40 @@ export const Template = class Template {
 
     this.initialized = true;
 
-    if (this.element) {
-      const el = this.element;
-      const stateReaction = reaction(() => {
-        // bind to any signal changing
-        each(this.state, (signal) => signal.dependency.depend());
-        // run onUpdated callback
-        if (this.rendered && !this.destroyed) {
-          el.updateScheduled = true;
-          afterFlush(this.onUpdated);
-        }
-      });
-      this.reactions.push(stateReaction);
-    }
-
-    // Resolve renderer class from engine object or registry
-    const engine = isObject(this.renderingEngine)
-      ? this.renderingEngine
-      : getEngine(this.renderingEngine);
-    if (!engine) {
-      // a synchronous throw on purpose: the async report let execution fall
-      // through to a second, accidental error on the missing engine
-      throwError('engineNotRegistered', String(this.renderingEngine), {
-        explanation: isDevelopment
-          ? `Renderer "${this.renderingEngine}" not registered.`
-            + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`
-          : 0,
-      });
-    }
-
+    const engine = this.resolvedEngine;
     const RendererClass = (Template.isServer && engine.serverRenderer)
       ? engine.serverRenderer
       : engine.renderer;
     this.renderer = new RendererClass({
       ast: this.ast,
-      data: this.overlaySettingsSignals(this.getDataContext()),
+      data: this.getDataContext({ overlaySettings: true }),
       template: this,
       subTemplates: this.subTemplates,
       helpers: this.helpers || TemplateHelpers,
-      receivesData: this.isSubtemplate(),
     });
+
+    // any state or settings signal changing is an update of the element. created after
+    // the overlay so every declared setting already has its signal
+    if (this.element) {
+      const el = this.element;
+      const settingsVars = this.isSubtemplate() ? this.settingsVars : el.settingsVars;
+      const updateReaction = reaction(() => {
+        each(this.state, (signal) => signal.dependency.depend());
+        each(settingsVars, (signal) => signal.dependency.depend());
+        if (this.rendered && !this.destroyed) {
+          el.updateScheduled = true;
+          afterFlush(this.onUpdated);
+        }
+      });
+      this.reactions.push(updateReaction);
+    }
 
     this.callParams = this.buildCallParams();
 
     this.onCreated();
   }
 
-  async attach(
+  attach(
     renderRoot,
     { parentNode = renderRoot, startNode, endNode } = {},
   ) {
@@ -405,56 +403,70 @@ export const Template = class Template {
     this.attachEvents();
     this.bindKeys();
     if (this.attachStyles) {
-      await this.adoptStylesheet();
+      this.adoptStylesheet();
     }
   }
 
-  getDataContext() {
-    return extend({}, this.customData, this.data, this.state, this.instance);
+  mount(target, options) {
+    const engine = this.resolvedEngine;
+    if (!engine.mount) {
+      throwError('unsupportedEngine', 'Template.mount', {
+        explanation: isDevelopment ? 'the rendering engine does not support `mount()`' : 0,
+      });
+    }
+    return nonreactive(() => engine.mount(this, target, options));
   }
 
-  // Overlay settings shadow signals so the renderer tracks settings reactively.
-  // Applied after all spreads so Signals always win over plain duplicates.
-  overlaySettingsSignals(context) {
-    // subtemplates — overlay own settingsVars if declared, otherwise skip
-    if (this.isSubtemplate()) {
-      if (this.settingsVars && this.defaultSettings) {
-        each(this.defaultSettings, (_, name) => {
-          this.settings[name]; // ensure shadow signal exists
-        });
-        this.settingsVars.forEach((signal, name) => {
-          context[name] = signal;
-        });
-      }
+  unmount() {
+    if (!this.mounted) {
+      return;
+    }
+    const engine = this.resolvedEngine;
+    if (!engine.unmount) {
+      throwError('unsupportedEngine', 'Template.unmount', {
+        explanation: isDevelopment ? 'the rendering engine does not support `unmount()`' : 0,
+      });
+    }
+    return nonreactive(() => engine.unmount(this));
+  }
+
+  getDataContext({ overlaySettings = false, additionalData } = {}) {
+    const context = extend(
+      {},
+      this.defaultSettings,
+      this.customData,
+      this.data,
+      this.state,
+      this.instance,
+      additionalData,
+    );
+    return overlaySettings ? this.overlaySettings(context) : context;
+  }
+
+  // overlays settings shadow signals so the renderer tracks settings reactively
+  overlaySettings(context) {
+    const isSubtemplate = this.isSubtemplate();
+    if (isSubtemplate && !this.defaultSettings) {
       return context;
     }
-    // web component — overlay all settingsVars as Signals.
-    // Signals are created when settings are accessed or mutated (including
-    // by initialize()), so settingsVars is the authoritative set.
-    const settingsVars = this.element?.settingsVars;
-    const defaultSettings = this.element?.defaultSettings;
-    const componentSpec = this.element?.componentSpec;
-    if (settingsVars) {
-      if (defaultSettings) {
-        each(defaultSettings, (_, name) => {
-          this.element.settings[name]; // ensure shadow signal exists
+    const el = !isSubtemplate && this.element;
+    const settings = this.settings || el?.settings;
+    const settingsVars = isSubtemplate ? this.settingsVars : el?.settingsVars;
+    if (settings && settingsVars) {
+      if (isSubtemplate) {
+        each(this.defaultSettings, (_, name) => {
+          settings[name];
         });
       }
-      // Also read spec attributes through the proxy so their Signals
-      // are updated with current property values (e.g. active, size)
-      if (componentSpec?.attributes) {
-        each(componentSpec.attributes, (attribute) => {
-          this.element.settings[attribute];
-        });
-      }
-      settingsVars.forEach((signal, name) => {
+      each(settingsVars, (signal, name) => {
+        settings[name];
         context[name] = signal;
       });
     }
     return context;
   }
 
-  async adoptStylesheet() {
+  adoptStylesheet() {
     if (!this.css || !this.renderRoot?.adoptedStyleSheets) {
       return;
     }
@@ -515,7 +527,7 @@ export const Template = class Template {
     this.customData ??= {};
     extend(this.customData, data);
     if (this.renderer) {
-      this.renderer.setData(this.overlaySettingsSignals(this.getDataContext()));
+      this.syncRenderer();
       this.renderer.bumpDataVersion?.();
     }
   }
@@ -566,7 +578,9 @@ export const Template = class Template {
       ...cloneDefaults,
       ...settings,
     };
-    return new Template(templateSettings);
+    const cloned = new Template(templateSettings);
+    cloned.prototypeTemplate = this.prototypeTemplate || (this.isPrototype ? this : undefined);
+    return cloned;
   }
 
   parseEventString(eventString) {
@@ -932,32 +946,62 @@ export const Template = class Template {
     });
   }
 
-  render(additionalData = {}) {
+  // brought to `data` and built once. a later call updates in place and hands back
+  // what the engine produced the first time. nonreactive so the settings reads inside
+  // register on no caller's reaction, a child's own setting never wakes its block
+  render(data) {
+    return nonreactive(() => {
+      this.update(data);
+      if (!this.rendered) {
+        this.syncRenderer(data);
+        this.html = this.renderer.render();
+        if (!isServer) {
+          setTimeout(this.onRendered, 0);
+        }
+        this.markRendered();
+      }
+      return this.html;
+    });
+  }
+
+  // a declared setting moves through its signal, every other key is plain data that
+  // reaches the DOM through the coarse channel. returns whether a plain key changed
+  update(data = {}) {
+    return nonreactive(() => {
+      if (!this.initialized) {
+        this.initialize();
+      }
+      this.updateSettings(data);
+      const changed = this.setDataContext(data);
+      if (this.rendered) {
+        this.syncRenderer(data);
+        if (changed) {
+          this.renderer.bumpDataVersion();
+        }
+      }
+      return changed;
+    });
+  }
+
+  // the renderer reads the full context with settings overlaid as signals and the keys
+  // this call carries on top, so a plain key is current before the coarse channel fires
+  syncRenderer(additionalData) {
+    this.renderer.setData(this.getDataContext({ overlaySettings: true, additionalData }));
+  }
+
+  // the escape valve: every binding re-evaluates and every {#rerender} region rebuilds.
+  // a component element's properties are read first so a write behind an accessor counts
+  rerender() {
     if (!this.initialized) {
       this.initialize();
     }
-    const dataContext = extend({}, this.getDataContext(), additionalData);
-    this.setDataContext(dataContext, { rerender: false });
-    this.updateSubtemplateSettings(dataContext);
-
-    this.overlaySettingsSignals(dataContext);
-    this.renderer.setData(dataContext);
-
-    // render will rerender the AST creating new html
-    if (!this.rendered) {
-      this.html = this.renderer.render();
-      if (!isServer) {
-        setTimeout(this.onRendered, 0);
-      }
+    if (this.element?.getData && !this.isSubtemplate()) {
+      this.update(this.element.getData());
     }
-    else if (this.dataReplaced) {
-      // Data context was replaced — bump version to propagate changes.
-      // Skip when only Signals changed (they notify Reactions directly).
-      this.dataReplaced = false;
-      this.renderer.bumpDataVersion();
+    else if (this.rendered) {
+      this.syncRenderer();
     }
-    this.markRendered();
-    return this.html;
+    this.renderer.bumpDataVersion();
   }
 
   // Engine-facing: report that this template instance has been rendered to
@@ -1059,7 +1103,7 @@ export const Template = class Template {
       get isHydrating() {
         return Boolean(template.isHydrating || element?.isHydrating);
       },
-      rerender: () => element?.requestUpdate(),
+      rerender: this.rerender.bind(this),
       dispatchEvent: this.dispatchEvent.bind(this),
       attachEvent: this.attachEvent.bind(this),
       bindKey: this.bindKey.bind(this),
@@ -1154,8 +1198,7 @@ export const Template = class Template {
 
   createSubtemplateSettings() {
     const template = this;
-    // the host is the fallback: its element on the client, the root template on the
-    // server where the settings are the data itself
+    // walk up to the root template so server renders (where element is undefined) can read host settings
     let host = this.parentTemplate;
     while (host?.parentTemplate) {
       host = host.parentTemplate;
@@ -1211,13 +1254,22 @@ export const Template = class Template {
     });
   }
 
-  updateSubtemplateSettings(dataContext) {
-    if (!this.settings || !this.defaultSettings) {
+  // syncs declared settings passed to render(additionalData) into the backing settings store
+  // without converting untouched defaults into own properties or scheduling a second render
+  updateSettings(additionalData = {}) {
+    const isSubtemplate = this.isSubtemplate();
+    const el = !isSubtemplate && this.element;
+    const settings = this.settings || el?.settings;
+    const settingsVars = isSubtemplate ? this.settingsVars : el?.settingsVars;
+    if (!settings || !settingsVars) {
       return;
     }
-    each(this.defaultSettings, (_, name) => {
-      if (name in dataContext) {
-        this.settings[name] = dataContext[name];
+    each(settingsVars, (_, name) => {
+      if (name in additionalData) {
+        this.data[name] = additionalData[name];
+        if (additionalData[name] !== settings[name]) {
+          settings[name] = additionalData[name];
+        }
       }
     });
   }
@@ -1303,6 +1355,16 @@ export const Template = class Template {
   static getTemplates(templateName) {
     return Template.renderedTemplates.get(templateName) || [];
   }
+  static getTemplateContext(node) {
+    const template = (node instanceof Template) ? node : node?.template;
+    if (template) {
+      return template.getDataContext();
+    }
+    return {
+      ...node?.component,
+      ...node?.dataContext,
+    };
+  }
   static findTemplate(templateName) {
     if (templateName == null) { return undefined; }
     templateName = kebabToCamel(templateName);
@@ -1310,10 +1372,7 @@ export const Template = class Template {
     if (!template) {
       return undefined;
     }
-    return {
-      ...template.instance,
-      ...template.data,
-    };
+    return Template.getTemplateContext(template);
   }
   static findParentTemplate(template, templateName) {
     templateName = kebabToCamel(templateName);
@@ -1336,10 +1395,7 @@ export const Template = class Template {
       let parentNode = getParent(template.element);
       while (parentNode) {
         if (isMatch(parentNode.component)) {
-          match = {
-            ...parentNode.component,
-            ...parentNode.dataContext,
-          };
+          match = Template.getTemplateContext(parentNode);
           break;
         }
         parentNode = getParent(parentNode);
@@ -1351,10 +1407,7 @@ export const Template = class Template {
       seen.add(template);
       template = template.parentTemplate;
       if (isMatch(template)) {
-        match = {
-          ...template.instance,
-          ...template.data,
-        };
+        match = Template.getTemplateContext(template);
         break;
       }
     }
@@ -1375,29 +1428,7 @@ export const Template = class Template {
       return true;
     };
 
-    // First check DOM children (web components) - cascade downward
-    if (template.element?.shadowRoot) {
-      const traverseChildren = (node) => {
-        if (node?.children) {
-          for (const child of node.children) {
-            if (child.component && isMatch(child.component)) {
-              result.push({
-                ...child.component,
-                ...child.dataContext,
-              });
-            }
-            // Recursively check nested children including their shadow roots
-            traverseChildren(child);
-            if (child.shadowRoot) {
-              traverseChildren(child.shadowRoot);
-            }
-          }
-        }
-      };
-      traverseChildren(template.element.shadowRoot);
-    }
-
-    // Then check subtemplate children (recursive lookup for nested partials)
+    // subtemplates have no element, only the tree link reaches them
     const visited = new Set();
     function search(childTemplates, templateName) {
       if (childTemplates) {
@@ -1405,14 +1436,34 @@ export const Template = class Template {
           if (visited.has(childTemplate)) { return; }
           visited.add(childTemplate);
           if (!templateName || (childTemplate.templateName === templateName)) {
-            result.push({
-              ...childTemplate.instance,
-              ...childTemplate.data,
-            });
+            result.push(Template.getTemplateContext(childTemplate));
           }
           search(childTemplate._childTemplates, templateName);
         });
       }
+    }
+
+    const traverseChildren = (node) => {
+      if (node?.children) {
+        for (const child of node.children) {
+          if (child.component && isMatch(child.component)) {
+            result.push(Template.getTemplateContext(child));
+          }
+          search(child.template?._childTemplates, templateName);
+          traverseChildren(child);
+          if (child.shadowRoot) {
+            traverseChildren(child.shadowRoot);
+          }
+        }
+      }
+    };
+    // traverse both the render root (shadowRoot or light DOM mount target) and slotted light DOM children
+    const root = template.element?.renderRoot || template.element?.shadowRoot;
+    if (root) {
+      traverseChildren(root);
+    }
+    if (template.element && template.element !== root) {
+      traverseChildren(template.element);
     }
     // Only search child templates, not the template itself
     search(template._childTemplates, templateName);

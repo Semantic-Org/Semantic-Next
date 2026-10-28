@@ -621,6 +621,10 @@ export const adoptStylesheet = (css, adoptedElement, {
   if (!adoptedElement?.adoptedStyleSheets && adoptedElement?.getRootNode) {
     adoptedElement = adoptedElement.getRootNode();
   }
+  // fall back to document when the target is detached and has no root with adoptedStyleSheets
+  if (!adoptedElement.adoptedStyleSheets) {
+    adoptedElement = document;
+  }
 
   if (!adoptedElement.cssHashes) {
     adoptedElement.cssHashes = new Set();

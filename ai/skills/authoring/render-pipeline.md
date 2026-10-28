@@ -355,17 +355,27 @@ The params object is cached in `this.callParams` during `initialize()` — `call
 ### Rendering
 
 ```js
-render(additionalData = {}) {
-  this.renderer.setData(dataContext);
+render(data) {
+  this.update(data);
   if (!this.rendered) {
+    this.syncRenderer(data);
     this.html = this.renderer.render();  // walk AST -> DOM (or HTML string on server)
     setTimeout(this.onRendered, 0);
-  } else {
-    this.renderer.bumpDataVersion();     // signal Reactions to re-evaluate
-    setTimeout(this.onUpdated, 0);
+    this.markRendered();
   }
-  this.rendered = true;
   return this.html;
+}
+
+update(data) {
+  this.updateSettings(data);             // declared settings move through their signals
+  const changed = this.setDataContext(data);
+  if (this.rendered) {
+    this.syncRenderer(data);
+    if (changed) {
+      this.renderer.bumpDataVersion();   // a plain key changed, every Reaction re-evaluates
+    }
+  }
+  return changed;
 }
 ```
 
