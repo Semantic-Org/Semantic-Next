@@ -557,8 +557,12 @@ class WebComponentBase extends HTMLElementBase {
     else {
       this[name] = value;
     }
+    const resolved = this[name] ?? this.defaultSettings?.[name];
     if (this.template?.data) {
-      this.template.data[name] = value;
+      this.template.data[name] = resolved;
+    }
+    if (this.dataContext) {
+      this.dataContext[name] = resolved;
     }
   }
 

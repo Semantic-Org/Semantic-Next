@@ -204,6 +204,12 @@ export const Template = class Template {
   // behind it changed. a declared setting moves through its own signal and a getter is
   // the caller's live value, so neither fires the coarse channel
   setDataContext(data = {}) {
+    if (!this.isSubtemplate() && this.element?.dataContext) {
+      assignInPlace(this.element.dataContext, data, {
+        preserveExistingKeys: true,
+        preserveGetters: true,
+      });
+    }
     return assignInPlace(this.data, data, {
       preserveExistingKeys: true,
       preserveGetters: true,
@@ -991,6 +997,9 @@ export const Template = class Template {
     }
     if (this.element?.getData && !this.isSubtemplate()) {
       this.update(this.element.getData());
+    }
+    else if (this.rendered) {
+      this.syncRenderer();
     }
     this.renderer.bumpDataVersion();
   }

@@ -227,6 +227,24 @@ describe('el.update', () => {
     expect(child.shadowRoot.querySelector('p').textContent).toBe('second');
     expect(Object.hasOwn(child, 'item')).toBe(false);
   });
+
+  it('keeps el.dataContext and $(el).dataContext() live after updates and falls back to defaultSettings on null', async () => {
+    const el = await mountTag({
+      template: '<p>{label} {extra}</p>',
+      defaultSettings: { label: 'default' },
+    });
+    expect(Object.hasOwn(el, 'dataContext')).toBe(true);
+    expect(el.dataContext.label).toBe('default');
+
+    el.update({ label: 'updated', extra: 'added' });
+    expect(el.dataContext.label).toBe('updated');
+    expect(el.dataContext.extra).toBe('added');
+    expect($(el).dataContext().extra).toBe('added');
+
+    el.settings.label = null;
+    expect(el.dataContext.label).toBe('default');
+    expect(el.template.getDataContext().label).toBe('default');
+  });
 });
 
 describe('rerender', () => {
@@ -289,6 +307,23 @@ describe('rerender', () => {
       new Promise((resolve) => setTimeout(() => resolve('hung'), 50)),
     ]);
     expect(result).toBe('resolved');
+  });
+
+  it('syncs direct writes to template.data on a bare template', async () => {
+    const Card = defineComponent({
+      template: '<p>{title}</p>',
+    });
+    const tpl = Card.clone({ data: { title: 'first' } });
+    tpl.initialize();
+    const host = document.createElement('div');
+    host.append(tpl.render());
+    document.body.append(host);
+    expect(host.querySelector('p').textContent).toBe('first');
+
+    tpl.data.title = 'second';
+    tpl.rerender();
+    await tick();
+    expect(host.querySelector('p').textContent).toBe('second');
   });
 });
 
