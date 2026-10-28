@@ -1355,6 +1355,12 @@ export class Query {
   dataContext(): any;
 
   /**
+   * Updates each component element in the current set.
+   * @returns The Query instance for chaining.
+   */
+  update(...args: any[]): this;
+
+  /**
    * Gets the inner width (content + padding) of the elements in the current set.
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#innerWidth
    * @returns The inner width of the *first* element, or an array of widths when the set holds more than one element.

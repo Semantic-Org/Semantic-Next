@@ -2530,4 +2530,7 @@ export class Query {
     const contexts = this.map(el => el.dataContext).filter(Boolean);
     return contexts.length > 1 ? contexts : contexts[0];
   }
+  update(...args) {
+    return this.each((el) => el.update?.(...args));
+  }
 }

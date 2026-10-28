@@ -82,6 +82,49 @@ describe('el.update', () => {
     await updated;
     expect(el.shadowRoot.querySelector('p').textContent).toBe('written');
   });
+
+  it('updates a spec attribute and camelCases hyphenated defaultValues', async () => {
+    const el = await mountTag({
+      template: '<div class="{uiClasses}btn">{#if iconAfter}after{/if}</div>',
+      componentSpec: {
+        attributes: ['color', 'icon-after'],
+        propertyTypes: { color: 'string', 'icon-after': 'boolean' },
+        allowedValues: { color: ['blue', 'red'] },
+        optionAttributes: { blue: 'color', red: 'color' },
+        attributeClasses: ['color'],
+        defaultValues: { 'icon-after': false },
+      },
+    });
+    expect(el.defaultSettings.iconAfter).toBe(false);
+    expect(el.defaultSettings['icon-after']).toBeUndefined();
+
+    const updated = $(el).onNext('updated');
+    el.update({ color: 'red', iconAfter: true });
+    await updated;
+    expect(el.color).toBe('red');
+    expect(el.iconAfter).toBe(true);
+    expect(el.shadowRoot.querySelector('.btn').className).toBe('red color icon-after btn');
+    expect(el.shadowRoot.querySelector('.btn').textContent).toBe('after');
+  });
+
+  it('updates every matched element through $(selector).update()', async () => {
+    const tag = uniqueTag();
+    defineComponent({
+      tagName: tag,
+      template: '<p>{label}</p>',
+      defaultSettings: { label: 'start' },
+    });
+    const first = document.createElement(tag);
+    const second = document.createElement(tag);
+    document.body.append(first, second);
+    await Promise.all([first.rendered, second.rendered]);
+
+    const $els = $(tag);
+    expect($els.update({ label: 'all' })).toBe($els);
+    await tick();
+    expect(first.shadowRoot.querySelector('p').textContent).toBe('all');
+    expect(second.shadowRoot.querySelector('p').textContent).toBe('all');
+  });
 });
 
 describe('rerender', () => {
