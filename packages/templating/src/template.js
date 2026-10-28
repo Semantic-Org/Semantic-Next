@@ -261,10 +261,11 @@ export const Template = class Template {
     let instance;
     this.instance = {};
 
-    // a template makes its own settings store when nothing handed it one and it has no
-    // element store to read: a subtemplate, a range mount, a bare render() root
+    // a subtemplate borrows its parent's element, so only a root's element is its own
+    const ownElement = !this.isSubtemplate() && this.element;
+    // a template makes its own settings store unless its own element carries one
     const declaresSettings = this.defaultSettings && Object.keys(this.defaultSettings).length > 0;
-    if (!this.settings && declaresSettings && (this.isSubtemplate() || !this.element?.settings)) {
+    if (!this.settings && declaresSettings && !ownElement?.settings) {
       this.createSubtemplateSettings();
     }
 
@@ -368,8 +369,7 @@ export const Template = class Template {
     // the overlay so every declared setting already has its signal
     if (this.element) {
       const el = this.element;
-      // a root with its own store answers to it; a subtemplate never answers to its element's
-      const settingsVars = (this.isSubtemplate() || this.settingsVars) ? this.settingsVars : el.settingsVars;
+      const settingsVars = this.settingsVars || ownElement?.settingsVars;
       const updateReaction = reaction(() => {
         each(this.state, (signal) => signal.dependency.depend());
         each(settingsVars, (signal) => signal.dependency.depend());
@@ -448,9 +448,9 @@ export const Template = class Template {
 
   // overlays settings shadow signals so the renderer tracks settings reactively
   overlaySettings(context) {
-    const el = !this.isSubtemplate() && this.element;
-    const settings = this.settings || el?.settings;
-    const settingsVars = this.settingsVars ?? el?.settingsVars;
+    const ownElement = !this.isSubtemplate() && this.element;
+    const settings = this.settings || ownElement?.settings;
+    const settingsVars = this.settingsVars || ownElement?.settingsVars;
     if (settings && settingsVars) {
       // an own store creates a signal on first read, so every declared key is read before its
       // signal is overlaid
@@ -1258,9 +1258,9 @@ export const Template = class Template {
   // syncs declared settings passed to render(additionalData) into the backing settings store
   // without converting untouched defaults into own properties or scheduling a second render
   updateSettings(additionalData = {}) {
-    const el = !this.isSubtemplate() && this.element;
-    const settings = this.settings || el?.settings;
-    const settingsVars = this.settingsVars ?? el?.settingsVars;
+    const ownElement = !this.isSubtemplate() && this.element;
+    const settings = this.settings || ownElement?.settings;
+    const settingsVars = this.settingsVars || ownElement?.settingsVars;
     if (!settings || !settingsVars) {
       return;
     }

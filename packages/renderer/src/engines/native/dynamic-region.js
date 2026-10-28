@@ -29,8 +29,6 @@ export class DynamicRegion {
     this.ownedNodes = [...fragment.childNodes];
     if (scope) { this.childScopes.push(scope); }
     this.anchor.after(fragment);
-    // a region that never held content keeps its single anchor; one that is closed
-    // stays closed through an empty fill
     if (this.ownedNodes.length || this.endAnchor) { this.placeEndAnchor(); }
   }
 
