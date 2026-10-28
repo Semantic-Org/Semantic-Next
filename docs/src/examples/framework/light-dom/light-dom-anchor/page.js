@@ -1,15 +1,15 @@
 import { $ } from '@semantic-ui/query';
 import { About, Home } from './component.js';
 
+const pages = { home: Home, about: About };
 const main = $('main').el();
 const footer = $('footer').el();
 let page;
 
-const show = (Page) => {
+const show = (name) => {
   page?.unmount();
-  page = Page.mount(main, { anchor: footer });
+  page = pages[name].mount(main, { anchor: footer });
 };
 
-$('.home').on('click', () => show(Home));
-$('.about').on('click', () => show(About));
-show(Home);
+$('ui-menu').on('change', ({ detail }) => show(detail.value));
+show('home');

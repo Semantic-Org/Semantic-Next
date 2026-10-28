@@ -1,8 +1,7 @@
-/* every direct child of main gets a box, so a page's nodes show up as siblings of the nav and footer */
-main > * {
-  display: block;
-  margin-bottom: var(--8px);
-  padding: var(--8px);
+/* each page node and the footer get a box, so a page reads as siblings of the menu and the footer */
+main > :not(ui-menu) {
+  margin-top: var(--margin-xs);
+  padding: var(--padding-xs);
   border: var(--border);
   border-radius: var(--border-radius);
 }
