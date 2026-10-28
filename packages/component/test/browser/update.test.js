@@ -132,9 +132,14 @@ describe('el.update', () => {
       tagName: childTag,
       template: '<p>{value}</p>',
       defaultSettings: { value: '' },
-      createComponent: ({ settings }) => ({
+      componentSpec: {
+        attributes: ['value'],
+        propertyTypes: { value: 'string' },
+      },
+      createComponent: ({ settings, dispatchEvent }) => ({
         setValue(val) {
           settings.value = val;
+          dispatchEvent('change', { value: val });
         },
       }),
     });
@@ -143,11 +148,15 @@ describe('el.update', () => {
     const parent = await mountTag({
       template: `<${childTag} value={active}></${childTag}>`,
       defaultState: { active: 'first' },
+      events: {
+        [`change ${childTag}`]({ state, data }) {
+          state.active.set(data.value);
+        },
+      },
     });
     const child = parent.shadowRoot.querySelector(childTag);
     await child.rendered;
 
-    expect(Object.hasOwn(child, 'value')).toBe(false);
     expect(child.shadowRoot.querySelector('p').textContent).toBe('first');
 
     child.component.setValue('second');
@@ -159,6 +168,32 @@ describe('el.update', () => {
     await tick();
     expect(child.value).toBe('first');
     expect(child.shadowRoot.querySelector('p').textContent).toBe('first');
+    expect(Object.hasOwn(child, 'value')).toBe(false);
+  });
+
+  it('absorbs .prop bindings set before custom element upgrade so later updates re-render', async () => {
+    const childTag = uniqueTag();
+    defineComponent({
+      tagName: childTag,
+      template: '<p>{item.label}</p>',
+      defaultSettings: { item: { label: 'default' } },
+    });
+
+    const parent = await mountTag({
+      template: `<${childTag} .item={item}></${childTag}>`,
+      defaultState: { item: { label: 'first' } },
+    });
+    const child = parent.shadowRoot.querySelector(childTag);
+    await child.rendered;
+
+    expect(child.shadowRoot.querySelector('p').textContent).toBe('first');
+
+    parent.template.state.item.set({ label: 'second' });
+    await tick();
+    await tick();
+    expect(child.item).toEqual({ label: 'second' });
+    expect(child.shadowRoot.querySelector('p').textContent).toBe('second');
+    expect(Object.hasOwn(child, 'item')).toBe(false);
   });
 });
 
