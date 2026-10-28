@@ -37,10 +37,10 @@ const createComponent = ({ el, self, settings, data, $ }) => ({
 });
 
 const events = {
-  'touchstart .button'() {
+  'touchstart .button'({ $ }) {
     $(this).addClass('pressed');
   },
-  'touchend .button'() {
+  'touchend, touchcancel .button'({ $ }) {
     $(this).removeClass('pressed');
   },
   'click .button'({ event, self, $ }) {
