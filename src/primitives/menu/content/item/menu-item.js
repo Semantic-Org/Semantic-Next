@@ -11,7 +11,7 @@ const events = {
   'touchstart .menu'({ event, tpl, $ }) {
     $(this).addClass('pressed');
   },
-  'touchend .menu'({ event, tpl, $ }) {
+  'touchend, touchcancel .menu'({ event, tpl, $ }) {
     $(this).removeClass('pressed');
   },
 };
