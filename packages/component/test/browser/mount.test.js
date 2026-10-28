@@ -271,6 +271,34 @@ describe('Template.mount', () => {
       }
     });
 
+    it("hands the element's store to its template on the hydrate and lit doors, as mount does", async () => {
+      const Hydrated = defineComponent({
+        tagName: uniqueTag('mount-hydrated'),
+        template: '<p>server</p>',
+        defaultSettings: { label: 'd' },
+      });
+      const holder = document.createElement('div');
+      document.body.append(holder);
+      holder.setHTMLUnsafe(
+        `<${Hydrated.componentTagName}><template shadowrootmode="open"><p>server</p></template></${Hydrated.componentTagName}>`,
+      );
+      const hydrated = holder.firstElementChild;
+      await tick();
+      expect(hydrated.template.mounted).toBe(true);
+      expect(hydrated.template.settings).toBe(hydrated.settings);
+
+      const Lit = defineComponent({
+        tagName: uniqueTag('mount-lit-store'),
+        renderingEngine: LitEngine,
+        template: '<p>{label}</p>',
+        defaultSettings: { label: 'd' },
+      });
+      const lit = document.createElement(Lit.componentTagName);
+      document.body.append(lit);
+      await lit.rendered;
+      expect(lit.template.settings).toBe(lit.settings);
+    });
+
     it('renders a write that bypassed the accessor at the next render, on a tag', async () => {
       const Tagged = defineComponent({
         tagName: uniqueTag('mount-bypass'),

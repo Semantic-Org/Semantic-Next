@@ -361,6 +361,7 @@ class WebComponentBase extends HTMLElementBase {
       element: this,
     });
 
+    template.settings = this.settings;
     template.isHydrating = true;
     template.initialize();
     this.addTemplateToEl(template);

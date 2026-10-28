@@ -72,11 +72,11 @@ class LitWebComponentBase extends LitElement {
       this.template = prototypeTemplate.clone({
         data: this.getData(),
         element: this,
-        renderRoot: this.renderRoot,
       });
-      if (!this.template.initialized) {
-        this.template.initialize();
-      }
+      // the element hands its store before initialize, the native base's order
+      this.template.settings = this.settings;
+      this.template.initialize();
+      this.template.attach(this.renderRoot);
       this.component = this.template.instance;
       this.dataContext = this.template.getDataContext();
     }

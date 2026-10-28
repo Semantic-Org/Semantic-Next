@@ -261,11 +261,10 @@ export const Template = class Template {
     let instance;
     this.instance = {};
 
-    // a subtemplate borrows its parent's element, so only a root's element is its own
-    const ownElement = !this.isSubtemplate() && this.element;
-    // a template makes its own settings store unless its own element carries one
+    // a component element hands its store to its template before initialize; every other
+    // template that declares settings makes its own
     const declaresSettings = this.defaultSettings && Object.keys(this.defaultSettings).length > 0;
-    if (!this.settings && declaresSettings && !ownElement?.settings) {
+    if (!this.settings && declaresSettings) {
       this.createSubtemplateSettings();
     }
 
@@ -369,6 +368,8 @@ export const Template = class Template {
     // the overlay so every declared setting already has its signal
     if (this.element) {
       const el = this.element;
+      // a subtemplate answers to its own store only, never its borrowed element's
+      const ownElement = !this.isSubtemplate() && el;
       const settingsVars = this.settingsVars || ownElement?.settingsVars;
       const updateReaction = reaction(() => {
         each(this.state, (signal) => signal.dependency.depend());
