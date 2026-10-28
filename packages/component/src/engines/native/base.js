@@ -130,14 +130,7 @@ class WebComponentBase extends HTMLElementBase {
       this.defaultSettings = {};
     }
     if (resolvedProperties) {
-      // properties written before custom element upgrade sit on the instance and shadow prototype accessors
-      each(resolvedProperties, (config, name) => {
-        if (!config.noAccessor && Object.hasOwn(this, name)) {
-          const value = this[name];
-          delete this[name];
-          this.properties.set(name, value);
-        }
-      });
+      this.upgradeProperties(resolvedProperties);
       this.settings = this.createSettingsProxy();
     }
     if (componentSpec) {
@@ -147,6 +140,17 @@ class WebComponentBase extends HTMLElementBase {
     if (this.isLightDOM) {
       this.setupAttributeObserver();
     }
+  }
+
+  // properties written before custom element upgrade sit on the instance and shadow prototype accessors
+  upgradeProperties(properties = this.constructor.config?.resolvedProperties) {
+    each(properties, (config, name) => {
+      if (!config.noAccessor && Object.hasOwn(this, name)) {
+        const value = this[name];
+        delete this[name];
+        this.properties.set(name, value);
+      }
+    });
   }
 
   /*******************************
