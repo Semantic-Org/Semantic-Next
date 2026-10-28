@@ -363,7 +363,7 @@ export const Template = class Template {
       const settingsVars = this.isSubtemplate() ? this.settingsVars : el.settingsVars;
       const updateReaction = reaction(() => {
         each(this.state, (signal) => signal.dependency.depend());
-        settingsVars?.forEach((signal) => signal.dependency.depend());
+        each(settingsVars, (signal) => signal.dependency.depend());
         if (this.rendered && !this.destroyed) {
           el.updateScheduled = true;
           afterFlush(this.onUpdated);
@@ -439,38 +439,21 @@ export const Template = class Template {
 
   // overlays settings shadow signals so the renderer tracks settings reactively
   overlaySettings(context) {
-    // subtemplates — overlay own settingsVars if declared, otherwise skip
-    if (this.isSubtemplate()) {
-      if (this.settingsVars && this.defaultSettings) {
-        each(this.defaultSettings, (_, name) => {
-          this.settings[name]; // ensure shadow signal exists
-        });
-        this.settingsVars.forEach((signal, name) => {
-          context[name] = signal;
-        });
-      }
+    const isSubtemplate = this.isSubtemplate();
+    if (isSubtemplate && !this.defaultSettings) {
       return context;
     }
-    // web component — overlay all settingsVars as Signals.
-    // Signals are created when settings are accessed or mutated (including
-    // by initialize()), so settingsVars is the authoritative set.
-    const settingsVars = this.element?.settingsVars;
-    const defaultSettings = this.element?.defaultSettings;
-    const componentSpec = this.element?.componentSpec;
-    if (settingsVars) {
-      if (defaultSettings) {
-        each(defaultSettings, (_, name) => {
-          this.element.settings[name]; // ensure shadow signal exists
+    const el = !isSubtemplate && this.element;
+    const settings = this.settings || el?.settings;
+    const settingsVars = isSubtemplate ? this.settingsVars : el?.settingsVars;
+    if (settings && settingsVars) {
+      if (isSubtemplate) {
+        each(this.defaultSettings, (_, name) => {
+          settings[name];
         });
       }
-      // Also read spec attributes through the proxy so their Signals
-      // are updated with current property values (e.g. active, size)
-      if (componentSpec?.attributes) {
-        each(componentSpec.attributes, (attribute) => {
-          this.element.settings[attribute];
-        });
-      }
-      settingsVars.forEach((signal, name) => {
+      each(settingsVars, (signal, name) => {
+        settings[name];
         context[name] = signal;
       });
     }

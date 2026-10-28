@@ -402,9 +402,7 @@ describe('Template — overlaySettings (web component path)', () => {
     expect(ctx.size).toBe(sizeSignal);
   });
 
-  it('touches each defaultSettings key to drive shadow Signal creation', () => {
-    // Reading element.settings[name] for each defaultSettings key triggers
-    // the settings proxy getter, which lazy-creates Signals in production.
+  it('touches each settingsVars key on element.settings to sync current property values', () => {
     const reads = [];
     const fakeElement = {
       settings: new Proxy({ color: 'blue', size: 'small' }, {
@@ -415,39 +413,16 @@ describe('Template — overlaySettings (web component path)', () => {
           return target[prop];
         },
       }),
-      settingsVars: new Map([['color', new Signal('blue')]]),
-      defaultSettings: { color: 'blue', size: 'small' },
+      settingsVars: new Map([
+        ['color', new Signal('blue')],
+        ['size', new Signal('small')],
+      ]),
     };
     const template = new Template({
       element: fakeElement,
     });
     template.overlaySettings({});
     expect(reads).toContain('color');
-    expect(reads).toContain('size');
-  });
-
-  it('touches each componentSpec.attributes key to drive spec-attribute Signals', () => {
-    const reads = [];
-    const fakeElement = {
-      settings: new Proxy({ color: 'blue', active: false, size: 'm' }, {
-        get: (target, prop) => {
-          if (typeof prop === 'string') {
-            reads.push(prop);
-          }
-          return target[prop];
-        },
-      }),
-      settingsVars: new Map([['color', new Signal('blue')]]),
-      defaultSettings: { color: 'blue' },
-      componentSpec: {
-        attributes: ['active', 'size'],
-      },
-    };
-    const template = new Template({
-      element: fakeElement,
-    });
-    template.overlaySettings({});
-    expect(reads).toContain('active');
     expect(reads).toContain('size');
   });
 

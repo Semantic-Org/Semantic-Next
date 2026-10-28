@@ -249,7 +249,7 @@ export function setDefaultSettings(el, { defaultSettings = {}, componentSpec }) 
 // Cache of non-alias property names per properties object, built on first access
 const settingsKeysCache = new WeakMap();
 
-export function getSettingsFromConfig(el, { componentSpec, properties }) {
+function getSettingsKeys(properties) {
   let settingsKeys = settingsKeysCache.get(properties);
   if (!settingsKeys) {
     settingsKeys = [];
@@ -260,6 +260,11 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
     });
     settingsKeysCache.set(properties, settingsKeys);
   }
+  return settingsKeys;
+}
+
+export function getSettingsFromConfig(el, { componentSpec, properties }) {
+  const settingsKeys = getSettingsKeys(properties);
 
   let settings = {};
   for (let i = 0; i < settingsKeys.length; i++) {
@@ -285,6 +290,17 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
 */
 export function createSettingsProxy(el) {
   el.settingsVars = new Map();
+  const properties = el.constructor?.config?.resolvedProperties;
+  if (properties) {
+    each(getSettingsKeys(properties), (name) => {
+      el.settingsVars.set(name, signal(el[name] ?? el.defaultSettings?.[name]));
+    });
+  }
+  each(el.defaultSettings, (value, name) => {
+    if (!el.settingsVars.has(name)) {
+      el.settingsVars.set(name, signal(el[name] ?? value));
+    }
+  });
   // teardown clears settingsVars on unmount so a proxy captured by a callback becomes a no-op
   return new Proxy({}, {
     get: (target, property) => {
