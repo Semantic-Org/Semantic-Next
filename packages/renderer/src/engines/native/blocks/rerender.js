@@ -1,23 +1,24 @@
-import { guard } from '@semantic-ui/reactivity';
+import { Signal } from '@semantic-ui/reactivity';
 import { defineBlock } from '../define-block.js';
 import { registerBlock } from './registry.js';
 
 /*
 
   {#rerender} / {#guard} — both compile to AST node.type === 'rerender'.
-  Guard sets node.key (deep-equality-gated re-render via guard);
-  rerender sets node.expression (any-signal-change re-render via plain
-  lookupExpression).
+  rerender sets node.expression and rebuilds on every wake, a signal the
+  expression read or the coarse channel, the value is never compared. guard
+  sets node.key and rebuilds only when the key's value changed, by the same
+  equality a signal uses to decide it changed.
 
 */
 
-function trackDeps({ node, data, lookupExpression, self }) {
-  if (node.key) {
-    guard(() => self.evaluator.lookupTokenValue(node.key, data));
-  }
+// the reads register on the block's own reaction, so a signal wakes it the same way a
+// coarse pass does, and a function key is invoked
+function readKeys({ node, lookupExpression }) {
   if (node.expression) {
     lookupExpression(node.expression);
   }
+  return node.key ? lookupExpression(node.key) : undefined;
 }
 
 function renderContent({ node, scope, region, renderAST }) {
@@ -35,19 +36,17 @@ const rerender = defineBlock({
       ? `{#guard ${node.key}}`
       : '{#rerender}',
 
-  create({ renderer }) {
-    // Capture evaluator so hooks can call lookupTokenValue for the
-    // single-token node.key path — the hook bag doesn't expose it.
-    return { evaluator: renderer.evaluator };
+  create() {
+    return { key: undefined, equality: Signal.equality };
   },
 
   render(ctx) {
-    trackDeps(ctx);
+    ctx.self.key = readKeys(ctx);
     renderContent(ctx);
   },
 
   hydrate(ctx) {
-    trackDeps(ctx);
+    ctx.self.key = readKeys(ctx);
     const { node, region, hydrateInto } = ctx;
     if (region.ownedNodes.length > 0 && node.content) {
       hydrateInto({ innerAST: node.content });
@@ -55,7 +54,11 @@ const rerender = defineBlock({
   },
 
   update(ctx) {
-    trackDeps(ctx);
+    const key = readKeys(ctx);
+    if (ctx.node.key && ctx.self.equality(key, ctx.self.key)) {
+      return;
+    }
+    ctx.self.key = key;
     renderContent(ctx);
   },
 

@@ -173,6 +173,13 @@ RENDERING_ENGINES.forEach((engine) => {
         // ticker changed — inner expression's own Reaction should fire,
         // but guard block itself must not have torn down/rebuilt.
         expect(shadowText(el)).toContain('t-1');
+        const countAfterTicker = guardEvalCount;
+
+        // the key function returns a new value, so the block rebuilds its content
+        el.template.state.stableValue.set('changed');
+        await settle(el);
+        expect(guardEvalCount).toBeGreaterThan(countAfterTicker);
+        expect(shadowText(el)).toContain('t-1');
       });
     });
 

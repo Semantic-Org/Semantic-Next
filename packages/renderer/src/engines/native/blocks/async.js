@@ -67,7 +67,7 @@ const asyncBlock = defineBlock({
   // the resource owns expression evaluation, its backing reaction tracks the
   // reads. created nonreactive so the block's own re-runs can't tear it down,
   // destroy() owns the teardown instead
-  ensureResource({ self, node, lookupExpression }) {
+  ensureResource({ self, node, scope, lookupExpression }) {
     if (self.resource === null) {
       self.resource = nonreactive(() =>
         resource(() => {
@@ -82,6 +82,8 @@ const asyncBlock = defineBlock({
           }
         }, { concurrency: 'overlap' })
       );
+      // the fetcher reads template data, so the coarse channel reaches it through the scope
+      scope.track(self.resource.reaction);
     }
     return self.resource;
   },

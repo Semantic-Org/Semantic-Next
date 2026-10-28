@@ -83,8 +83,13 @@ export class RenderTemplateDirective extends AsyncDirective {
     if (!dataContext) {
       dataContext = this.unpackData(this.data);
     }
-    this.template.setDataContext(dataContext, { rerender: false });
-    return this.template.render(dataContext);
+    // lit tracks the data version alone, so every pass after the first fires it
+    const built = this.template.rendered;
+    const result = this.template.render(dataContext);
+    if (built) {
+      this.template.renderer.bumpDataVersion();
+    }
+    return result;
   }
 
   maybeCreateTemplate() {

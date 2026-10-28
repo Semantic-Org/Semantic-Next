@@ -1,3 +1,4 @@
+import { flush } from '@semantic-ui/reactivity';
 import { MARKER_VERSION } from '@semantic-ui/renderer';
 import { adoptStylesheet, each, inArray, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
@@ -269,7 +270,7 @@ class WebComponentBase extends HTMLElementBase {
     'otherData',
     'attributeObserver',
     'updateScheduled',
-    'pendingRender',
+    'isUpdatePending',
   ];
 
   // resets every instance field to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
@@ -466,18 +467,18 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   get updateComplete() {
-    if (!this.updateScheduled) {
+    if (!this.updateScheduled && !this.isUpdatePending) {
       return Promise.resolve();
     }
     return new Promise(resolve => setTimeout(resolve, 0));
   }
 
-  render(data = this.getData()) {
-    return this.template?.render(data);
-  }
-
-  update(data) {
-    return this.render(data);
+  // a plain key fires the coarse channel, which ends in onUpdated, so that is the
+  // update the lifecycle waits on. a setting reaches onUpdated through its own signal
+  update(data = this.getData()) {
+    if (this.template?.update(data)) {
+      this.updateScheduled = true;
+    }
   }
 
   requestUpdate() {
@@ -485,17 +486,20 @@ class WebComponentBase extends HTMLElementBase {
     if (!this.template) {
       return;
     }
-    this.updateScheduled = true;
-    if (this.pendingRender) {
+    if (this.isUpdatePending) {
       return;
     }
-    this.pendingRender = true;
+    this.isUpdatePending = true;
     queueMicrotask(() => {
-      if (this.pendingRender) {
-        this.pendingRender = false;
+      this.isUpdatePending = false;
+      if (!this.template) {
+        return;
       }
-      if (this.template) {
-        this.render();
+      this.update();
+      flush();
+      // nothing moved, so nothing reaches onUpdated for the waiters this update collected
+      if (!this.updateScheduled && !this.template.updateScheduled) {
+        this.template.resolveLifecyclePromise('updated');
       }
     });
   }
@@ -590,7 +594,7 @@ class WebComponentBase extends HTMLElementBase {
     return this.template?.lifecyclePromise('rendered');
   }
   get updated() {
-    if (!this.updateScheduled) {
+    if (!this.updateScheduled && !this.isUpdatePending) {
       return Promise.resolve();
     }
     return this.template?.lifecyclePromise('updated');

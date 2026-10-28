@@ -15,7 +15,6 @@ import {
 import {
   adoptStylesheet,
   any,
-  assignInPlace,
   capitalize,
   clone,
   createErrors,
@@ -201,17 +200,25 @@ export const Template = class Template {
     return reactiveState;
   }
 
-  setDataContext(data, { rerender = true } = {}) {
-    // preserveGetters keeps computed properties on this.data intact —
-    // both component-level getters (e.g. darkMode) and the lazy-getter
-    // record installed by buildArgsRecord for reactiveData subtemplates.
-    const changed = assignInPlace(this.data, data, { preserveGetters: true, returnChanged: true });
-    if (changed) {
-      this.dataReplaced = true;
-    }
-    if (rerender) {
-      this.rendered = false;
-    }
+  // merges a partial context in place and reports whether a key with nothing reactive
+  // behind it changed. a declared setting moves through its own signal and a getter is
+  // the caller's live value, so neither fires the coarse channel
+  setDataContext(data = {}) {
+    const declared = this.getDeclaredSettings();
+    let changed = false;
+    each(data, (value, key) => {
+      if (Object.getOwnPropertyDescriptor(this.data, key)?.get) {
+        return;
+      }
+      if (this.data[key] === value) {
+        return;
+      }
+      this.data[key] = value;
+      if (!declared || !(key in declared)) {
+        changed = true;
+      }
+    });
+    return changed;
   }
 
   isSubtemplate() {
@@ -347,20 +354,6 @@ export const Template = class Template {
 
     this.initialized = true;
 
-    if (this.element) {
-      const el = this.element;
-      const stateReaction = reaction(() => {
-        // bind to any signal changing
-        each(this.state, (signal) => signal.dependency.depend());
-        // run onUpdated callback
-        if (this.rendered && !this.destroyed) {
-          el.updateScheduled = true;
-          afterFlush(this.onUpdated);
-        }
-      });
-      this.reactions.push(stateReaction);
-    }
-
     const engine = this.resolvedEngine;
     const RendererClass = (Template.isServer && engine.serverRenderer)
       ? engine.serverRenderer
@@ -371,8 +364,23 @@ export const Template = class Template {
       template: this,
       subTemplates: this.subTemplates,
       helpers: this.helpers || TemplateHelpers,
-      receivesData: this.isSubtemplate(),
     });
+
+    // any state or settings signal changing is an update of the element. created after
+    // the overlay so every declared setting already has its signal
+    if (this.element) {
+      const el = this.element;
+      const settingsVars = this.isSubtemplate() ? this.settingsVars : el.settingsVars;
+      const updateReaction = reaction(() => {
+        each(this.state, (signal) => signal.dependency.depend());
+        settingsVars?.forEach((signal) => signal.dependency.depend());
+        if (this.rendered && !this.destroyed) {
+          el.updateScheduled = true;
+          afterFlush(this.onUpdated);
+        }
+      });
+      this.reactions.push(updateReaction);
+    }
 
     this.callParams = this.buildCallParams();
 
@@ -951,36 +959,59 @@ export const Template = class Template {
     });
   }
 
-  // run nonreactively so reading settings or data during render does not subscribe an
-  // enclosing parent reaction. inner bindings register their own dependencies
-  render(additionalData = {}) {
+  // brought to `data` and built once. a later call updates in place and hands back
+  // what the engine produced the first time. nonreactive so the settings reads inside
+  // register on no caller's reaction, a child's own setting never wakes its block
+  render(data) {
     return nonreactive(() => {
-      if (!this.initialized) {
-        this.initialize();
-      }
-      const dataContext = extend({}, this.getDataContext(), additionalData);
-      this.setDataContext(dataContext, { rerender: false });
-      this.updateSettings(additionalData);
-
-      this.overlaySettingsSignals(dataContext);
-      this.renderer.setData(dataContext);
-
-      // render will rerender the AST creating new html
+      this.update(data);
       if (!this.rendered) {
+        this.syncRenderer(data);
         this.html = this.renderer.render();
         if (!isServer) {
           setTimeout(this.onRendered, 0);
         }
+        this.markRendered();
       }
-      else if (this.dataReplaced) {
-        // Data context was replaced — bump version to propagate changes.
-        // Skip when only Signals changed (they notify Reactions directly).
-        this.dataReplaced = false;
-        this.renderer.bumpDataVersion();
-      }
-      this.markRendered();
       return this.html;
     });
+  }
+
+  // a declared setting moves through its signal, every other key is plain data that
+  // reaches the DOM through the coarse channel. returns whether a plain key changed
+  update(data = {}) {
+    return nonreactive(() => {
+      if (!this.initialized) {
+        this.initialize();
+      }
+      this.updateSettings(data);
+      const changed = this.setDataContext(data);
+      if (this.rendered) {
+        this.syncRenderer(data);
+        if (changed) {
+          this.renderer.bumpDataVersion();
+        }
+      }
+      return changed;
+    });
+  }
+
+  // the renderer reads the full context with settings overlaid as signals and the keys
+  // this call carries on top, so a plain key is current before the coarse channel fires
+  syncRenderer(data) {
+    this.renderer.setData(this.overlaySettingsSignals(extend({}, this.getDataContext(), data)));
+  }
+
+  // the escape valve: every binding re-evaluates and every {#rerender} region rebuilds.
+  // a component element's properties are read first so a write behind an accessor counts
+  rerender() {
+    if (!this.initialized) {
+      this.initialize();
+    }
+    if (this.element?.getData && !this.isSubtemplate()) {
+      this.update(this.element.getData());
+    }
+    this.renderer.bumpDataVersion();
   }
 
   // Engine-facing: report that this template instance has been rendered to
@@ -1082,7 +1113,7 @@ export const Template = class Template {
       get isHydrating() {
         return Boolean(template.isHydrating || element?.isHydrating);
       },
-      rerender: () => element?.requestUpdate(),
+      rerender: this.rerender.bind(this),
       dispatchEvent: this.dispatchEvent.bind(this),
       attachEvent: this.attachEvent.bind(this),
       bindKey: this.bindKey.bind(this),
@@ -1238,7 +1269,7 @@ export const Template = class Template {
   updateSettings(additionalData = {}) {
     const el = !this.isSubtemplate() && this.element;
     const settings = this.settings || el?.settings;
-    const declared = el?.defaultSettings || this.defaultSettings;
+    const declared = this.getDeclaredSettings();
     if (!settings || !declared) {
       return;
     }
@@ -1253,6 +1284,13 @@ export const Template = class Template {
         }
       }
     });
+  }
+
+  // the settings with a store behind them: a nested template's own, or the element's full
+  // set. a bare template's defaults have no store, so they count as plain data
+  getDeclaredSettings() {
+    const el = !this.isSubtemplate() && this.element;
+    return el ? el.defaultSettings : this.settings && this.defaultSettings;
   }
 
   /*******************************

@@ -162,7 +162,7 @@ Every lifecycle callback, event handler, and key binding receives the same destr
 | `settings` | Reactive settings proxy (read/write) |
 | `state` | Reactive state signals |
 | `data` | Full template data context |
-| `rerender` | Force a full DOM re-render |
+| `rerender` | Re-evaluate every expression and rebuild `{#rerender}` blocks |
 | `isRendered` | Function: whether DOM has rendered |
 | `isServer` / `isClient` | Environment detection booleans |
 | `dispatchEvent` | Emit custom events from component |

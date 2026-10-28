@@ -12,7 +12,8 @@ description: Latest updates and changes in Semantic UI
 xx.xx.xxxx
 
 ### Component
-* **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
+* **Feature** - All callbacks now receive a `rerender()` function that re-evaluates every expression and rebuilds every `{#rerender}` block.
+* **Feature** - `el.update(data)` and `template.update(data)` bring a component to new data. Declared settings move through their signals, any other key is re-evaluated wherever the template reads it.
 
 ### Behaviors
 * **Feature** - Add new `portal` behavior for moving DOM like modals and popups

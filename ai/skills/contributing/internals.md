@@ -352,7 +352,7 @@ params = {
   state: this.state,                   // reactive state signals
   isServer: Template.isServer,
   isClient: !Template.isServer,
-  rerender: () => this.element.requestUpdate(),
+  rerender: this.rerender.bind(this),  // every binding re-evaluates, every {#rerender} rebuilds
   dispatchEvent: this.dispatchEvent.bind(this),
   findParent: this.findParent.bind(this),
   findChild: this.findChild.bind(this),
@@ -377,7 +377,7 @@ The native `WebComponentBase` extends `HTMLElement` directly. The lit `LitWebCom
 - **`isDarkMode()`** — detects dark mode via Query on closest ancestor
 - **`$$(selector)`** — queries original (slotted) DOM
 
-The `requestUpdate()` method is the critical interface contract — called by `Template.call()` params as `rerender()` and by `adjustPropertyFromAttribute()`. The native base defines it directly (`engines/native/base.js`); the lit base inherits it from LitElement. Any base class must provide this method.
+The `requestUpdate()` method is the interface contract `adjustPropertyFromAttribute()` and the property accessors call to schedule an update from the element's current settings. The native base defines it directly (`engines/native/base.js`); the lit base inherits it from LitElement. Any base class must provide this method. `rerender()` belongs to the Template, not the element: it re-evaluates every binding and rebuilds every `{#rerender}` region.
 
 ---
 

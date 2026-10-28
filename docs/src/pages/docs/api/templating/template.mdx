@@ -5,7 +5,7 @@ title: Template
 icon: file-text
 description: API reference for the Template class in Semantic UI Templating
 package: '@semantic-ui/templating'
-methods: ['initialize', 'mount', 'unmount', 'render', 'setDataContext', 'clone', 'attachEvents']
+methods: ['initialize', 'mount', 'unmount', 'render', 'update', 'rerender', 'setDataContext', 'clone', 'attachEvents']
 ---
 
 The `Template` class represents a compiled template and provides methods for manipulating and rendering it. It integrates with the Semantic UI component system and supports various rendering engines.
@@ -202,17 +202,17 @@ card.unmount();
 
 ### render
 
-Renders the template with the current data.
+Brings the template to the data it is given and builds it once. A later call updates in place and returns what the engine produced the first time.
 
 #### Syntax
 ```javascript
-template.render(additionalData)
+template.render(data)
 ```
 
 #### Parameters
-| Name           | Type   | Description                          |
-|----------------|--------|--------------------------------------|
-| additionalData | Object | Additional data to merge for rendering |
+| Name | Type   | Description                   |
+|------|--------|-------------------------------|
+| data | Object | Keys to merge before building |
 
 #### Returns
 The rendered template content. The shape depends on the rendering engine — DOM nodes for `native`, a `TemplateResult` for `lit`.
@@ -227,24 +227,25 @@ const template = new Template({
   data: { name: 'John' }
 });
 
-const rendered = template.render({ title: 'Hello' });
-console.log(rendered);
+document.body.append(template.render({ title: 'Hello' }));
 ```
 
-### setDataContext
+### update
 
-Updates the data context of the template.
+Brings the template to the data it is given. A declared setting moves through its signal. Every other key is plain data, re-evaluated wherever the template reads it, including inside `{#rerender}` blocks and subtemplate props.
 
 #### Syntax
 ```javascript
-template.setDataContext(data, options)
+template.update(data)
 ```
 
 #### Parameters
-| Name    | Type   | Description                    |
-|---------|--------|--------------------------------|
-| data    | Object | New data to set                |
-| options | Object | Additional options             |
+| Name | Type   | Description   |
+|------|--------|---------------|
+| data | Object | Keys to merge |
+
+#### Returns
+`boolean` - Whether a plain key changed.
 
 #### Usage
 ```javascript
@@ -256,8 +257,35 @@ const template = new Template({
   data: { name: 'John' }
 });
 
-template.setDataContext({ name: 'Jane' }, { rerender: true });
+document.body.append(template.render());
+template.update({ name: 'Jane' });
 ```
+
+### rerender
+
+Re-evaluates every expression in place and rebuilds every `{#rerender}` block. The escape valve for content that reads something outside the reactive graph.
+
+#### Syntax
+```javascript
+template.rerender()
+```
+
+### setDataContext
+
+Merges data into the template's context without touching the rendered output. `update` calls this, then re-evaluates what changed.
+
+#### Syntax
+```javascript
+template.setDataContext(data)
+```
+
+#### Parameters
+| Name | Type   | Description   |
+|------|--------|---------------|
+| data | Object | Keys to merge |
+
+#### Returns
+`boolean` - Whether a key with nothing reactive behind it changed.
 
 ### clone
 
