@@ -1369,11 +1369,9 @@ export const Template = class Template {
     return Template.renderedTemplates.get(templateName) || [];
   }
   static getTemplateContext(node) {
-    if (node instanceof Template) {
-      return node.getDataContext();
-    }
-    if (node?.template) {
-      return node.template.getDataContext();
+    const template = (node instanceof Template) ? node : node?.template;
+    if (template) {
+      return extend({}, template.defaultSettings, template.getDataContext());
     }
     return {
       ...node?.component,

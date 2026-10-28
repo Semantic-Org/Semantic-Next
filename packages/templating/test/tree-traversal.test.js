@@ -447,11 +447,14 @@ describe('findParent — subtemplate cascade', () => {
       expect(found.secret).toBe('closure-snapshot');
     });
 
-    it('exposes state Signals and instance methods through findParent', () => {
+    it('exposes plugin data, settings, data, state Signals, and instance methods across findParent, findChild, and findTemplate', () => {
       const parent = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
-        templateName: 'parentWithState',
+        templateName: 'fullContextParent',
+        extendedData: [{ fromPlugin: 'plugin-value' }],
+        defaultSettings: { theme: 'dark' },
+        data: { label: 'plain-data' },
         defaultState: { count: 7 },
         createComponent: ({ state }) => ({
           getCount() {
@@ -462,17 +465,39 @@ describe('findParent — subtemplate cascade', () => {
       const child = new Template({
         template: '<div></div>',
         renderingEngine: realEngine,
-        templateName: 'innerKid',
+        templateName: 'fullContextChild',
+        extendedData: [{ childPlugin: 'child-plugin-value' }],
+        defaultSettings: { size: 'large' },
+        data: { item: 'child-data' },
+        defaultState: { active: true },
+        createComponent: () => ({
+          isChild() {
+            return true;
+          },
+        }),
       });
       parent.initialize();
       child.initialize();
       child.setParent(parent);
 
-      const found = child.findParent('parentWithState');
-      expect(typeof found.count?.get).toBe('function');
-      expect(found.count.get()).toBe(7);
-      expect(typeof found.getCount).toBe('function');
-      expect(found.getCount()).toBe(7);
+      for (const found of [child.findParent('fullContextParent'), Template.findTemplate('fullContextParent')]) {
+        expect(found.fromPlugin).toBe('plugin-value');
+        expect(found.theme).toBe('dark');
+        expect(found.label).toBe('plain-data');
+        expect(typeof found.count?.get).toBe('function');
+        expect(found.count.get()).toBe(7);
+        expect(typeof found.getCount).toBe('function');
+        expect(found.getCount()).toBe(7);
+      }
+
+      const foundChild = parent.findChild('fullContextChild');
+      expect(foundChild.childPlugin).toBe('child-plugin-value');
+      expect(foundChild.size).toBe('large');
+      expect(foundChild.item).toBe('child-data');
+      expect(typeof foundChild.active?.get).toBe('function');
+      expect(foundChild.active.get()).toBe(true);
+      expect(typeof foundChild.isChild).toBe('function');
+      expect(foundChild.isChild()).toBe(true);
     });
   });
 
