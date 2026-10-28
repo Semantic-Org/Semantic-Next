@@ -112,9 +112,8 @@ class WebComponentBase extends HTMLElementBase {
       this.defaultSettings = {};
     }
 
-    // a mounted element has no custom element lifecycle, so the attributes it carries are
-    // replayed through the hook the browser fires on a tag, and later changes are observed
-    // into the same hook a microtask later
+    // light DOM mounts lack native custom element callbacks, so replay initial observed
+    // attributes and watch later attribute mutations through attributeChangedCallback
     const observed = this.isLightDOM ? this.constructor.observedAttributes : undefined;
     if (observed?.length) {
       for (const attribute of this.attributes) {
@@ -130,10 +129,8 @@ class WebComponentBase extends HTMLElementBase {
       this.attributeObserver.observe(this, { attributes: true, attributeOldValue: true, attributeFilter: observed });
     }
 
-    // the bag a mount carries splits by declaration: a declared key is a setting, with an
-    // accessor and an attribute, written after the replay so the call wins over markup. the
-    // rest is data the settings do not know, handed to the template the way a subtemplate
-    // takes an arg nobody declared
+    // declared settings run after the attribute replay so explicit call settings win over
+    // markup; undeclared keys are plain data implanted into the template context
     if (this.isLightDOM && settings) {
       each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
         const key = resolvedProperties?.[name]?.aliasFor ?? name;
@@ -163,8 +160,7 @@ class WebComponentBase extends HTMLElementBase {
   mount(template, { signal } = {}) {
     const renderRoot = this.renderRoot;
     try {
-      // the template's own data, then what the mount carried beyond the declaration, then the
-      // settings the store holds, copied as descriptors so getData's getters survive
+      // copy getData() via property descriptors so getters like darkMode stay live
       const data = { ...template.data, ...this.additionalData };
       Object.defineProperties(data, Object.getOwnPropertyDescriptors(this.getData()));
       if (template.isPrototype) {
@@ -250,8 +246,7 @@ class WebComponentBase extends HTMLElementBase {
     Object.setPrototypeOf(this, original);
   }
 
-  // instance fields the base manages: zeroed on teardown and reserved against undeclared
-  // mount settings
+  // instance fields managed by the base class and cleared on teardown
   static fields = [
     'template',
     'component',

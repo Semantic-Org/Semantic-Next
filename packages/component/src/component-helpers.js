@@ -112,8 +112,7 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
 }
 
 /*
-  Defines reactive get/set accessors backed by el.properties. Installed on the class
-  prototype for custom elements and on the element instance for undeclared mount settings.
+  Defines reactive get/set accessors on the component prototype backed by el.properties.
 */
 export function defineAccessors(target, properties) {
   each(properties, (config, propName) => {
