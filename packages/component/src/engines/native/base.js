@@ -123,17 +123,25 @@ class WebComponentBase extends HTMLElementBase {
     const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
     this.css = css;
     this.componentSpec = componentSpec;
-    if (resolvedProperties) {
-      this.settings = this.createSettingsProxy();
-    }
-    if (componentSpec) {
-      this.uiClasses = () => this.getUIClasses({ componentSpec, properties: resolvedProperties });
-    }
     if (defaultSettings) {
       this.setDefaultSettings({ defaultSettings, componentSpec });
     }
     else {
       this.defaultSettings = {};
+    }
+    if (resolvedProperties) {
+      // properties written before custom element upgrade sit on the instance and shadow prototype accessors
+      each(resolvedProperties, (config, name) => {
+        if (!config.noAccessor && Object.hasOwn(this, name)) {
+          const value = this[name];
+          delete this[name];
+          this.properties.set(name, value);
+        }
+      });
+      this.settings = this.createSettingsProxy();
+    }
+    if (componentSpec) {
+      this.uiClasses = () => this.getUIClasses({ componentSpec, properties: resolvedProperties });
     }
 
     if (this.isLightDOM) {
@@ -544,6 +552,9 @@ class WebComponentBase extends HTMLElementBase {
     }
     else {
       this[name] = value;
+    }
+    if (this.template?.data) {
+      this.template.data[name] = value;
     }
   }
 

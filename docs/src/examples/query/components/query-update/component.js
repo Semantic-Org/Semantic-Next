@@ -8,7 +8,7 @@ const defaultSettings = {
 };
 
 defineComponent({
-  tagName: 'ui-card',
+  tagName: 'card-example',
   template,
   css,
   defaultSettings,

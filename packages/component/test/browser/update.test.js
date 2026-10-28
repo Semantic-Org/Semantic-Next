@@ -125,6 +125,41 @@ describe('el.update', () => {
     expect(first.shadowRoot.querySelector('p').textContent).toBe('all');
     expect(second.shadowRoot.querySelector('p').textContent).toBe('all');
   });
+
+  it('absorbs properties set before custom element upgrade so settings writes stay in sync', async () => {
+    const childTag = uniqueTag();
+    defineComponent({
+      tagName: childTag,
+      template: '<p>{value}</p>',
+      defaultSettings: { value: '' },
+      createComponent: ({ settings }) => ({
+        setValue(val) {
+          settings.value = val;
+        },
+      }),
+    });
+
+    // parent template binds value={active} on child inside the inert template fragment before upgrade
+    const parent = await mountTag({
+      template: `<${childTag} value={active}></${childTag}>`,
+      defaultState: { active: 'first' },
+    });
+    const child = parent.shadowRoot.querySelector(childTag);
+    await child.rendered;
+
+    expect(Object.hasOwn(child, 'value')).toBe(false);
+    expect(child.shadowRoot.querySelector('p').textContent).toBe('first');
+
+    child.component.setValue('second');
+    await tick();
+    expect(child.value).toBe('second');
+    expect(child.shadowRoot.querySelector('p').textContent).toBe('second');
+
+    child.component.setValue('first');
+    await tick();
+    expect(child.value).toBe('first');
+    expect(child.shadowRoot.querySelector('p').textContent).toBe('first');
+  });
 });
 
 describe('rerender', () => {
