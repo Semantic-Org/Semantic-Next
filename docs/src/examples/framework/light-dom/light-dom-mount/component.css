@@ -1,11 +1,9 @@
 .counter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--gap);
   border: var(--border);
+  padding: var(--padding);
   border-radius: var(--border-radius);
-  background: var(--standard-5);
-  padding: var(--padding-sm);
-  margin: var(--vertically-spaced);
+
+  .parity {
+    float: right;
+  }
 }

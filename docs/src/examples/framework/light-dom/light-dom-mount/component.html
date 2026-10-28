@@ -1,4 +1,12 @@
 <div class="counter">
-  <span class="label">{label}: <b>{count}</b></span>
-  <ui-button class="increment" size="small">Increment</ui-button>
+  <div class="parity">
+    {#if isEven counter}
+     Even
+    {else}
+     Odd
+    {/if}
+  </div>
+  <span class="text">
+    The counter is {counter}
+  </span>
 </div>
