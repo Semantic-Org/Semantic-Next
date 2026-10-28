@@ -917,10 +917,13 @@ export class Template {
   unmount(): void;
 
   /**
-   * Gets the combined data context, including data, state, and instance properties.
+   * Gets the combined data context, including settings, plugin data, data, state, and instance properties.
+   * @param options - Options for building the context.
+   * @param options.overlaySettings - Whether to overlay settings shadow signals onto the context.
+   * @param options.additionalData - Additional data to merge on top of the context.
    * @returns The data context object.
    */
-  getDataContext(): DataContext;
+  getDataContext(options?: { overlaySettings?: boolean; additionalData?: DataContext; }): DataContext;
 
   /**
    * Overlays settings signals onto a data context so the renderer tracks settings
@@ -928,7 +931,7 @@ export class Template {
    * @param context - The data context to overlay onto. Mutated in place.
    * @returns The same context.
    */
-  overlaySettingsSignals(context: DataContext): DataContext;
+  overlaySettings(context: DataContext): DataContext;
 
   /**
    * Adopts the template's stylesheet to the renderRoot (if using a ShadowRoot).

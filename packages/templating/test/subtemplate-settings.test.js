@@ -280,7 +280,7 @@ describe('Subtemplate with defaultSettings', () => {
 
   it('creates a Signal in settingsVars on first read', () => {
     // Use createSubtemplateSettings directly to observe the lazy-create path.
-    // initialize() walks all defaultSettings keys via overlaySettingsSignals
+    // initialize() walks all defaultSettings keys via overlaySettings
     // before tests can observe the pre-read state.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },
@@ -313,7 +313,7 @@ describe('Subtemplate with defaultSettings', () => {
   });
 
   it('creates a Signal on first write to a key never read before', () => {
-    // Use the Proxy directly without initialize() so overlaySettingsSignals
+    // Use the Proxy directly without initialize() so overlaySettings
     // priming doesn't pre-create the signal.
     const { child } = makeSubtemplatePair({
       childDefaultSettings: { theme: 'light' },

@@ -351,7 +351,7 @@ export const Template = class Template {
       : engine.renderer;
     this.renderer = new RendererClass({
       ast: this.ast,
-      data: this.overlaySettingsSignals(this.getDataContext()),
+      data: this.getDataContext({ overlaySettings: true }),
       template: this,
       subTemplates: this.subTemplates,
       helpers: this.helpers || TemplateHelpers,
@@ -425,13 +425,21 @@ export const Template = class Template {
     return nonreactive(() => engine.unmount(this));
   }
 
-  getDataContext() {
-    return extend({}, this.customData, this.data, this.state, this.instance);
+  getDataContext({ overlaySettings = false, additionalData } = {}) {
+    const context = extend(
+      {},
+      this.defaultSettings,
+      this.customData,
+      this.data,
+      this.state,
+      this.instance,
+      additionalData,
+    );
+    return overlaySettings ? this.overlaySettings(context) : context;
   }
 
-  // Overlay settings shadow signals so the renderer tracks settings reactively.
-  // Applied after all spreads so Signals always win over plain duplicates.
-  overlaySettingsSignals(context) {
+  // overlays settings shadow signals so the renderer tracks settings reactively
+  overlaySettings(context) {
     // subtemplates — overlay own settingsVars if declared, otherwise skip
     if (this.isSubtemplate()) {
       if (this.settingsVars && this.defaultSettings) {
@@ -531,7 +539,7 @@ export const Template = class Template {
     this.customData ??= {};
     extend(this.customData, data);
     if (this.renderer) {
-      this.renderer.setData(this.overlaySettingsSignals(this.getDataContext()));
+      this.syncRenderer();
       this.renderer.bumpDataVersion?.();
     }
   }
@@ -989,8 +997,8 @@ export const Template = class Template {
 
   // the renderer reads the full context with settings overlaid as signals and the keys
   // this call carries on top, so a plain key is current before the coarse channel fires
-  syncRenderer(data) {
-    this.renderer.setData(this.overlaySettingsSignals(extend({}, this.getDataContext(), data)));
+  syncRenderer(additionalData) {
+    this.renderer.setData(this.getDataContext({ overlaySettings: true, additionalData }));
   }
 
   // the escape valve: every binding re-evaluates and every {#rerender} region rebuilds.
@@ -1371,7 +1379,7 @@ export const Template = class Template {
   static getTemplateContext(node) {
     const template = (node instanceof Template) ? node : node?.template;
     if (template) {
-      return extend({}, template.defaultSettings, template.getDataContext());
+      return template.getDataContext();
     }
     return {
       ...node?.component,
