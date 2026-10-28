@@ -232,10 +232,12 @@ export function setDefaultSettings(el, { defaultSettings = {}, componentSpec }) 
     }
   });
   if (componentSpec?.defaultValues) {
-    el.defaultSettings = {
-      ...componentSpec.defaultValues,
-      ...el.defaultSettings,
-    };
+    each(componentSpec.defaultValues, (value, name) => {
+      const prop = kebabToCamel(name);
+      if (el.defaultSettings[prop] === undefined) {
+        el.defaultSettings[prop] = value;
+      }
+    });
   }
 }
 

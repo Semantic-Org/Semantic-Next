@@ -1153,12 +1153,6 @@ export class Template {
   updateSettings(additionalData?: DataContext): void;
 
   /**
-   * The settings this template declares: a nested template's own, a root template's
-   * element's full set.
-   */
-  getDeclaredSettings(): Record<string, any> | undefined;
-
-  /**
    * `setInterval` scoped to the template, cleared when the template is destroyed.
    * @param callback - Function to run on each tick.
    * @param ms - Delay between ticks in milliseconds.

@@ -33,7 +33,6 @@ import {
   isObject,
   isServer,
   kebabToCamel,
-  keys,
   mapObject,
   noop,
   remove,
@@ -1266,33 +1265,21 @@ export const Template = class Template {
   // syncs declared settings passed to render(additionalData) into the backing settings store
   // without converting untouched defaults into own properties or scheduling a second render
   updateSettings(additionalData = {}) {
-    const el = !this.isSubtemplate() && this.element;
+    const isSubtemplate = this.isSubtemplate();
+    const el = !isSubtemplate && this.element;
     const settings = this.settings || el?.settings;
-    const declared = this.getDeclaredSettings();
-    if (!settings || !declared) {
+    const settingsVars = isSubtemplate ? this.settingsVars : el?.settingsVars;
+    if (!settings || !settingsVars) {
       return;
     }
-    const resolvedProperties = el?.constructor?.config?.resolvedProperties;
-    each(keys(declared), (name) => {
+    each(settingsVars, (_, name) => {
       if (name in additionalData) {
         this.data[name] = additionalData[name];
         if (additionalData[name] !== settings[name]) {
-          if (el?.properties && !resolvedProperties?.[name]?.noAccessor) {
-            el.properties.set(name, additionalData[name]);
-          }
-          else {
-            settings[name] = additionalData[name];
-          }
+          settings[name] = additionalData[name];
         }
       }
     });
-  }
-
-  // the settings with a store behind them: a nested template's own, or the element's full
-  // set. a bare template's defaults have no store, so they count as plain data
-  getDeclaredSettings() {
-    const el = !this.isSubtemplate() && this.element;
-    return el ? el.defaultSettings : this.settings && this.defaultSettings;
   }
 
   /*******************************

@@ -538,7 +538,13 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   setSetting(name, value) {
-    this[name] = value;
+    const { resolvedProperties } = this.constructor.config || {};
+    if (this.properties && resolvedProperties?.[name] && !resolvedProperties[name].noAccessor) {
+      this.properties.set(name, value);
+    }
+    else {
+      this[name] = value;
+    }
   }
 
   getData() {
