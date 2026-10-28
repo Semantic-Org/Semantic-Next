@@ -1,6 +1,6 @@
 import { flush } from '@semantic-ui/reactivity';
 import { MARKER_VERSION } from '@semantic-ui/renderer';
-import { adoptStylesheet, each, inArray, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { adoptStylesheet, each, extend, inArray, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
 import {
   createSettingsProxy,
@@ -174,8 +174,7 @@ class WebComponentBase extends HTMLElementBase {
           }
         });
       }
-      // copy getData() via property descriptors so getters like darkMode stay live
-      Object.defineProperties(data, Object.getOwnPropertyDescriptors(this.getData()));
+      extend(data, this.getData());
       if (template.isPrototype) {
         template = template.clone({ data, element: this });
       }
