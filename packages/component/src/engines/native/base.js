@@ -134,17 +134,16 @@ class WebComponentBase extends HTMLElementBase {
     // rest is data the settings do not know, handed to the template the way a subtemplate
     // takes an arg nobody declared
     if (this.isLightDOM && settings) {
-      const otherData = {};
       each(resolveAttributeAliases({ ...settings }, componentSpec), (value, name) => {
         const key = resolvedProperties?.[name]?.aliasFor ?? name;
         if (resolvedProperties && Object.hasOwn(resolvedProperties, key)) {
           this.setSetting(key, value);
         }
         else {
-          otherData[key] = value;
+          this.otherData ??= {};
+          this.otherData[key] = value;
         }
       });
-      this.otherData = otherData;
     }
   }
 

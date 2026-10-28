@@ -395,6 +395,28 @@ describe('Template.mount', () => {
       expect(el.maxItems).toBeUndefined();
     });
 
+    it("lets the markup win over a tagless definition's own default, and the call win over both", () => {
+      // a tagless definition carries its defaults on the template's data, which must seed
+      // the settings beneath the markup rather than overwrite it
+      const Row = defineComponent({
+        template: '<i>{maxItems}</i>',
+        defaultSettings: { maxItems: 10 },
+      });
+      const fromMarkup = document.createElement('unregistered-card');
+      fromMarkup.setAttribute('max-items', '5');
+      document.body.append(fromMarkup);
+      Row.mount(fromMarkup);
+      expect(fromMarkup.querySelector('i').textContent).toBe('5');
+      // nothing undeclared was passed, so nothing undeclared sits on the element
+      expect(Object.hasOwn(fromMarkup, 'otherData')).toBe(false);
+
+      const fromCall = document.createElement('unregistered-card');
+      fromCall.setAttribute('max-items', '5');
+      document.body.append(fromCall);
+      Row.mount(fromCall, { settings: { maxItems: 7 } });
+      expect(fromCall.querySelector('i').textContent).toBe('7');
+    });
+
     it('lets a setting passed to mount win over the attribute the element carries', () => {
       const Row = defineComponent({
         tagName: uniqueTag('mount-precedence'),
