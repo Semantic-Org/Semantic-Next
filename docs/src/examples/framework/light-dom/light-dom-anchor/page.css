@@ -1,0 +1,8 @@
+/* every direct child of main gets a box, so a page's nodes show up as siblings of the nav and footer */
+main > * {
+  display: block;
+  margin-bottom: var(--8px);
+  padding: var(--8px);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
