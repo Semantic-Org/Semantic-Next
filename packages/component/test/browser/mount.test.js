@@ -379,6 +379,40 @@ describe('Template.mount', () => {
     });
   });
 
+  describe('attributes on a mounted element', () => {
+    it('reads the attributes the element carries and follows their changes, the way a tag does', async () => {
+      const Icon = defineComponent({
+        tagName: uniqueTag('mount-icon-attrs'),
+        template: '<i class="{icon}">{maxItems}</i>',
+        defaultSettings: { maxItems: 10 },
+        componentSpec: createIconLikeSpec(),
+      });
+      const el = document.createElement('unregistered-card');
+      el.setAttribute('chevron-down', '');
+      el.setAttribute('max-items', '5');
+      document.body.append(el);
+      const row = Icon.mount(el);
+      // present at mount, replayed through the same hook the browser fires on a tag
+      expect(el.settings.icon).toBe('chevron-down');
+      expect(el.settings.maxItems).toBe(5);
+      expect(el.querySelector('i').textContent).toBe('5');
+      // changed after mount, observed into the same hook a microtask later
+      el.setAttribute('icon', 'home');
+      el.setAttribute('max-items', '7');
+      await tick();
+      expect(el.settings.icon).toBe('home');
+      expect(el.querySelector('i').textContent).toBe('7');
+      el.removeAttribute('max-items');
+      await tick();
+      expect(el.querySelector('i').textContent).toBe('10');
+      // after unmount the element is plain again and attributes mean nothing to it
+      row.unmount();
+      el.setAttribute('max-items', '3');
+      await tick();
+      expect(el.maxItems).toBeUndefined();
+    });
+  });
+
   describe('inside a sui host', () => {
     const defineHost = () =>
       defineComponent({

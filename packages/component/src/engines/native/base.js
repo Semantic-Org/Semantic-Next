@@ -123,6 +123,24 @@ class WebComponentBase extends HTMLElementBase {
       this.defaultSettings = {};
     }
 
+    // a mounted element has no custom element lifecycle, so the attributes it carries are
+    // replayed through the hook the browser fires on a tag, and later changes are observed
+    // into the same hook a microtask later
+    const observed = this.isLightDOM ? this.constructor.observedAttributes : undefined;
+    if (observed?.length) {
+      for (const attribute of this.attributes) {
+        if (inArray(attribute.name, observed)) {
+          this.attributeChangedCallback(attribute.name, null, attribute.value);
+        }
+      }
+      this.attributeObserver = new MutationObserver((records) => {
+        for (const { attributeName, oldValue } of records) {
+          this.attributeChangedCallback(attributeName, oldValue, this.getAttribute(attributeName));
+        }
+      });
+      this.attributeObserver.observe(this, { attributes: true, attributeOldValue: true, attributeFilter: observed });
+    }
+
     if (this.isLightDOM && settings) {
       const undeclared = {};
       // resolve spec attribute aliases and kebab-case setting keys to their canonical property names
@@ -277,12 +295,14 @@ class WebComponentBase extends HTMLElementBase {
     'uiClasses',
     'defaultSettings',
     'extraProperties',
+    'attributeObserver',
     'updateScheduled',
     'pendingRender',
   ];
 
   // resets every instance field to undefined (avoiding `delete` so the element stays out of V8 dictionary mode)
   teardown() {
+    this.attributeObserver?.disconnect();
     if (this.extraProperties) {
       each(this.extraProperties, (config, name) => {
         if (!config.noAccessor) {
