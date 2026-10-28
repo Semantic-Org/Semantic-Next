@@ -188,15 +188,29 @@ describe('Subtemplate without defaultSettings', () => {
     expect(child.settings).toBeUndefined();
   });
 
-  it('does not create a settings Proxy on a non-subtemplate even with defaultSettings', () => {
-    // Gate is conjunctive: isSubtemplate() AND defaultSettings AND length > 0.
+  it('creates its own settings store on a root with defaultSettings and no element store', () => {
+    // a bare render() root, like a range mount, has no element store to read, so it makes one
     const template = new Template({
       template: '<div></div>',
       renderingEngine: realEngine,
       defaultSettings: { foo: 'bar' },
     });
     template.initialize();
-    expect(template.settings).toBeUndefined();
+    expect(template.settings.foo).toBe('bar');
+    expect(template.settingsVars.get('foo')).toBeInstanceOf(Signal);
+  });
+
+  it('keeps a settings store assigned before initialize', () => {
+    // the server hands its template the data as the store before initialize runs
+    const template = new Template({
+      template: '<div></div>',
+      renderingEngine: realEngine,
+      defaultSettings: { foo: 'bar' },
+    });
+    const given = { foo: 'x' };
+    template.settings = given;
+    template.initialize();
+    expect(template.settings).toBe(given);
   });
 
   it('exposes data passed at construction in the renderer data context', () => {

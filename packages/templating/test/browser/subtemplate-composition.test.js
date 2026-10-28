@@ -296,8 +296,34 @@ describe('Subtemplate composition — clone + wire + initialize sequence', () =>
   });
 });
 
-describe('a {>child} under a root with no element', () => {
-  it('binds its events through the render root the root template was attached to', async () => {
+describe('a root template with no element', () => {
+  it('moves a declared setting through its own store, by a write and by update', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = new Template({
+      template: '<span class="label">{label}</span>',
+      renderingEngine: realEngine,
+      defaultSettings: { label: 'a' },
+    });
+    root.initialize();
+    root.attach(container);
+    container.append(root.render());
+    const text = () => container.querySelector('.label').textContent;
+    expect(root.settings.label).toBe('a');
+    expect(text()).toBe('a');
+
+    root.settings.label = 'b';
+    flush();
+    expect(text()).toBe('b');
+
+    root.update({ label: 'c' });
+    flush();
+    expect(text()).toBe('c');
+    expect(root.settings.label).toBe('c');
+    root.onDestroyed();
+  });
+
+  it('binds a {>child} through the render root the root template was attached to', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const kid = new Template({
