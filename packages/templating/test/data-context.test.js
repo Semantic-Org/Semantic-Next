@@ -282,12 +282,12 @@ describe('Template — setDataContext', () => {
     });
     template.setParent(new Template({}));
     template.initialize();
-    expect(template.setDataContext({ label: 'next' })).toBe(false);
+    expect(template.update({ label: 'next' })).toBe(false);
     expect(template.data.label).toBe('next');
-    expect(template.setDataContext({ other: 1 })).toBe(true);
+    expect(template.update({ other: 1 })).toBe(true);
   });
 
-  it('leaves a getter on this.data in place', () => {
+  it('leaves a getter on this.data in place without invoking a source getter', () => {
     const template = new Template({
       data: {},
     });
@@ -296,7 +296,18 @@ describe('Template — setDataContext', () => {
       configurable: true,
       enumerable: true,
     });
-    expect(template.setDataContext({ live: 'replaced' })).toBe(false);
+    let sourceInvoked = false;
+    const incoming = {};
+    Object.defineProperty(incoming, 'live', {
+      get: () => {
+        sourceInvoked = true;
+        return 'replaced';
+      },
+      configurable: true,
+      enumerable: true,
+    });
+    expect(template.setDataContext(incoming)).toBe(false);
+    expect(sourceInvoked).toBe(false);
     expect(template.data.live).toBe('live');
   });
 });

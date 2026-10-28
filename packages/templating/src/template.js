@@ -15,6 +15,7 @@ import {
 import {
   adoptStylesheet,
   any,
+  assignInPlace,
   capitalize,
   clone,
   createErrors,
@@ -204,21 +205,11 @@ export const Template = class Template {
   // behind it changed. a declared setting moves through its own signal and a getter is
   // the caller's live value, so neither fires the coarse channel
   setDataContext(data = {}) {
-    const declared = this.getDeclaredSettings();
-    let changed = false;
-    each(data, (value, key) => {
-      if (Object.getOwnPropertyDescriptor(this.data, key)?.get) {
-        return;
-      }
-      if (this.data[key] === value) {
-        return;
-      }
-      this.data[key] = value;
-      if (!declared || !(key in declared)) {
-        changed = true;
-      }
+    return assignInPlace(this.data, data, {
+      preserveExistingKeys: true,
+      preserveGetters: true,
+      returnChanged: true,
     });
-    return changed;
   }
 
   isSubtemplate() {
@@ -1275,12 +1266,15 @@ export const Template = class Template {
     }
     const resolvedProperties = el?.constructor?.config?.resolvedProperties;
     each(keys(declared), (name) => {
-      if (name in additionalData && additionalData[name] !== settings[name]) {
-        if (el?.properties && !resolvedProperties?.[name]?.noAccessor) {
-          el.properties.set(name, additionalData[name]);
-        }
-        else {
-          settings[name] = additionalData[name];
+      if (name in additionalData) {
+        this.data[name] = additionalData[name];
+        if (additionalData[name] !== settings[name]) {
+          if (el?.properties && !resolvedProperties?.[name]?.noAccessor) {
+            el.properties.set(name, additionalData[name]);
+          }
+          else {
+            settings[name] = additionalData[name];
+          }
         }
       }
     });
