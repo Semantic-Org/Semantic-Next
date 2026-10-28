@@ -642,7 +642,7 @@ describe('Query - Untested API Methods', () => {
   });
 
   /*******************************
-     component() / dataContext()
+     component() / dataContext() / update()
   *******************************/
 
   describe('component', () => {
@@ -692,6 +692,51 @@ describe('Query - Untested API Methods', () => {
     it('should return undefined when no context attached', () => {
       document.body.innerHTML = '<div id="test"></div>';
       expect($('#test').dataContext()).toBeUndefined();
+    });
+  });
+
+  describe('update', () => {
+    it('should call update on a single element and forward arguments', () => {
+      document.body.innerHTML = '<div id="test"></div>';
+      const el = document.getElementById('test');
+      el.update = vi.fn();
+
+      const $el = $(el);
+      const result = $el.update({ label: 'next' });
+
+      expect(el.update).toHaveBeenCalledTimes(1);
+      expect(el.update).toHaveBeenCalledWith({ label: 'next' });
+      expect(result).toBe($el);
+    });
+
+    it('should call update on each matched element', () => {
+      document.body.innerHTML = '<div class="c"></div><div class="c"></div>';
+      const els = document.querySelectorAll('.c');
+      els[0].update = vi.fn();
+      els[1].update = vi.fn();
+
+      const $els = $('.c');
+      const result = $els.update({ count: 2 });
+
+      expect(els[0].update).toHaveBeenCalledWith({ count: 2 });
+      expect(els[1].update).toHaveBeenCalledWith({ count: 2 });
+      expect(result).toBe($els);
+    });
+
+    it('should skip elements that do not define update', () => {
+      document.body.innerHTML = '<div class="c"></div><div class="c"></div>';
+      const els = document.querySelectorAll('.c');
+      els[0].update = vi.fn();
+
+      const $els = $('.c');
+      expect(() => $els.update({ a: 1 })).not.toThrow();
+      expect(els[0].update).toHaveBeenCalledWith({ a: 1 });
+    });
+
+    it('should handle empty selections and return the Query instance', () => {
+      document.body.innerHTML = '';
+      const $empty = $('.missing');
+      expect($empty.update({ a: 1 })).toBe($empty);
     });
   });
 
