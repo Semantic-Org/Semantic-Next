@@ -783,7 +783,7 @@ class TemplateCompiler {
           templateInfo.name = value;
         }
         else if (property === 'staticData') {
-          templateInfo.staticData = isPlainObject(value) ? { ...templateInfo.staticData, ...value } : value;
+          templateInfo.data = isPlainObject(value) ? { ...templateInfo.data, ...value } : value;
         }
         else if (property === 'data') {
           if (isPlainObject(value)) {

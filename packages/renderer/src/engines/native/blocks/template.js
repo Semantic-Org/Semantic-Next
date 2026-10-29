@@ -57,20 +57,19 @@ const { throwError } = createErrors({ namespace: 'renderer' });
 
 function unpackBlobData(node, data, evaluator) {
   let blobData = {};
+  if (!node.data) { return blobData; }
   if (isString(node.data)) {
     const evaluated = evaluator.lookupExpressionValue(node.data, data);
     if (isPlainObject(evaluated)) {
       blobData = { ...blobData, ...evaluated };
     }
+    return blobData;
   }
-  const staticObj = isPlainObject(node.staticData)
-    ? node.staticData
-    : (isPlainObject(node.data) ? node.data : null);
-  if (staticObj) {
+  if (isPlainObject(node.data)) {
     // Inside {#each}, read reactively so item-signal mutations propagate
-    // into subtemplate data. Outside each, staticData={} stays non-reactive.
+    // into subtemplate data. Outside each, static data={} stays non-reactive.
     const inItemContext = isItemContext(data);
-    each(staticObj, (expr, key) => {
+    each(node.data, (expr, key) => {
       blobData[key] = inItemContext
         ? evaluator.lookupExpressionValue(expr, data)
         : nonreactive(() => evaluator.lookupExpressionValue(expr, data));
@@ -151,11 +150,6 @@ function buildArgsRecord({ node, parentData, evaluator, target }) {
     else if (isPlainObject(node.data)) {
       each(node.data, (expr, key) => declare(key, 'e', expr));
     }
-  }
-  if (isPlainObject(node.staticData)) {
-    each(node.staticData, (expr, key) => {
-      declare(key, 's', nonreactive(() => evaluator.lookupExpressionValue(expr, parentData)));
-    });
   }
   if (node.reactiveData) {
     each(node.reactiveData, (expr, key) => declare(key, 'e', expr));

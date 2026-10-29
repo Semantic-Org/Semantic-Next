@@ -64,7 +64,7 @@ console.log(ast);
 
 ### parseTemplateString
 
-Parses the inner expression of a `{> ...}` subtemplate or snippet tag into its AST fields (`name`, `reactiveData`, `data`, `staticData`, `inheritsData`).
+Parses the inner expression of a `{> ...}` subtemplate or snippet tag into its AST fields (`name`, `reactiveData`, `data`, `inheritsData`).
 
 #### Syntax
 ```javascript
@@ -77,7 +77,7 @@ compiler.parseTemplateString(expression)
 | expression | string | The template string to parse     |
 
 #### Returns
-`Object` - `{ name, reactiveData, data, staticData, inheritsData }`.
+`Object` - `{ name, reactiveData, data, inheritsData }`.
 
 #### Usage
 ```javascript
@@ -85,7 +85,7 @@ const shorthand = compiler.parseTemplateString('partialName data1=value1 data2=v
 // { name: "'partialName'", reactiveData: { data1: 'value1', data2: 'value2' } }
 
 const verbose = compiler.parseTemplateString('template name=rowTemplate label=title staticData={role: role}');
-// { name: 'rowTemplate', reactiveData: { label: 'title' }, staticData: { role: 'role' } }
+// { name: 'rowTemplate', reactiveData: { label: 'title' }, data: { role: 'role' } }
 ```
 
 ### detectSyntax
