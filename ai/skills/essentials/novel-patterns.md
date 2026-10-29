@@ -188,6 +188,7 @@ dialog instanceof HTMLDialogElement;   // true
 - **Full element contract without Shadow DOM:** The target element gets reactive property getters/setters, `el.settings`, `el.component`, `el.dataContext`, `el.update()`, `el.rendered`/`el.updated`, spec attribute dialects, and `MutationObserver`-driven `attributeChangedCallback`. Component CSS is adopted onto the enclosing document or shadow root.
 - **Native prototype preservation:** Because the upgrade prototype inherits from `el`'s original prototype (`HTMLDialogElement.prototype`, `HTMLTableRowElement.prototype`, etc.), native methods (`dialog.showModal()`, `dialog.close()`, `form.requestSubmit()`) and `instanceof` checks work unmodified alongside the component's own properties.
 - **Reversible:** Calling `instance.unmount()` (or `el.unmount()`) disconnects reactions and observers, clears rendered content, and restores `el`'s original prototype.
+- **Range mounting with `anchor`:** Passing `{ anchor }` (`Page.mount(container, { anchor: footer })`, or `{ anchor: null }` to append) renders the template as a DOM range inside `container` without upgrading `container` or replacing its existing children — no wrapper `<div>` needed.
 
 ---
 

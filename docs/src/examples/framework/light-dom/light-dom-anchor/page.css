@@ -1,0 +1,6 @@
+footer {
+  margin-top: var(--margin-m);
+  padding-top: var(--padding-s);
+  border-top: var(--internal-border);
+  color: var(--muted-text-color);
+}

@@ -18,6 +18,8 @@ import { defineComponent } from '@semantic-ui/component';
 import { flush, reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { DynamicRegion } from '../../src/engines/native/dynamic-region.js';
+
 const ENGINE = 'native';
 
 let tagCounter = 0;
@@ -757,6 +759,34 @@ describe('DynamicRegion cleanup', () => {
     }
 
     expect(el.shadowRoot.childNodes.length).toBeLessThanOrEqual(initialChildCount + 1);
+  });
+
+  it('closes an empty range on demand and keeps it closed through an empty fill', () => {
+    // a caller that attaches a template to the region before filling it needs both
+    // anchors in the tree, and a fill with no nodes must not leave the end anchor detached
+    const parent = document.createElement('div');
+    const region = new DynamicRegion(parent);
+    parent.append(region.anchor);
+    region.placeEndAnchor();
+    expect(region.anchor.nextSibling).toBe(region.endAnchor);
+
+    const filled = document.createDocumentFragment();
+    filled.append(document.createElement('span'));
+    region.setContent(filled);
+    expect([...parent.childNodes].map((node) => node.nodeName)).toEqual(['#text', 'SPAN', '#text']);
+
+    region.setContent(document.createDocumentFragment());
+    expect(region.endAnchor.parentNode).toBe(parent);
+    expect(region.anchor.nextSibling).toBe(region.endAnchor);
+  });
+
+  it('keeps a single anchor for a region that never held content', () => {
+    const parent = document.createElement('div');
+    const region = new DynamicRegion(parent);
+    parent.append(region.anchor);
+    region.setContent(document.createDocumentFragment());
+    expect(region.endAnchor).toBeUndefined();
+    expect(parent.childNodes.length).toBe(1);
   });
 });
 

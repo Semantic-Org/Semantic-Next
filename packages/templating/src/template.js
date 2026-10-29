@@ -261,8 +261,9 @@ export const Template = class Template {
     let instance;
     this.instance = {};
 
-    // create settings proxy for subtemplates that declare defaultSettings
-    if (this.isSubtemplate() && this.defaultSettings && Object.keys(this.defaultSettings).length > 0) {
+    // create own settings store when not provided by a component element
+    const declaresSettings = this.defaultSettings && Object.keys(this.defaultSettings).length > 0;
+    if (!this.settings && declaresSettings) {
       this.createSubtemplateSettings();
     }
 
@@ -318,7 +319,7 @@ export const Template = class Template {
       this.updateScheduled = true;
       queueMicrotask(() => {
         this.updateScheduled = false;
-        if (this.element) {
+        if (this.element?.template) {
           this.element.updateScheduled = false;
         }
         this.call(this.onUpdatedCallback);
@@ -334,6 +335,7 @@ export const Template = class Template {
     }, 10);
 
     this.onDestroyed = () => {
+      this.mounted = false;
       Template.removeTemplate(this);
       this.markDestroyed();
       this.renderer?.destroy?.();
@@ -342,10 +344,16 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
-      each(this.plugins, (plugin) => plugin.onDestroyed());
-      this.call(this.onDestroyedCallback);
-      this.resolveLifecyclePromise('destroyed');
-      dispatchLifecycle('destroyed');
+      // fire onDestroyed before detaching so callbacks can still query rendered DOM
+      try {
+        each(this.plugins, (plugin) => plugin.onDestroyed());
+        this.call(this.onDestroyedCallback);
+        this.resolveLifecyclePromise('destroyed');
+        dispatchLifecycle('destroyed');
+      }
+      finally {
+        this.detach();
+      }
     };
 
     this.initialized = true;
@@ -366,12 +374,16 @@ export const Template = class Template {
     // the overlay so every declared setting already has its signal
     if (this.element) {
       const el = this.element;
-      const settingsVars = this.isSubtemplate() ? this.settingsVars : el.settingsVars;
+      const ownElement = !this.isSubtemplate() && el;
+      const settingsVars = this.settingsVars || ownElement?.settingsVars;
       const updateReaction = reaction(() => {
         each(this.state, (signal) => signal.dependency.depend());
         each(settingsVars, (signal) => signal.dependency.depend());
         if (this.rendered && !this.destroyed) {
-          el.updateScheduled = true;
+          // skip unupgraded range containers
+          if (el.template) {
+            el.updateScheduled = true;
+          }
           afterFlush(this.onUpdated);
         }
       });
@@ -385,13 +397,18 @@ export const Template = class Template {
 
   attach(
     renderRoot,
-    { parentNode = renderRoot, startNode, endNode } = {},
+    { region, parentNode = renderRoot, startNode, endNode } = {},
   ) {
     if (!this.initialized) {
       this.initialize();
     }
     if (this.renderRoot == renderRoot) {
       return;
+    }
+    if (region) {
+      this.region = region;
+      startNode = region.anchor;
+      endNode = region.endAnchor;
     }
 
     // to attach styles & events
@@ -405,6 +422,18 @@ export const Template = class Template {
     if (this.attachStyles) {
       this.adoptStylesheet();
     }
+  }
+
+  detach() {
+    if (this.region) {
+      this.region.clear();
+      this.region.anchor.remove();
+    }
+    this.region = undefined;
+    this.renderRoot = undefined;
+    this.parentNode = undefined;
+    this.startNode = undefined;
+    this.endNode = undefined;
   }
 
   mount(target, options) {
@@ -421,13 +450,12 @@ export const Template = class Template {
     if (!this.mounted) {
       return;
     }
-    const engine = this.resolvedEngine;
-    if (!engine.unmount) {
-      throwError('unsupportedEngine', 'Template.unmount', {
-        explanation: isDevelopment ? 'the rendering engine does not support `unmount()`' : 0,
-      });
-    }
-    return nonreactive(() => engine.unmount(this));
+    return nonreactive(() => {
+      if (this.element?.template === this) {
+        return this.element.unmount();
+      }
+      this.onDestroyed();
+    });
   }
 
   getDataContext({ overlaySettings = false, additionalData } = {}) {
@@ -445,15 +473,12 @@ export const Template = class Template {
 
   // overlays settings shadow signals so the renderer tracks settings reactively
   overlaySettings(context) {
-    const isSubtemplate = this.isSubtemplate();
-    if (isSubtemplate && !this.defaultSettings) {
-      return context;
-    }
-    const el = !isSubtemplate && this.element;
-    const settings = this.settings || el?.settings;
-    const settingsVars = isSubtemplate ? this.settingsVars : el?.settingsVars;
+    const ownElement = !this.isSubtemplate() && this.element;
+    const settings = this.settings || ownElement?.settings;
+    const settingsVars = this.settingsVars || ownElement?.settingsVars;
     if (settings && settingsVars) {
-      if (isSubtemplate) {
+      // prime lazy signals for declared defaults before overlaying settingsVars
+      if (this.settingsVars) {
         each(this.defaultSettings, (_, name) => {
           settings[name];
         });
@@ -1257,10 +1282,9 @@ export const Template = class Template {
   // syncs declared settings passed to render(additionalData) into the backing settings store
   // without converting untouched defaults into own properties or scheduling a second render
   updateSettings(additionalData = {}) {
-    const isSubtemplate = this.isSubtemplate();
-    const el = !isSubtemplate && this.element;
-    const settings = this.settings || el?.settings;
-    const settingsVars = isSubtemplate ? this.settingsVars : el?.settingsVars;
+    const ownElement = !this.isSubtemplate() && this.element;
+    const settings = this.settings || ownElement?.settings;
+    const settingsVars = this.settingsVars || ownElement?.settingsVars;
     if (!settings || !settingsVars) {
       return;
     }

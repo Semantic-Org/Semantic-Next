@@ -525,6 +525,35 @@ performance.measure('each-mount-1000', startMark('each-mount-1000'));
 destroy();
 
 /*******************************
+      Template mount
+*******************************/
+
+const benchMountRow = defineComponent({
+  renderingEngine: 'native',
+  template: '<div class="row"><span>{label}</span><span>{index}</span></div>',
+  defaultSettings: { label: 'row' },
+  defaultState: { index: 0 },
+});
+
+// purpose: Mount and unmount a tagless template on a fresh div 1000 times (prototype upgrade + restore).
+performance.mark(startMark('element-mount-1k'));
+for (let i = 0; i < 1000; i++) {
+  const el = document.createElement('div');
+  container.appendChild(el);
+  benchMountRow.mount(el, { settings: { label: `r${i}` } }).unmount();
+}
+performance.measure('element-mount-1k', startMark('element-mount-1k'));
+destroy();
+
+// purpose: Mount and unmount a tagless template as a range inside a container 1000 times (DynamicRegion anchors, no element upgrade).
+performance.mark(startMark('range-mount-1k'));
+for (let i = 0; i < 1000; i++) {
+  benchMountRow.mount(container, { anchor: null, settings: { label: `r${i}` } }).unmount();
+}
+performance.measure('range-mount-1k', startMark('range-mount-1k'));
+destroy();
+
+/*******************************
       Results
 *******************************/
 

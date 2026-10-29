@@ -251,7 +251,6 @@ class WebComponentBase extends HTMLElementBase {
     if (!template?.mounted) {
       return;
     }
-    template.mounted = false;
     template.settings = undefined;
     // fire onDestroyed before clearing the DOM so callbacks can still query rendered nodes
     try {
@@ -361,6 +360,7 @@ class WebComponentBase extends HTMLElementBase {
       element: this,
     });
 
+    template.settings = this.settings;
     template.isHydrating = true;
     template.initialize();
     this.addTemplateToEl(template);

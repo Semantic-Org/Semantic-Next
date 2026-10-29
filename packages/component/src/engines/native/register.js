@@ -2,7 +2,7 @@ import { getEngine, registerEngine, Renderer } from '@semantic-ui/renderer';
 
 import { IS_NATIVE_ENGINE } from '../../helpers/identity.js';
 import { createComponent } from './factory.js';
-import { mount, unmount } from './mount.js';
+import { mount } from './mount.js';
 
 // a bundle per entry carries its own copy of this module. a second copy adopts the engine
 // the first registered, so the server entry's serverRenderer lands on the object
@@ -11,7 +11,7 @@ import { mount, unmount } from './mount.js';
 const registered = getEngine('native');
 const NativeEngine = registered?.[IS_NATIVE_ENGINE]
   ? registered
-  : { [IS_NATIVE_ENGINE]: true, renderer: Renderer, factory: createComponent, mount, unmount };
+  : { [IS_NATIVE_ENGINE]: true, renderer: Renderer, factory: createComponent, mount };
 registerEngine('native', NativeEngine);
 
 export { NativeEngine };

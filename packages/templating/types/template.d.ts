@@ -1,7 +1,7 @@
 import { ASTNode } from '@semantic-ui/compiler';
 import { EventHandler, Query, QueryOptions } from '@semantic-ui/query';
 import { Matcher, Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
-import type { Engine } from '@semantic-ui/renderer';
+import type { DynamicRegion, Engine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 /**
@@ -682,6 +682,8 @@ export interface QuerySettings { // extends QueryOptions
 }
 
 export interface AttachSettings {
+  /** DynamicRegion owned by this template. Sets `startNode` and `endNode` to the region's anchors and clears the region on `detach()`. */
+  region?: DynamicRegion;
   /** The parent node to which the template's content should be attached. Defaults to renderRoot. */
   parentNode?: HTMLElement | ShadowRoot;
   /**  Optional start marker node for insertion. */
@@ -695,14 +697,19 @@ export interface AttachSettings {
  * node, or onto `document` if the target is detached at mount time.
  */
 export interface MountSettings {
-  /** Initial settings for the mounted component, overriding defaults and target HTML attributes. Undeclared keys are passed to the template as data. */
+  /** Initial settings values; overrides declared defaults (and target HTML attributes on element mounts). */
   settings?: Record<string, any>;
-  /** Initial data context merged into the template on mount. */
+  /** Initial data context values passed to the template, separate from settings. */
   data?: Record<string, any>;
   /** Unmounts the template when aborted. Throws if already aborted at mount time. */
   signal?: AbortSignal;
-  /** Reserved for future range mounting. Passing `anchor` currently throws `unsupportedAnchor`. */
-  anchor?: Node;
+  /**
+   * Mounts the template as a DOM range before `anchor` inside `target` (or appends when `null`).
+   * Leaves `target` unupgraded with its existing children intact so multiple ranges can share a container.
+   * Inside the mounted template, `el` is `target` and `findParent()` resolves the enclosing component if present.
+   * Throws `unsupportedTagName` if the template defines a custom element `tagName`.
+   */
+  anchor?: Node | null;
 }
 
 export class Template {
@@ -769,11 +776,13 @@ export class Template {
   html?: any;
   /** Optional start marker node for insertion. */
   startNode?: Node;
-  /** Optional end marker node for insertion.. */
+  /** Optional end marker node for insertion. */
   endNode?: Node;
+  /** The region holding a range mount's nodes and anchors, set by `mount` with `anchor`. */
+  region?: DynamicRegion;
   /** The reactive state of the template. */
   state: Record<string, Signal<any>>;
-  /** Settings proxy, present on subtemplates that declare `defaultSettings`. */
+  /** Reactive settings proxy when the template declares `defaultSettings`. */
   settings?: Record<string, any>;
   /** Shadow signals backing `settings`, created as each setting is read or written. */
   settingsVars?: Map<string, Signal<any>>;
@@ -903,7 +912,8 @@ export class Template {
    * prototype template clones and mounts a new instance; calling it on an instance mounts
    * that instance once. Plain elements are upgraded with the component's class while
    * mounted so `el.settings`, property writes, Query `.settings()`, `findParent`, and
-   * lifecycle events work the same as on a custom element.
+   * lifecycle events work the same as on a custom element. With `anchor` the target is a
+   * container instead and the template renders as a range before the anchor.
    * @param target - The element or shadow root to mount into
    * @param options - Mount options
    * @returns The mounted template instance
@@ -911,10 +921,15 @@ export class Template {
   mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 
   /**
-   * Unmounts a mounted template, destroying the instance, removing rendered DOM, and
-   * restoring the target element. Subsequent calls are no-ops.
+   * Unmounts a mounted template, destroying the instance, removing its rendered DOM,
+   * and restoring the target element if it was upgraded. Subsequent calls are no-ops.
    */
   unmount(): void;
+
+  /**
+   * Clears any owned `DynamicRegion` and resets attachment references (`renderRoot`, `parentNode`, `startNode`, `endNode`).
+   */
+  detach(): void;
 
   /**
    * Gets the combined data context, including settings, plugin data, data, state, and instance properties.

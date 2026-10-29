@@ -23,9 +23,9 @@ description: Create interactive playground examples. Use when creating examples 
 
 Read before creating examples:
 
-1. `ai/documentation/example/example-authoring.md` - Start with "Example Philosophy" section
-2. `ai/documentation/example/example-self-critique.md` - Quality checklist
-3. `ai/guides/css/tokens/token-usage.md` - Design tokens for CSS
+1. `ai/skills/docs/docs-examples-authoring.md` - Start with the "Philosophy" section
+2. `ai/skills/workflows/contributing/docs-examples-self-critique.md` - Quality checklist
+3. `ai/skills/usage/design-tokens.md` - Design tokens for CSS
 
 ## Output Locations
 

@@ -152,15 +152,17 @@ template.mount(target, options);
 #### Parameters
 | Name    | Type                  | Description                                        |
 |---------|-----------------------|----------------------------------------------------|
-| target  | Element \| ShadowRoot | Element or shadow root whose contents are replaced |
+| target  | Element \| ShadowRoot | Target element or shadow root (upgraded in place, or treated as a container when `anchor` is passed) |
 | options | Object                | Optional mount configuration                       |
 
 ##### Options
 
-| Name     | Type        | Description                                                |
-|----------|-------------|------------------------------------------------------------|
-| settings | Object      | Initial settings merged over declared defaults             |
-| signal   | AbortSignal | Unmounts the template automatically when the signal aborts |
+| Name     | Type          | Description                                                |
+|----------|---------------|------------------------------------------------------------|
+| settings | Object        | Initial settings merged over declared defaults             |
+| data     | Object        | Data for the template beyond its declared settings         |
+| anchor   | Node \| null  | Mounts the template as a range before `anchor` inside `target`, `null` to append. `target` is not upgraded and keeps its own children |
+| signal   | AbortSignal   | Unmounts the template automatically when the signal aborts |
 
 #### Returns
 `Template` - The mounted template instance.
@@ -182,9 +184,26 @@ const card = UserCard.mount(el, {
 el.name = 'Grace';
 ```
 
+#### Mounting at an anchor
+
+When `anchor` is passed, `target` is treated as a container and keeps its existing children. The template renders as a DOM range before `anchor` (or at the end of `target` when `anchor` is `null`), matching `insertBefore`. Because `target` is not upgraded, multiple templates can mount inside the same container alongside static markup. Inside the mounted template, `el` is the container and `findParent()` resolves the enclosing component if present (note that custom elements rendered inside the range walk the DOM past the unupgraded container to that enclosing component, not the range template).
+
+```javascript
+const main = document.querySelector('main');
+const marker = main.querySelector('.outlet');
+
+const page = About.mount(main, { anchor: marker, data: { route: '/about' } });
+// <main> <nav>…</nav> [about's nodes] .outlet <footer>…</footer> </main>
+
+page.update({ route: '/about/team' });
+page.unmount(); // removes exactly the nodes it placed, the marker survives
+```
+
+Components with a `tagName` cannot be mounted at an anchor — create the custom element and insert it before `anchor` directly.
+
 ### unmount
 
-Tears down a mounted template, fires `onDestroyed`, clears the rendered nodes from `target`, and restores `target`'s prototype and properties if it was upgraded in light DOM.
+Tears down a mounted template, fires `onDestroyed`, clears the rendered nodes from `target`, and restores `target`'s prototype and properties if it was upgraded in light DOM. A range mount removes only its own nodes.
 
 #### Syntax
 ```javascript

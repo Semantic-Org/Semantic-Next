@@ -26,6 +26,8 @@ async function mountTemplate({ template = '<div></div>', ...opts } = {}) {
     ...opts,
   });
   tpl.initialize();
+  // simulate mounted host element so updateScheduled is tracked
+  host.template = tpl;
   await tpl.attach(host);
   return {
     host,

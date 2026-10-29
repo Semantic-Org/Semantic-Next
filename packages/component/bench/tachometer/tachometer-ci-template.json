@@ -20,7 +20,9 @@
         { "mode": "performance", "entryName": "active-indicator-nested-200" },
         { "mode": "performance", "entryName": "subtemplate-helpers-light-100x500" },
         { "mode": "performance", "entryName": "subtemplate-helpers-heavy-100x500" },
-        { "mode": "performance", "entryName": "each-mount-1000" }
+        { "mode": "performance", "entryName": "each-mount-1000" },
+        { "mode": "performance", "entryName": "element-mount-1k" },
+        { "mode": "performance", "entryName": "range-mount-1k" }
       ]
     },
     {
@@ -38,7 +40,9 @@
         { "mode": "performance", "entryName": "active-indicator-nested-200" },
         { "mode": "performance", "entryName": "subtemplate-helpers-light-100x500" },
         { "mode": "performance", "entryName": "subtemplate-helpers-heavy-100x500" },
-        { "mode": "performance", "entryName": "each-mount-1000" }
+        { "mode": "performance", "entryName": "each-mount-1000" },
+        { "mode": "performance", "entryName": "element-mount-1k" },
+        { "mode": "performance", "entryName": "range-mount-1k" }
       ]
     }
   ]
