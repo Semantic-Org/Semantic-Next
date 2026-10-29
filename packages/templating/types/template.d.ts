@@ -697,15 +697,16 @@ export interface AttachSettings {
  * node, or onto `document` if the target is detached at mount time.
  */
 export interface MountSettings {
-  /** Initial settings for the mounted component, overriding defaults and target HTML attributes. Undeclared keys are passed to the template as data. */
+  /** Initial settings values; overrides declared defaults (and target HTML attributes on element mounts). */
   settings?: Record<string, any>;
-  /** Initial data context merged into the template on mount. */
+  /** Initial data context values passed to the template, separate from settings. */
   data?: Record<string, any>;
   /** Unmounts the template when aborted. Throws if already aborted at mount time. */
   signal?: AbortSignal;
   /**
    * Mounts the template as a DOM range before `anchor` inside `target` (or appends when `null`).
    * Leaves `target` unupgraded with its existing children intact so multiple ranges can share a container.
+   * Inside the mounted template, `el` is `target` and `findParent()` resolves the enclosing component if present.
    * Throws `unsupportedAnchor` if the template defines a custom element `tagName`.
    */
   anchor?: Node | null;

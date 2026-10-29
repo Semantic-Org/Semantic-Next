@@ -87,6 +87,7 @@ function mountRange(template, target, { data, anchor, signal }) {
   if (instance.css) {
     adoptStylesheet(instance.css, target);
   }
+  // set before initialize so detach() cleans up the region if initialize throws
   instance.region = region;
   try {
     instance.initialize();

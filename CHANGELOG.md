@@ -175,6 +175,7 @@ xx.xx.xxxx
 * **Bug** - Reflecting a circular object value drops the attribute instead of throwing mid-render
 * **Feature** - Added `renderToStaticMarkup(Component, data, { slots, text, css })`, rendering a component to its template's markup alone with no shadow root or hydration markers. Slots fill in place, nested components render flat, `text: true` renders plain text, `css: true` returns `{ html, css }` with the css of every component reached, and a definition without a `tagName` renders the same way
 * **Feature** - Added `@semantic-ui/component/server`, the server entry carrying `renderToString`, `renderToStaticMarkup` and `expandCustomElements`. The root entry stays the browser surface. A custom element tag inside `<script>`, `<style>`, `<textarea>` or `<title>` text stays text, and a render on the client renderer throws a named error, `Template.isServer = true` being the door
+* **Feature** - Added `Template.mount(target, { settings, data, anchor, signal })` and `Template.unmount()` (plus `el.mount()` / `el.unmount()` and `Template.update(data)` / `el.update(data)`) — mounts a tagless template directly onto a DOM element or shadow root by layering the component prototype for the lifetime of the mount, or as a DOM range before `anchor` inside an unupgraded container (`anchor: null` to append)
 
 ### Behaviors
 * **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup

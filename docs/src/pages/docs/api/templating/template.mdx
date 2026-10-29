@@ -186,7 +186,7 @@ el.name = 'Grace';
 
 #### Mounting at an anchor
 
-When `anchor` is passed, `target` is treated as a container and keeps its existing children. The template renders as a DOM range before `anchor` (or at the end of `target` when `anchor` is `null`), matching `insertBefore`. Because `target` is not upgraded, multiple templates can mount inside the same container alongside static markup.
+When `anchor` is passed, `target` is treated as a container and keeps its existing children. The template renders as a DOM range before `anchor` (or at the end of `target` when `anchor` is `null`), matching `insertBefore`. Because `target` is not upgraded, multiple templates can mount inside the same container alongside static markup. Inside the mounted template, `el` is the container and `findParent()` resolves the enclosing component if present (note that custom elements rendered inside the range walk the DOM past the unupgraded container to that enclosing component, not the range template).
 
 ```javascript
 const main = document.querySelector('main');
