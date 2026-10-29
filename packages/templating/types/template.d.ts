@@ -949,9 +949,16 @@ export class Template {
   overlaySettings(context: DataContext): DataContext;
 
   /**
-   * Adopts the template's stylesheet to the renderRoot (if using a ShadowRoot).
+   * Adopts the template's stylesheet onto `renderRoot` (or its enclosing root node),
+   * refcounted per root and CSS hash across clones.
    */
   adoptStylesheet(): void;
+
+  /**
+   * Releases this template's reference to its adopted stylesheet on `styleRoot`,
+   * removing the sheet when the last instance using it detaches.
+   */
+  removeStylesheet(): void;
 
   /**
    * Creates a clone of the template with optional overrides.

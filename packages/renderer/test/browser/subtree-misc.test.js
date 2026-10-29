@@ -933,5 +933,86 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toBe('<o><i>||passed</i></o>');
       });
     });
+
+    /*******************************
+       Subtemplate CSS Lifecycle
+    *******************************/
+
+    describe('subtemplate css lifecycle', () => {
+      it('adopts a dynamic subtemplate stylesheet once across rows, keeps it while siblings remain, and removes it on swap', async () => {
+        const tag = uniqueTag();
+        const RowA = defineComponent({
+          renderingEngine: engine,
+          template: '<td class="cell">{name}</td>',
+          css: '.cell { color: rgb(10, 20, 30); font-style: italic; }',
+        });
+        const RowB = defineComponent({
+          renderingEngine: engine,
+          template: '<td class="cell">{name}</td>',
+          css: '.cell { color: rgb(40, 50, 60); }',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          css: 'table { border-collapse: collapse; }',
+          template:
+            '<table><tbody>{#each row in rows}<tr>{>template name=rowTemplate data=row}</tr>{/each}</tbody></table>',
+          defaultSettings: {
+            rowTemplate: RowA,
+            rows: [{ name: 'one' }, { name: 'two' }],
+          },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        const cellStyle = () => getComputedStyle(el.shadowRoot.querySelector('.cell'));
+        expect(el.shadowRoot.adoptedStyleSheets.length).toBe(2);
+        expect(cellStyle().color).toBe('rgb(10, 20, 30)');
+        expect(cellStyle().fontStyle).toBe('italic');
+
+        // removing one row leaves the sibling row's stylesheet adopted
+        el.rows = [{ name: 'one' }];
+        await waitForUpdate(el);
+        expect(el.shadowRoot.adoptedStyleSheets.length).toBe(2);
+        expect(cellStyle().color).toBe('rgb(10, 20, 30)');
+
+        // swapping to RowB removes RowA's stylesheet (including font-style: italic) and adopts RowB's
+        el.rowTemplate = RowB;
+        await waitForUpdate(el);
+        expect(el.shadowRoot.adoptedStyleSheets.length).toBe(2);
+        expect(cellStyle().color).toBe('rgb(40, 50, 60)');
+        expect(cellStyle().fontStyle).toBe('normal');
+
+        // swapping back to RowA removes RowB's stylesheet and re-adopts RowA's cached sheet
+        el.rowTemplate = RowA;
+        await waitForUpdate(el);
+        expect(el.shadowRoot.adoptedStyleSheets.length).toBe(2);
+        expect(cellStyle().color).toBe('rgb(10, 20, 30)');
+        expect(cellStyle().fontStyle).toBe('italic');
+      });
+
+      it('does not adopt a second stylesheet for a static subtemplate in subTemplates', async () => {
+        const tag = uniqueTag();
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span class="child">ok</span>',
+          css: '.child { color: rgb(70, 80, 90); }',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          css: ':host { display: block; }',
+          template: '{>child}',
+          subTemplates: { child },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(el.shadowRoot.adoptedStyleSheets.length).toBe(1);
+        expect(getComputedStyle(el.shadowRoot.querySelector('.child')).color).toBe('rgb(70, 80, 90)');
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

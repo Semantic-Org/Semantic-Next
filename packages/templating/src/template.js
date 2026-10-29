@@ -25,6 +25,7 @@ import {
   generateId,
   get,
   getKeyFromEvent,
+  hashCode,
   inArray,
   isClient,
   isDevelopment,
@@ -429,6 +430,9 @@ export const Template = class Template {
       this.region.clear();
       this.region.anchor.remove();
     }
+    if (this.styleRoot) {
+      this.removeStylesheet();
+    }
     this.region = undefined;
     this.renderRoot = undefined;
     this.parentNode = undefined;
@@ -492,10 +496,52 @@ export const Template = class Template {
   }
 
   adoptStylesheet() {
-    if (!this.css || !this.renderRoot?.adoptedStyleSheets) {
+    if (isServer || !this.css || !this.renderRoot || this.styleRoot) {
       return;
     }
-    adoptStylesheet(this.css, this.renderRoot);
+    const source = this.prototypeTemplate || this;
+    const hash = (source.cssHash ??= hashCode(this.css));
+    let styleRoot = this.renderRoot;
+    if (!styleRoot.adoptedStyleSheets && styleRoot.getRootNode) {
+      styleRoot = styleRoot.getRootNode();
+    }
+    if (!styleRoot.adoptedStyleSheets) {
+      styleRoot = document;
+    }
+    this.styleRoot = styleRoot;
+    const counts = (styleRoot.cssCounts ??= new Map());
+    const count = counts.get(hash) || 0;
+    if (count > 0) {
+      counts.set(hash, count + 1);
+      return;
+    }
+    // preserve a stylesheet that was already adopted outside template lifecycle
+    const alreadyAdopted = Boolean(styleRoot.cssHashes?.has(hash));
+    counts.set(hash, alreadyAdopted ? 2 : 1);
+    if (!alreadyAdopted) {
+      adoptStylesheet(this.css, styleRoot, { hash });
+    }
+  }
+
+  removeStylesheet() {
+    const styleRoot = this.styleRoot;
+    this.styleRoot = undefined;
+    const counts = styleRoot?.cssCounts;
+    const source = this.prototypeTemplate || this;
+    const hash = source.cssHash;
+    if (!counts || hash === undefined) {
+      return;
+    }
+    const count = (counts.get(hash) || 0) - 1;
+    if (count > 0) {
+      counts.set(hash, count);
+      return;
+    }
+    counts.delete(hash);
+    styleRoot.cssHashes?.delete(hash);
+    if (styleRoot.adoptedStyleSheets) {
+      remove(styleRoot.adoptedStyleSheets, (sheet) => sheet.id === hash);
+    }
   }
 
   initializeParams() {
@@ -598,6 +644,7 @@ export const Template = class Template {
       parentTemplate: this.parentTemplate,
       onDestroyed: this.onDestroyedCallback,
       createComponent: this.createComponent,
+      attachStyles: this.attachStyles,
     };
     const templateSettings = {
       ...cloneDefaults,
