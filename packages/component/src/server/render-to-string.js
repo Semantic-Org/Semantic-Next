@@ -61,7 +61,7 @@ function serializeAttrs(attrs, resolvedProperties) {
 
   each(attrs, (value, key) => {
     if (value === undefined || value === null) { return; }
-    if (isFunction(value) || isClassInstance(value)) { return; }
+    if (isFunction(value)) { return; }
 
     const propConfig = resolvedProperties[key];
 
@@ -82,6 +82,8 @@ function serializeAttrs(attrs, resolvedProperties) {
       }
       return;
     }
+
+    if (isClassInstance(value)) { return; }
 
     // Default serialization for types without explicit converters
     const attrName = camelToKebab(key);

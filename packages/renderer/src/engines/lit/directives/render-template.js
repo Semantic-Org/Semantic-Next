@@ -63,6 +63,7 @@ export class RenderTemplateDirective extends AsyncDirective {
 
       // this is an empty template
       if (!template || template?.ast.length == 0) {
+        this.setValue(nothing);
         return;
       }
 
@@ -129,6 +130,8 @@ export class RenderTemplateDirective extends AsyncDirective {
 
     if (this.template) {
       this.template.onDestroyed();
+      this.template = null;
+      this.templateId = null;
     }
 
     // store template id
@@ -183,6 +186,8 @@ export class RenderTemplateDirective extends AsyncDirective {
     }
     if (this.template) {
       this.template.onDestroyed();
+      this.template = null;
+      this.templateId = null;
     }
   }
 }

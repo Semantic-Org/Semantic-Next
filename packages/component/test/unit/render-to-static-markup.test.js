@@ -309,4 +309,29 @@ describe('defaults on the server', () => {
     const staticResult = renderToStaticMarkup(DynamicList, { rowTemplate: RowB }, { css: true });
     expect(staticResult.css).toBe('table { width: 100%; }\n.row-b { color: red; }');
   });
+
+  it('serializes a class-valued setting through its declared toAttribute converter', () => {
+    class Stamp {
+      constructor(iso) {
+        this.iso = iso;
+      }
+    }
+    const Stamped = defineComponent({
+      tagName: 'ssr-stamped',
+      template: '<time>{when.iso}</time>',
+      defaultSettings: {
+        when: {
+          type: Object,
+          default: null,
+          converter: {
+            fromAttribute: (value) => new Stamp(value),
+            toAttribute: (value) => value?.iso ?? null,
+          },
+        },
+      },
+    });
+    const html = renderToString(Stamped, { when: new Stamp('2026-10-29') });
+    expect(html).toContain('when="2026-10-29"');
+    expect(html).toContain('2026-10-29</time>');
+  });
 });

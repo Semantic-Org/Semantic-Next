@@ -1013,6 +1013,36 @@ RENDERING_ENGINES.forEach(engine => {
         expect(el.shadowRoot.adoptedStyleSheets.length).toBe(1);
         expect(getComputedStyle(el.shadowRoot.querySelector('.child')).color).toBe('rgb(70, 80, 90)');
       });
+
+      it('clears the rows and releases their stylesheet when the template expression resolves to nothing', async () => {
+        const tag = uniqueTag();
+        const Row = defineComponent({
+          renderingEngine: engine,
+          template: '<td class="cell">{name}</td>',
+          css: '.cell { color: rgb(90, 100, 110); }',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          css: 'table { border-collapse: collapse; }',
+          template:
+            '<table><tbody>{#each row in rows}<tr>{>template name=rowTemplate data=row}</tr>{/each}</tbody></table>',
+          defaultState: { rowTemplate: Row },
+          defaultSettings: {
+            rows: [{ name: 'one' }, { name: 'two' }],
+          },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+        expect(el.shadowRoot.querySelectorAll('.cell').length).toBe(2);
+        expect(el.shadowRoot.adoptedStyleSheets.length).toBe(2);
+
+        el.template.state.rowTemplate.set(null);
+        await waitForUpdate(el);
+        expect(el.shadowRoot.querySelectorAll('.cell').length).toBe(0);
+        expect(el.shadowRoot.adoptedStyleSheets.length).toBe(1);
+      });
     });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

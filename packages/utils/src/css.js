@@ -629,6 +629,8 @@ export const adoptStylesheet = (css, adoptedElement, {
   if (!adoptedElement.cssHashes) {
     adoptedElement.cssHashes = new Set();
   }
+  adoptedElement.cssCounts ??= new Map();
+  adoptedElement.cssCounts.set(hash, (adoptedElement.cssCounts.get(hash) || 0) + 1);
   // already added
   if (adoptedElement.cssHashes.has(hash)) {
     return;

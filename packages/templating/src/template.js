@@ -500,7 +500,10 @@ export const Template = class Template {
       return;
     }
     const source = this.prototypeTemplate || this;
-    const hash = (source.cssHash ??= hashCode(this.css));
+    const hash = (source.css === this.css)
+      ? (source.cssHash ??= hashCode(this.css))
+      : (this.cssHash ??= hashCode(this.css));
+    this.cssHash = hash;
     let styleRoot = this.renderRoot;
     if (!styleRoot.adoptedStyleSheets && styleRoot.getRootNode) {
       styleRoot = styleRoot.getRootNode();
@@ -509,26 +512,14 @@ export const Template = class Template {
       styleRoot = document;
     }
     this.styleRoot = styleRoot;
-    const counts = (styleRoot.cssCounts ??= new Map());
-    const count = counts.get(hash) || 0;
-    if (count > 0) {
-      counts.set(hash, count + 1);
-      return;
-    }
-    // preserve a stylesheet that was already adopted outside template lifecycle
-    const alreadyAdopted = Boolean(styleRoot.cssHashes?.has(hash));
-    counts.set(hash, alreadyAdopted ? 2 : 1);
-    if (!alreadyAdopted) {
-      adoptStylesheet(this.css, styleRoot, { hash });
-    }
+    adoptStylesheet(this.css, styleRoot, { hash });
   }
 
   removeStylesheet() {
     const styleRoot = this.styleRoot;
     this.styleRoot = undefined;
     const counts = styleRoot?.cssCounts;
-    const source = this.prototypeTemplate || this;
-    const hash = source.cssHash;
+    const hash = this.cssHash ?? (this.prototypeTemplate || this).cssHash;
     if (!counts || hash === undefined) {
       return;
     }

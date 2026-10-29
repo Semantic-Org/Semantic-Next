@@ -22,11 +22,21 @@ function restorePropValue(value, existingValue) {
   ) {
     if (
       existingValue instanceof Template
-      && existingValue.template === value.template
-      && existingValue.css === value.css
+      && (
+        existingValue.id === value.id
+        || (Boolean(value.template) && existingValue.template === value.template && existingValue.css === value.css)
+      )
     ) {
       return existingValue;
     }
+    const subTemplates = value.subTemplates && typeof value.subTemplates === 'object'
+      ? Object.fromEntries(
+        Object.entries(value.subTemplates).map(([name, sub]) => [
+          name,
+          restorePropValue(sub, existingValue?.subTemplates?.[name]),
+        ]),
+      )
+      : undefined;
     return new Template({
       templateName: value.templateName,
       ast: value.ast,
@@ -34,6 +44,7 @@ function restorePropValue(value, existingValue) {
       css: value.css,
       defaultState: value.defaultState,
       defaultSettings: value.defaultSettings,
+      subTemplates,
       renderingEngine: value.renderingEngine,
       isPrototype: true,
     });

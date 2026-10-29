@@ -700,6 +700,37 @@ describe('SSR hydration — subtemplates', () => {
     expect(getComputedStyle(spanAfter).color).toBe('rgb(210, 45, 12)');
     expect(el.shadowRoot.adoptedStyleSheets.length).toBe(2);
   });
+
+  it('attaches runtime subtemplate css and events when the subtemplate rendered empty on the server', async () => {
+    let clicks = 0;
+    const row = defineComponent({
+      renderingEngine: 'native',
+      template: '{#if visible}<span class="dyn-row">{label}</span>{/if}',
+      css: '.dyn-row { color: rgb(33, 144, 55); }',
+      events: {
+        'click .dyn-row'() {
+          clicks++;
+        },
+      },
+    });
+
+    const el = await ssrAndHydrate({
+      template: '<div>{>template name=rowTemplate data=ctx}</div>',
+      defaultSettings: { rowTemplate: row },
+      defaultState: { ctx: { label: 'hello', visible: false } },
+    });
+    expect(el.shadowRoot.querySelector('.dyn-row')).toBeNull();
+
+    const updated = $(el).onNext('updated');
+    el.template.state.ctx.set({ label: 'hello', visible: true });
+    await updated;
+
+    const span = el.shadowRoot.querySelector('.dyn-row');
+    expect(span).not.toBeNull();
+    expect(getComputedStyle(span).color).toBe('rgb(33, 144, 55)');
+    span.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(clicks).toBe(1);
+  });
 });
 
 /*******************************

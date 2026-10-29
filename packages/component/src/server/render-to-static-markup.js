@@ -29,8 +29,8 @@ export function renderToStaticMarkup(definition, attrs = {}, { slots = null, tex
   return { html, css: filterEmpty(Array.from(styles.values())).join('\n') };
 }
 
-// one flat render and the css of every definition it reached, keyed by definition so a
-// component used twice counts once, in document order so the css cascades as written
+// one flat render and the css of every definition or runtime subtemplate it reached,
+// keyed so a definition or stylesheet used twice counts once, parent before children
 function renderFlat(definition, attrs, { slots, text, depth = 0 }) {
   const { template, css, styles: componentStyles } = createServerTemplate(definition, attrs, {
     renderOptions: { markers: false, text, slots: slots || {} },

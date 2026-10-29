@@ -786,8 +786,10 @@ export class Template {
   settings?: Record<string, any>;
   /** Shadow signals backing `settings`, created as each setting is read or written. */
   settingsVars?: Map<string, Signal<any>>;
-  /** The constructed stylesheet for the template (if `attachStyles` is true). */
-  stylesheet?: CSSStyleSheet;
+  /** Cached hash of `css` used for stylesheet deduplication and refcounting. */
+  cssHash?: number;
+  /** The root (`ShadowRoot` or `Document`) where this instance adopted its stylesheet. */
+  styleRoot?: Document | ShadowRoot;
   /** Sub-templates used within the template. */
   subTemplates?: Record<string, Template>;
   /** The name of the template. */

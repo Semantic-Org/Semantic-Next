@@ -447,8 +447,8 @@ const templateBlock = defineBlock({
     self.currentInstance.markRendered();
     if (region.ownedNodes.length > 0) {
       stampScope(region, self.currentInstance.data);
-      attachToRenderRoot(self.currentInstance, region, self, { startNode: region.ownedNodes[0] });
     }
+    attachToRenderRoot(self.currentInstance, region, self, { startNode: region.ownedNodes[0] });
   },
 
   update({ node, data, region, scope, renderAST, self, isSVG }) {

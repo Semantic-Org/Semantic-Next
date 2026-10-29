@@ -1,5 +1,5 @@
 import { DynamicRegion } from '@semantic-ui/renderer';
-import { adoptStylesheet, createErrors, isDevelopment, isServer, noop } from '@semantic-ui/utils';
+import { createErrors, isDevelopment, isServer, noop } from '@semantic-ui/utils';
 
 import { getProperties } from '../../component-helpers.js';
 import { createComponent } from './factory.js';
@@ -84,9 +84,7 @@ function mountRange(template, target, { data, anchor, signal }) {
   if (host) {
     instance.setParent(host.template);
   }
-  if (instance.css) {
-    adoptStylesheet(instance.css, target);
-  }
+  instance.attachStyles = Boolean(instance.css);
   // set before initialize so detach() cleans up the region if initialize throws
   instance.region = region;
   try {
