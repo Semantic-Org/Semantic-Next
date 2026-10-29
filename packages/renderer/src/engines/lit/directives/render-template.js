@@ -63,6 +63,7 @@ export class RenderTemplateDirective extends AsyncDirective {
 
       // this is an empty template
       if (!template || template?.ast.length == 0) {
+        this.setValue(nothing);
         return;
       }
 
@@ -97,6 +98,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     // in the case of a string we will pull from subtemplates
     let templateName;
     let template;
+    let attachStyles = false;
 
     const templateOrName = this.getTemplate();
     // find template to render
@@ -108,10 +110,16 @@ export class RenderTemplateDirective extends AsyncDirective {
       // support passing in full templates using expressions
       template = templateOrName;
       templateName = template.templateName;
+      attachStyles = Boolean(template.css);
     }
 
     // make sure we have something to create
     if (!template) {
+      if (this.template) {
+        this.template.onDestroyed();
+        this.template = null;
+        this.templateId = null;
+      }
       return false;
     }
 
@@ -120,12 +128,19 @@ export class RenderTemplateDirective extends AsyncDirective {
       return;
     }
 
+    if (this.template) {
+      this.template.onDestroyed();
+      this.template = null;
+      this.templateId = null;
+    }
+
     // store template id
     this.templateId = template.id;
     this.template = template.clone({
       templateName,
       data: this.unpackData(this.data),
       parentTemplate: this.parentTemplate,
+      attachStyles: attachStyles || template.attachStyles,
     });
   }
 
@@ -171,6 +186,8 @@ export class RenderTemplateDirective extends AsyncDirective {
     }
     if (this.template) {
       this.template.onDestroyed();
+      this.template = null;
+      this.templateId = null;
     }
   }
 }

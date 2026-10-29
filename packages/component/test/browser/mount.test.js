@@ -1021,6 +1021,29 @@ describe('Template.mount', () => {
       page.unmount();
     });
 
+    it('releases its stylesheet on unmount and adopts it again on the next mount', () => {
+      const { main, footer } = mainWith();
+      const Page = defineComponent({
+        template: '<p class="row">{label}</p>',
+        css: '.row { color: rgb(21, 22, 23); }',
+        defaultSettings: { label: 'a' },
+      });
+      const sheetsBefore = document.adoptedStyleSheets.length;
+
+      const page = Page.mount(main, { anchor: footer });
+      expect(document.adoptedStyleSheets.length).toBe(sheetsBefore + 1);
+      expect(getComputedStyle(main.querySelector('.row')).color).toBe('rgb(21, 22, 23)');
+
+      page.unmount();
+      expect(document.adoptedStyleSheets.length).toBe(sheetsBefore);
+
+      const again = Page.mount(main, { anchor: footer });
+      expect(document.adoptedStyleSheets.length).toBe(sheetsBefore + 1);
+      expect(getComputedStyle(main.querySelector('.row')).color).toBe('rgb(21, 22, 23)');
+      again.unmount();
+      expect(document.adoptedStyleSheets.length).toBe(sheetsBefore);
+    });
+
     it('appends with a null anchor', () => {
       const { main } = mainWith();
       definePage().mount(main, { anchor: null });

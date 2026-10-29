@@ -196,12 +196,16 @@ function detectTemplateType({ node, data, self }) {
 function resolveSubtemplate(nameExpr, data, self) {
   const templateOrName = self.evaluator.lookupExpressionValue(nameExpr, data);
   if (isString(templateOrName)) {
-    return { template: self.subTemplates?.[templateOrName], templateName: templateOrName };
+    return { template: self.subTemplates?.[templateOrName], templateName: templateOrName, attachStyles: false };
   }
   if (templateOrName instanceof Template) {
-    return { template: templateOrName, templateName: templateOrName.templateName };
+    return {
+      template: templateOrName,
+      templateName: templateOrName.templateName,
+      attachStyles: Boolean(templateOrName.css),
+    };
   }
-  return { template: null, templateName: null };
+  return { template: null, templateName: null, attachStyles: false };
 }
 
 function resolveSnippet(nameExpr, data, self) {
@@ -250,12 +254,13 @@ function stampScope(region, data) {
 // source-signal deps on the parent's outer Reaction. Reads from later
 // binding-Reaction context still register normally — the wrap only
 // silences the setup path.
-function cloneInstance({ template, templateName, templateData, self, parentData, node, scope }) {
+function cloneInstance({ template, templateName, templateData, attachStyles, self, parentData, node, scope }) {
   const instance = template.clone({
     templateName,
     data: templateData,
     parentTemplate: self.parentTemplate,
     renderingEngine: 'native',
+    attachStyles: attachStyles || template.attachStyles,
   });
   if (self.parentTemplate?.element) { instance.setElement(self.parentTemplate.element); }
   if (self.parentTemplate) { instance.setParent(self.parentTemplate); }
@@ -375,7 +380,7 @@ const templateBlock = defineBlock({
       return;
     }
 
-    const { template, templateName } = resolveSubtemplate(node.name, data, self);
+    const { template, templateName, attachStyles } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
 
@@ -384,6 +389,7 @@ const templateBlock = defineBlock({
       template,
       templateName,
       templateData: blobData,
+      attachStyles,
       self,
       parentData: data,
       node,
@@ -411,7 +417,7 @@ const templateBlock = defineBlock({
       return;
     }
 
-    const { template, templateName } = resolveSubtemplate(node.name, data, self);
+    const { template, templateName, attachStyles } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
     if (!template) { return; }
 
@@ -420,6 +426,7 @@ const templateBlock = defineBlock({
       template,
       templateName,
       templateData: blobData,
+      attachStyles,
       self,
       parentData: data,
       node,
@@ -440,8 +447,8 @@ const templateBlock = defineBlock({
     self.currentInstance.markRendered();
     if (region.ownedNodes.length > 0) {
       stampScope(region, self.currentInstance.data);
-      attachToRenderRoot(self.currentInstance, region, self, { startNode: region.ownedNodes[0] });
     }
+    attachToRenderRoot(self.currentInstance, region, self, { startNode: region.ownedNodes[0] });
   },
 
   update({ node, data, region, scope, renderAST, self, isSVG }) {
@@ -465,7 +472,7 @@ const templateBlock = defineBlock({
       return;
     }
 
-    const { template, templateName } = resolveSubtemplate(node.name, data, self);
+    const { template, templateName, attachStyles } = resolveSubtemplate(node.name, data, self);
     const blobData = unpackBlobData(node, data, self.evaluator);
 
     if (!template) {
@@ -481,6 +488,7 @@ const templateBlock = defineBlock({
         template,
         templateName,
         templateData: blobData,
+        attachStyles,
         self,
         parentData: data,
         node,

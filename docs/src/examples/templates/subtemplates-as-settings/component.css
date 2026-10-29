@@ -9,8 +9,3 @@ th {
   font-weight: var(--bold);
   background-color: var(--standard-5);
 }
-td {
-  border: var(--solid-border);
-  padding: 8px 10px;
-  border-collapse: collapse;
-}

@@ -1,3 +1,6 @@
+tr:nth-child(even) {
+  background-color: var(--red-5);
+}
 td {
   border: var(--solid-border);
   padding: 8px 10px;

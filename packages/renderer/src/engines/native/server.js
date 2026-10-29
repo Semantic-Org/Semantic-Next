@@ -194,10 +194,11 @@ export class ServerRenderer {
     this.isSVG = isSVG;
     this.protectedKeys = protectedKeys;
     // the server forms set these on the template before initialize, the web form leaves them unset
-    const { markers = true, text = false, slots = null } = template?.renderOptions || {};
+    const { markers = true, text = false, slots = null, styles = null } = template?.renderOptions || {};
     this.markers = markers;
     this.text = text;
     this.slots = slots;
+    this.styles = styles;
 
     this.evaluator = new ExpressionEvaluator({
       data: this.data,
@@ -656,6 +657,9 @@ export class ServerRenderer {
       }
       else {
         template = templateName;
+        if (template?.css) {
+          this.styles?.add(template.css);
+        }
       }
 
       if (template) {
@@ -680,7 +684,7 @@ export class ServerRenderer {
       const instance = template.clone({ data });
       if (this.template?.element) { instance.setElement(this.template.element); }
       if (this.template) { instance.setParent(this.template); }
-      instance.renderOptions = { markers: this.markers, text: this.text, slots: this.slots };
+      instance.renderOptions = { markers: this.markers, text: this.text, slots: this.slots, styles: this.styles };
       instance.initialize();
       return instance.render();
     }

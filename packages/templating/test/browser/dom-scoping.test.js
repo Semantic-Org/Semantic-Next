@@ -20,6 +20,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { Renderer, ServerRenderer } from '@semantic-ui/renderer';
+import { adoptStylesheet } from '@semantic-ui/utils';
 
 import { Template } from '../../src/template.js';
 
@@ -582,6 +583,113 @@ describe('Template — DOM scoping (shadow only)', () => {
       expect(shadow.adoptedStyleSheets.length).toBe(2);
       expect(getComputedStyle(el1).display).toBe('grid');
       expect(getComputedStyle(el2).display).toBe('flex');
+    });
+
+    it('refcounts clones on the same root, caches cssHash on the prototype, and removes the sheet when the last clone destroys', () => {
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      document.body.appendChild(host);
+      cleanups.push(() => host.remove());
+
+      const proto = new Template({
+        template: '<div class="row"></div>',
+        css: '.row { color: rgb(11, 22, 33); }',
+        isPrototype: true,
+        attachStyles: true,
+        renderingEngine: realEngine,
+      });
+
+      const a = proto.clone({ element: host });
+      const b = proto.clone({ element: host });
+      a.initialize();
+      a.attach(shadow);
+      b.initialize();
+      b.attach(shadow);
+
+      expect(proto.cssHash).toBeDefined();
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+
+      a.onDestroyed();
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+
+      b.onDestroyed();
+      expect(shadow.adoptedStyleSheets.length).toBe(0);
+    });
+
+    it('preserves a stylesheet that was already adopted outside template lifecycle when the template destroys', () => {
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      document.body.appendChild(host);
+      cleanups.push(() => host.remove());
+
+      const css = '.shared { color: rgb(44, 55, 66); }';
+      adoptStylesheet(css, shadow);
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+
+      const tpl = new Template({
+        template: '<div class="shared"></div>',
+        css,
+        attachStyles: true,
+        renderingEngine: realEngine,
+        element: host,
+      });
+      tpl.initialize();
+      tpl.attach(shadow);
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+
+      tpl.onDestroyed();
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+    });
+
+    it('hashes a clone that overrides css by its own css rather than the prototype cache', () => {
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      document.body.appendChild(host);
+      cleanups.push(() => host.remove());
+
+      const proto = new Template({
+        template: '<div class="row"></div>',
+        css: '.row { color: rgb(1, 2, 3); }',
+        isPrototype: true,
+        attachStyles: true,
+        renderingEngine: realEngine,
+      });
+      const a = proto.clone({ element: host });
+      const b = proto.clone({ element: host, css: '.row { font-style: italic; }' });
+      a.initialize();
+      a.attach(shadow);
+      b.initialize();
+      b.attach(shadow);
+      expect(shadow.adoptedStyleSheets.length).toBe(2);
+
+      b.onDestroyed();
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+      expect(shadow.adoptedStyleSheets[0].cssRules[0].cssText).toContain('rgb(1, 2, 3)');
+    });
+
+    it('keeps a stylesheet adopted outside template lifecycle after a template holding the same css destroys', () => {
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      document.body.appendChild(host);
+      cleanups.push(() => host.remove());
+
+      const css = '.shared-late { color: rgb(77, 88, 99); }';
+      const tpl = new Template({
+        template: '<div class="shared-late"></div>',
+        css,
+        attachStyles: true,
+        renderingEngine: realEngine,
+        element: host,
+      });
+      tpl.initialize();
+      tpl.attach(shadow);
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+
+      adoptStylesheet(css, shadow);
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
+
+      tpl.onDestroyed();
+      expect(shadow.adoptedStyleSheets.length).toBe(1);
     });
   });
 });
