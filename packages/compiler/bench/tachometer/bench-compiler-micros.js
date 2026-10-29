@@ -187,7 +187,7 @@ const kitchenSinkTemplate = `<article class="card">
 *******************************/
 
 // parseTemplateString is the shared parser for {>name k=v ...} and the
-// verbose {>template name=... reactiveData={...}} forms — covers both
+// verbose {>template name=... data={...}} forms — covers both
 // snippet calls and subtemplate calls. Mix of shapes per iter so V8
 // sees the full distribution: standard shorthand with multiple data
 // args, standard shorthand with quoted strings, name-only, and verbose
@@ -199,7 +199,7 @@ const kitchenSinkTemplate = `<article class="card">
     'listItem id=item.id title=item.title completed=item.completed author=item.author date=item.date',
     "card name=card variant='primary' size='large' disabled=isBusy",
     'simpleItem',
-    "template name=fancyCard reactiveData={a: 'one', b: two, c: 'three'}",
+    "template name=fancyCard data={a: 'one', b: two, c: 'three'}",
   ];
 
   // purpose: Parses four representative subtemplate-call shapes 5000 times each. Snippet args extraction.

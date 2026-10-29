@@ -55,7 +55,7 @@ const reactiveDataChild = defineComponent({
 defineComponent({
   tagName: 'bench-reactivedata',
   renderingEngine: 'native',
-  template: `{#each i in idxs}{> template name='child' reactiveData={label: getLabel, status: getStatus}}{/each}`,
+  template: `{#each i in idxs}{> template name='child' data={label: getLabel, status: getStatus}}{/each}`,
   subTemplates: { child: reactiveDataChild },
   defaultState: { labelVal: 'init' },
   createComponent: ({ state }) => ({
