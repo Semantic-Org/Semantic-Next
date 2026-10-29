@@ -277,4 +277,36 @@ describe('defaults on the server', () => {
       '<i>300 5</i>',
     );
   });
+
+  it('collects css from runtime subtemplates passed via settings or attrs without serializing Template attrs', () => {
+    const RowA = defineComponent({
+      template: '<tr><td>{name}</td></tr>',
+      css: '.row-a { color: blue; }',
+    });
+    const RowB = defineComponent({
+      template: '<tr><td>{name}</td></tr>',
+      css: '.row-b { color: red; }',
+    });
+    const DynamicList = defineComponent({
+      tagName: 'ssr-dynamic-list',
+      template: '<table>{#each item in rows}{> template name=rowTemplate data=item}{/each}</table>',
+      css: 'table { width: 100%; }',
+      defaultSettings: {
+        rowTemplate: RowA,
+        rows: [{ name: 'Alice' }, { name: 'Bob' }],
+      },
+    });
+
+    const dsdDefault = renderToString(DynamicList);
+    expect(dsdDefault).toContain('<style>table { width: 100%; }\n.row-a { color: blue; }</style>');
+    expect(dsdDefault).not.toContain('row-template=');
+
+    const dsdOverride = renderToString(DynamicList, { rowTemplate: RowB });
+    expect(dsdOverride).toContain('<style>table { width: 100%; }\n.row-b { color: red; }</style>');
+    expect(dsdOverride).not.toContain('.row-a');
+    expect(dsdOverride).not.toContain('row-template=');
+
+    const staticResult = renderToStaticMarkup(DynamicList, { rowTemplate: RowB }, { css: true });
+    expect(staticResult.css).toBe('table { width: 100%; }\n.row-b { color: red; }');
+  });
 });

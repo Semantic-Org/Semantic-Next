@@ -1,4 +1,4 @@
-import { camelToKebab, each, escapeHTML, isFunction } from '@semantic-ui/utils';
+import { camelToKebab, each, escapeHTML, isClassInstance, isFunction } from '@semantic-ui/utils';
 import { expandCustomElements } from './expand-custom-elements.js';
 import { createServerTemplate } from './server-template.js';
 
@@ -23,9 +23,10 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   if (!tagName) {
     throw new Error('renderToString requires a component with a tagName');
   }
-  const { template, normalizedAttrs, resolvedProperties, css } = createServerTemplate(ComponentClass, attrs);
+  const { template, normalizedAttrs, resolvedProperties, styles } = createServerTemplate(ComponentClass, attrs);
 
   let html = template.render();
+  const css = [...styles].join('\n');
 
   // Phase 2: expand nested custom elements recursively
   html = expandCustomElements(html, { depth, hydrate, renderFn: renderToString });
@@ -60,7 +61,7 @@ function serializeAttrs(attrs, resolvedProperties) {
 
   each(attrs, (value, key) => {
     if (value === undefined || value === null) { return; }
-    if (isFunction(value)) { return; }
+    if (isFunction(value) || isClassInstance(value)) { return; }
 
     const propConfig = resolvedProperties[key];
 

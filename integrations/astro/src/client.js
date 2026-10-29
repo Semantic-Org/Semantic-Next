@@ -10,6 +10,37 @@
   2. client:load — forward complex props after self-hydration
 */
 
+import { Template } from '@semantic-ui/templating';
+
+function restorePropValue(value, existingValue) {
+  if (
+    value
+    && typeof value === 'object'
+    && !(value instanceof Template)
+    && value.isPrototype
+    && Array.isArray(value.ast)
+  ) {
+    if (
+      existingValue instanceof Template
+      && existingValue.template === value.template
+      && existingValue.css === value.css
+    ) {
+      return existingValue;
+    }
+    return new Template({
+      templateName: value.templateName,
+      ast: value.ast,
+      template: value.template,
+      css: value.css,
+      defaultState: value.defaultState,
+      defaultSettings: value.defaultSettings,
+      renderingEngine: value.renderingEngine,
+      isPrototype: true,
+    });
+  }
+  return value;
+}
+
 export default (element) => async (Component, props, { default: defaultChildren, ...slotted }, { client }) => {
   let component = element.children[0];
 
@@ -30,7 +61,7 @@ export default (element) => async (Component, props, { default: defaultChildren,
     // Forward props BEFORE connecting to DOM — connectedCallback triggers
     // fullRender synchronously, so settings must be populated first
     for (const [name, value] of Object.entries(props)) {
-      component[name] = value;
+      component[name] = restorePropValue(value, component.defaultSettings?.[name]);
     }
 
     element.appendChild(component);
@@ -47,7 +78,7 @@ export default (element) => async (Component, props, { default: defaultChildren,
   if (client !== 'only') {
     for (const [name, value] of Object.entries(props)) {
       if (value != null && (typeof value === 'object' || typeof value === 'function')) {
-        component[name] = value;
+        component[name] = restorePropValue(value, component[name] ?? component.defaultSettings?.[name]);
       }
     }
   }

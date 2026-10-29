@@ -23,6 +23,7 @@ export function createServerTemplate(definition, attrs = {}, { renderOptions } =
   const defaultSettings = config.defaultSettings || {};
   const componentSpec = config.componentSpec;
   const css = config.css || '';
+  const styles = new Set(css ? [css] : []);
   const resolvedProperties = config.resolvedProperties || definition.properties || {};
 
   // fromAttribute converters already ran wherever attributes came from markup
@@ -37,12 +38,12 @@ export function createServerTemplate(definition, attrs = {}, { renderOptions } =
   // no host element on the server, so the settings are the data itself, and the
   // render options sit on the instance for its renderer to read
   template.settings = data;
-  template.renderOptions = renderOptions;
+  template.renderOptions = { styles, ...renderOptions };
   template.initialize();
 
   // after initialize, since createComponent can change the settings {uiClasses} reads
   if (componentSpec) {
     data.uiClasses = getUIClasses(data, { componentSpec, properties: resolvedProperties });
   }
-  return { template, normalizedAttrs, resolvedProperties, css };
+  return { template, normalizedAttrs, resolvedProperties, css, styles };
 }
