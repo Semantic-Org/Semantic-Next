@@ -61,7 +61,7 @@ export function mount(template, target, { settings = {}, data = {}, anchor, sign
 
 function mountRange(template, target, { data, anchor, signal }) {
   if (template.tagName) {
-    throwError('unsupportedAnchor', 'Template.mount', {
+    throwError('unsupportedTagName', 'Template.mount', {
       explanation: isDevelopment
         ? `<${template.tagName}> renders itself. Create the element and insert it before \`anchor\``
         : 0,

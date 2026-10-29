@@ -707,7 +707,7 @@ export interface MountSettings {
    * Mounts the template as a DOM range before `anchor` inside `target` (or appends when `null`).
    * Leaves `target` unupgraded with its existing children intact so multiple ranges can share a container.
    * Inside the mounted template, `el` is `target` and `findParent()` resolves the enclosing component if present.
-   * Throws `unsupportedAnchor` if the template defines a custom element `tagName`.
+   * Throws `unsupportedTagName` if the template defines a custom element `tagName`.
    */
   anchor?: Node | null;
 }

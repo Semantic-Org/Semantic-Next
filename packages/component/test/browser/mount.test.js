@@ -1152,7 +1152,7 @@ describe('Template.mount', () => {
       );
       const Tagged = defineComponent({ tagName: uniqueTag('anchor-tagged'), template: '<i></i>' });
       expect(() => Tagged.mount(main, { anchor: footer })).toThrow(
-        expect.objectContaining({ code: 'unsupportedAnchor', at: 'Template.mount' }),
+        expect.objectContaining({ code: 'unsupportedTagName', at: 'Template.mount' }),
       );
       // the DOM's own refusal, nothing of ours in the way
       expect(() => definePage().mount(main, { anchor: document.body })).toThrow(DOMException);
