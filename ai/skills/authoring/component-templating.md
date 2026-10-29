@@ -354,31 +354,29 @@ Render a separate `defineComponent` (without `tagName`) from inside another temp
 |------|--------|-----------------|
 | **Shorthand** | `{>templateName prop=value}` | Reactive per prop |
 | **Shorthand + data** | `{>templateName data=(getData user)}` | Reactive as a unit |
+| **Verbose + inline props** | `{>template name=expr prop=value}` | Reactive per prop |
+| **Verbose + data object** | `{>template name=expr data={...}}` | Reactive per prop |
 | **Verbose + data expression** | `{>template name='templateName' data=getData}` | Reactive as a unit |
-| **Verbose + data object** | `{>template name='templateName' data={...}}` | Static, `reactiveData` opts values in |
+| **Verbose + staticData** | `{>template name='templateName' staticData={...}}` | Static snapshot on first render |
 | **Inherits data** | `{>templateName prop=value inheritsData}` | The caller's context per key, the props on top |
 
 ```html
 <!-- Shorthand: inline props, each tracked on its own -->
 {>userProfile name=(getFullname user.id) age=user.age}
 
-<!-- Verbose: explicit name + data object, static -->
+<!-- Verbose: explicit name + reactive data object -->
 {>template name='userProfile' data={name: user.name}}
 
-<!-- Dynamic template name (verbose only) -->
-{>template name=(getProfileTemplate user) data={name: user.name}}
+<!-- Dynamic template name with reactive inline props -->
+{>template name=(getProfileTemplate user) age=user.age}
 ```
 
-### Verbose Reactive Data
+### Verbose Static Data
 
-Opt in to reactivity in verbose syntax with `reactiveData`:
+All subtemplate data forms (`prop=value`, `data={...}`, `data=expr`) are reactive by default. Use `staticData={...}` in verbose syntax when a value should be evaluated once on first render:
 
 ```html
-<!-- ❌ WRONG: expecting verbose data to be reactive -->
-{>template name='profile' data={status: getStatus}}
-
-<!-- ✅ RIGHT: use reactiveData for values that should re-render -->
-{>template name='profile' reactiveData={status: getStatus} data={name: user.name}}
+{>template name='profile' status=getStatus staticData={name: user.name}}
 ```
 
 ### Registering Subtemplates

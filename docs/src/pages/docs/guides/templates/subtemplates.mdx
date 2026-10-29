@@ -142,43 +142,20 @@ Use individual props when the subtemplate is rendered many times (like items in 
 
 ### Static Data in Verbose Syntax
 
-In verbose syntax, inline data objects using `data={...}` are **static** — they are evaluated once and do not update reactively.
+In verbose syntax, use `staticData={...}` for values that should be evaluated once and not update reactively:
 
 ```sui
 {> template
   name='userProfile'
-  data={
+  isLoggedIn=getLoginStatus
+  staticData={
     name: getFullname(user.id),
     age: user.age
   }
 }
 ```
 
-To make individual values in a verbose object reactive, use `reactiveData`:
-
-```sui
-{> template
-  name='userProfile'
-  reactiveData={
-    isLoggedIn: getLoginStatus
-  }
-  data={
-    name: getFullname(user.id),
-    age: user.age
-  }
-}
-```
-
-Here `isLoggedIn` will update when the signal changes, while `name` and `age` remain fixed at their initial values.
-
-Verbose syntax also supports reactive data expressions, which behave the same as the shorthand `data=` form — the entire object re-evaluates as a unit:
-
-```sui
-{> template
-  name='userProfile'
-  data=getUserData
-}
-```
+Here `isLoggedIn` updates when the signal changes, while `name` and `age` remain fixed at their initial values.
 
 ## Examples
 
@@ -206,7 +183,7 @@ This could also have been written with a helper that returns the data context. T
 {>row data=getRowData}
 ```
 
-Or using verbose syntax that specifies the template name explicitly. Note that verbose `data={...}` with an inline object is static — see [Data Reactivity](#data-reactivity) for details.
+Or using verbose syntax that specifies the template name explicitly.
 ```sui title="Verbose Syntax"
 {> template
   name='row'

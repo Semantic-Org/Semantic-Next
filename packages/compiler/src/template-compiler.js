@@ -774,12 +774,28 @@ class TemplateCompiler {
 
     regExp.VERBOSE_KEYWORD.lastIndex = 0;
     if (regExp.VERBOSE_KEYWORD.test(expression)) {
-      // verbose notation {{> template name=templateName reactiveData={one: 'one', two: 'two'} }}
+      // verbose notation {{> template name=templateName data={one: 'one', two: 'two'} }}
       const matches = [...expression.matchAll(regExp.VERBOSE_PROPERTIES)];
       each(matches, (match, index) => {
         const property = match[1];
         const value = TemplateCompiler.getObjectFromString(match[2]);
-        templateInfo[property] = value;
+        if (property === 'name') {
+          templateInfo.name = value;
+        }
+        else if (property === 'staticData') {
+          templateInfo.data = isPlainObject(value) ? { ...templateInfo.data, ...value } : value;
+        }
+        else if (property === 'data') {
+          if (isPlainObject(value)) {
+            templateInfo.reactiveData = { ...templateInfo.reactiveData, ...value };
+          }
+          else {
+            templateInfo.data = value;
+          }
+        }
+        else {
+          templateInfo.reactiveData = { ...templateInfo.reactiveData, [property]: value };
+        }
       });
     }
     else {

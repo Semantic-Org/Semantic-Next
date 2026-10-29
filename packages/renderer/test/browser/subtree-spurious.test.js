@@ -660,7 +660,7 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: "{> template name='child' reactiveData={label: getLabel, status: getStatus}}",
+          template: "{> template name='child' data={label: getLabel, status: getStatus}}",
           subTemplates: { child },
           defaultState: { labelVal: 'hello', statusVal: 'active' },
           createComponent: ({ state }) => ({

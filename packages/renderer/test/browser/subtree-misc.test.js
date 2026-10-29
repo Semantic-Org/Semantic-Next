@@ -363,7 +363,7 @@ RENDERING_ENGINES.forEach(engine => {
     *******************************/
 
     describe('subtemplate with reactiveData (verbose syntax)', () => {
-      it('should update subtemplate when reactiveData signal changes', async () => {
+      it('should update subtemplate when verbose data={} signal changes', async () => {
         const tag = uniqueTag();
         const child = defineComponent({
           renderingEngine: engine,
@@ -372,7 +372,7 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: "{>template name='child' reactiveData={label: getMessage}}",
+          template: "{>template name='child' data={label: getMessage}}",
           defaultState: { greeting: 'hi' },
           createComponent: ({ state }) => ({
             getMessage: () => `msg:${state.greeting.get()}`,
@@ -460,14 +460,45 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('inactive');
         expect(shadowText(el)).not.toContain('Alice');
       });
+
+      it('should update verbose {>template} when shorthand reactive props change', async () => {
+        const tag = uniqueTag();
+        const row = defineComponent({
+          renderingEngine: engine,
+          template: '{#if visible}<span>{label}</span>{/if}',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>template name=rowTemplate label=title visible=show}',
+          defaultSettings: {
+            rowTemplate: row,
+            title: 'hello',
+            show: false,
+          },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(shadowText(el)).toBe('');
+
+        el.show = true;
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('hello');
+
+        el.title = 'updated';
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('updated');
+      });
     });
 
     /*******************************
      Subtemplate with static data
     *******************************/
 
-    describe('subtemplate with static data (verbose syntax)', () => {
-      it('should render subtemplate with static data object', async () => {
+    describe('subtemplate with staticData (verbose syntax)', () => {
+      it('should render subtemplate with staticData object', async () => {
         const tag = uniqueTag();
         const child = defineComponent({
           renderingEngine: engine,
@@ -476,7 +507,7 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: "{>template name='child' data={title: 'Items', count: 42}}",
+          template: "{>template name='child' staticData={title: 'Items', count: 42}}",
           subTemplates: { child },
         });
         const el = document.createElement(tag);
@@ -487,7 +518,7 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('42');
       });
 
-      it('should NOT reactively update when static data references change', async () => {
+      it('should NOT reactively update when staticData references change', async () => {
         const tag = uniqueTag();
         const child = defineComponent({
           renderingEngine: engine,
@@ -496,7 +527,7 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: "{>template name='child' data={label: getMessage}}",
+          template: "{>template name='child' staticData={label: getMessage}}",
           defaultState: { version: 0 },
           createComponent: ({ state }) => ({
             getMessage: () => `v${state.version.get()}`,
@@ -569,7 +600,7 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: '{>template name=currentLayout reactiveData={title: getTitle}}',
+          template: '{>template name=currentLayout data={title: getTitle}}',
           defaultState: { layout: 'card', label: 'hello' },
           createComponent: ({ state }) => ({
             currentLayout: () => state.layout.get(),
@@ -788,9 +819,9 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Changed|done');
       });
 
-      it('verbose data={} inside each should update when item changes', async () => {
+      it('verbose staticData={} inside each should update when item changes', async () => {
         // Inside #each, dataVersion overrides the static/reactive distinction —
-        // even verbose data={} should update because the each body's cachedRender
+        // even verbose staticData={} should update because the each body's cachedRender
         // triggers the renderTemplate reaction via dataVersion
         const tag = uniqueTag();
         const child = defineComponent({
@@ -800,7 +831,7 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: "{#each item in getItems}{>template name='child' data={label: item.name}}{/each}",
+          template: "{#each item in getItems}{>template name='child' staticData={label: item.name}}{/each}",
           defaultState: { version: 0 },
           createComponent: ({ state }) => ({
             getItems: () => {

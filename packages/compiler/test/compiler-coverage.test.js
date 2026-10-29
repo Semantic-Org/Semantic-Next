@@ -619,7 +619,7 @@ describe('TemplateCompiler - Extended Coverage', () => {
   describe('parseTemplateString', () => {
     it('should parse verbose template notation', () => {
       const compiler = new TemplateCompiler();
-      const result = compiler.parseTemplateString("template name=myTemplate reactiveData={a: 'one', b: two}");
+      const result = compiler.parseTemplateString("template name=myTemplate data={a: 'one', b: two}");
       expect(result.name).toBe('myTemplate');
       expect(result.reactiveData).toEqual({ a: "'one'", b: 'two' });
     });

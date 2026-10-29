@@ -233,17 +233,32 @@ Represents an async block that handles asynchronous operations with loading, suc
 
 ### Template
 
-Represents a nested template or partial.
+Represents a nested subtemplate or snippet call. Per-key reactive props (from shorthand `key=value` or verbose `data={...}`) compile to `reactiveData`; a whole-object expression (`data=expr`) or static object (`staticData={...}`) compiles to `data`.
 
 #### Example
 ```javascript
 {
   type: 'template',
-  name: 'partialName',
-  data: {
+  name: "'partialName'",
+  reactiveData: {
     key1: 'value1',
     key2: 'value2'
   }
+}
+```
+
+#### Example (verbose with `staticData` and `inheritsData`)
+```javascript
+{
+  type: 'template',
+  name: 'rowTemplate',
+  data: {
+    role: "'member'"
+  },
+  reactiveData: {
+    label: 'title'
+  },
+  inheritsData: true
 }
 ```
 

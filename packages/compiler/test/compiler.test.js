@@ -1488,6 +1488,9 @@ describe('TemplateCompiler', () => {
         { type: 'template', name: "'child'", reactiveData: { baz: 'bar' }, inheritsData: true },
       ]);
       expect(compiler.compile(`{>template name='child' inheritsData=true data={a: b}}`)).toEqual([
+        { type: 'template', name: "'child'", reactiveData: { a: 'b' }, inheritsData: true },
+      ]);
+      expect(compiler.compile(`{>template name='child' inheritsData=true staticData={a: b}}`)).toEqual([
         { type: 'template', name: "'child'", data: { a: 'b' }, inheritsData: true },
       ]);
     });
@@ -1501,7 +1504,7 @@ describe('TemplateCompiler', () => {
       const compiler = new TemplateCompiler();
       const template = `
         <div>
-          {>template name=dynamicName reactiveData={one: 'one', two: two} }
+          {>template name=dynamicName data={one: 'one', two: two} }
         </div>
       `;
       const ast = compiler.compile(template);
@@ -1515,6 +1518,25 @@ describe('TemplateCompiler', () => {
         { type: 'html', html: '</div>' },
       ];
       expect(ast).toEqual(expectedAST);
+    });
+
+    it('should route shorthand key=value props and data={} on verbose {>template} into reactiveData, and staticData={} into data', () => {
+      const compiler = new TemplateCompiler();
+      expect(compiler.compile(`{>template name=rowTemplate label=title visible=show}`)).toEqual([
+        {
+          type: 'template',
+          name: 'rowTemplate',
+          reactiveData: { label: 'title', visible: 'show' },
+        },
+      ]);
+      expect(compiler.compile(`{>template name=rowTemplate data={a: one} b=two staticData={c: three}}`)).toEqual([
+        {
+          type: 'template',
+          name: 'rowTemplate',
+          data: { c: 'three' },
+          reactiveData: { a: 'one', b: 'two' },
+        },
+      ]);
     });
     it('should compile a template with a partial and data containing parentheses', () => {
       const compiler = new TemplateCompiler();
