@@ -61,7 +61,9 @@ export default (element) => async (Component, props, { default: defaultChildren,
     // Forward props BEFORE connecting to DOM — connectedCallback triggers
     // fullRender synchronously, so settings must be populated first
     for (const [name, value] of Object.entries(props)) {
-      component[name] = restorePropValue(value, component.defaultSettings?.[name]);
+      if (value != null) {
+        component[name] = restorePropValue(value, component.defaultSettings?.[name]);
+      }
     }
 
     element.appendChild(component);
