@@ -1,5 +1,6 @@
 import { ASTNode } from '@semantic-ui/compiler';
 import { CallParams, FactoryParams, MountSettings, Template } from '@semantic-ui/templating';
+import { BaseCSSValue } from './css-registry.js';
 import { ComponentConfig, PropertyConfig, WebComponentBase } from './engines/native/base.js';
 
 /**
@@ -166,6 +167,8 @@ export interface ComponentFactoryOptions {
   resolvedProperties: Record<string, PropertyConfig>;
   /** Shadow DOM styles, including styles collected from subtemplates. */
   css: string;
+  /** Shared or registered base stylesheets adopted before `css`. */
+  baseCSS?: BaseCSSValue;
   /** Whether the shadow root is created with `delegatesFocus`. */
   delegatesFocus: boolean;
   /** Component spec for Semantic UI states (modifiers, variations, etc.). */
@@ -272,6 +275,11 @@ export interface DefineComponentOptions<
    * @see {@link https://next.semantic-ui.com/docs/guides/components/create#css CSS}
    */
   css?: string;
+  /**
+   * Foundational or registered stylesheets adopted into the shadow root before `css`,
+   * or `false` to disable default base stylesheets.
+   */
+  baseCSS?: BaseCSSValue;
   /**
    * CSS styles added to the page (not scoped). Added once when the component is defined.
    * @see {@link https://next.semantic-ui.com/docs/guides/components/create#css CSS}

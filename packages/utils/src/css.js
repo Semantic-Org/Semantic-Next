@@ -612,7 +612,9 @@ export const adoptStylesheet = (css, adoptedElement, {
   if (isServer) {
     return;
   }
-  hash = hash ?? hashCode(css);
+  const isSheet = Boolean(css && typeof CSSStyleSheet !== 'undefined' && css instanceof CSSStyleSheet);
+  hash = hash
+    ?? (isSheet ? (css.id ??= hashCode(Array.from(css.cssRules || []).map(r => r.cssText).join(''))) : hashCode(css));
   if (!adoptedElement) {
     adoptedElement = document;
   }
@@ -640,7 +642,11 @@ export const adoptStylesheet = (css, adoptedElement, {
 
   let stylesheet;
 
-  if (cacheStylesheet && document.cachedStylesheets && document.cachedStylesheets[hash]) {
+  if (isSheet) {
+    stylesheet = css;
+    stylesheet.id ??= hash;
+  }
+  else if (cacheStylesheet && document.cachedStylesheets && document.cachedStylesheets[hash]) {
     // reuse stylesheet if cached
     stylesheet = document.cachedStylesheets[hash];
   }

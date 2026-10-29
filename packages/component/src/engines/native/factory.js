@@ -13,6 +13,7 @@ export function createComponent({
   prototypeTemplate,
   resolvedProperties,
   css,
+  baseCSS,
   delegatesFocus,
   componentSpec,
   defaultSettings,
@@ -28,6 +29,7 @@ export function createComponent({
     componentSpec,
     defaultSettings,
     css,
+    baseCSS,
     plural,
     onAttributeChanged,
   };
