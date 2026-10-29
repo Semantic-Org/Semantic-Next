@@ -388,17 +388,19 @@ export class LitRenderer {
       }
       return packedData;
     };
-    const packedStaticData = getPackedData(node.data);
+    const packedData = getPackedData(node.data);
+    const packedStaticData = getPackedData(node.staticData);
     const packedReactiveData = getPackedData(node.reactiveData, { reactive: true });
 
     // data expression returns a callable — use it as the entire packed context
-    if (isFunction(packedStaticData) || isFunction(packedReactiveData)) {
-      return isFunction(packedReactiveData) ? packedReactiveData : packedStaticData;
+    if (isFunction(packedData) || isFunction(packedReactiveData)) {
+      return isFunction(packedReactiveData) ? packedReactiveData : packedData;
     }
 
     // only inherit parent data context if specified
     data = {
       ...(inheritsData) ? data : {},
+      ...packedData,
       ...packedStaticData,
       ...packedReactiveData,
     };

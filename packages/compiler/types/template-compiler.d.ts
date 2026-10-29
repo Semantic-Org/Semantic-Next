@@ -121,6 +121,8 @@ export interface ASTNode {
   key?: string | null;
   /** Reactive data passed to a subtemplate, as unevaluated expression strings. */
   reactiveData?: Record<string, string>;
+  /** Static data passed to a subtemplate via `staticData={...}`, as unevaluated expression strings. */
+  staticData?: Record<string, string>;
   /** The reserved `data` blob passed to a subtemplate, as an expression string. */
   data?: string;
   /** Ordinal assigned to duplicate template calls so subtree caching can tell them apart. */
@@ -134,6 +136,7 @@ export interface ASTNode {
 export interface TemplateInfo {
   name?: string;
   reactiveData?: Record<string, string>;
+  staticData?: Record<string, string>;
   data?: string;
   [key: string]: any;
 }

@@ -1995,7 +1995,7 @@ RENDERING_ENGINES.forEach(engine => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          template: "{> template name='child' reactiveData={label: getLabel}}",
+          template: "{> template name='child' data={label: getLabel}}",
           subTemplates: { child },
           defaultState: { labelVal: 'first' },
           createComponent: ({ state }) => ({

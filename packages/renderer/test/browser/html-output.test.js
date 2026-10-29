@@ -455,7 +455,7 @@ RENDERING_ENGINES.forEach(engine => {
           template: '<div class="expanded"><h3>{label}</h3><p>detail</p></div>',
         });
         const el = await renderComponent({
-          template: '{>template name=currentView reactiveData={label: getLabel}}',
+          template: '{>template name=currentView data={label: getLabel}}',
           defaultState: { view: 'compact' },
           createComponent: ({ state }) => ({
             currentView: () => state.view.get(),

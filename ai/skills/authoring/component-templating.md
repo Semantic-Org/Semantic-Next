@@ -355,32 +355,28 @@ Render a separate `defineComponent` (without `tagName`) from inside another temp
 | **Shorthand** | `{>templateName prop=value}` | Reactive per prop |
 | **Shorthand + data** | `{>templateName data=(getData user)}` | Reactive as a unit |
 | **Verbose + inline props** | `{>template name=expr prop=value}` | Reactive per prop |
+| **Verbose + data object** | `{>template name=expr data={...}}` | Reactive per prop |
 | **Verbose + data expression** | `{>template name='templateName' data=getData}` | Reactive as a unit |
-| **Verbose + data object** | `{>template name='templateName' data={...}}` | Static, inline props or `reactiveData` opt values in |
+| **Verbose + staticData** | `{>template name='templateName' staticData={...}}` | Static snapshot on first render |
 | **Inherits data** | `{>templateName prop=value inheritsData}` | The caller's context per key, the props on top |
 
 ```html
 <!-- Shorthand: inline props, each tracked on its own -->
 {>userProfile name=(getFullname user.id) age=user.age}
 
-<!-- Verbose: explicit name + data object, static -->
+<!-- Verbose: explicit name + reactive data object -->
 {>template name='userProfile' data={name: user.name}}
 
 <!-- Dynamic template name with reactive inline props -->
 {>template name=(getProfileTemplate user) age=user.age}
 ```
 
-### Verbose Reactive Data
+### Verbose Static Data
 
-Pass inline `key=value` props or use `reactiveData` to opt in to per-prop reactivity when `data={...}` is static:
+All subtemplate data forms (`prop=value`, `data={...}`, `data=expr`) are reactive by default. Use `staticData={...}` in verbose syntax when a value should be evaluated once on first render:
 
 ```html
-<!-- ❌ WRONG: expecting verbose data={} object to be reactive -->
-{>template name='profile' data={status: getStatus}}
-
-<!-- ✅ RIGHT: pass inline props or use reactiveData for values that should re-render -->
-{>template name='profile' status=getStatus data={name: user.name}}
-{>template name='profile' reactiveData={name: user.name, status: getStatus}}
+{>template name='profile' status=getStatus staticData={name: user.name}}
 ```
 
 ### Registering Subtemplates

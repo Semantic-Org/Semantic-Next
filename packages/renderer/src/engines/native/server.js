@@ -715,6 +715,11 @@ export class ServerRenderer {
         });
       }
     }
+    if (isPlainObject(node.staticData)) {
+      each(node.staticData, (expr, key) => {
+        target[key] = this.evaluator.lookupExpressionValue(expr, data);
+      });
+    }
     if (node.reactiveData) {
       each(node.reactiveData, (expr, key) => {
         target[key] = this.evaluator.lookupExpressionValue(expr, data);

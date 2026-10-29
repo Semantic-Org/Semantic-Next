@@ -510,11 +510,11 @@ RENDERING_ENGINES.forEach((engine) => {
         defineComponent({
           renderingEngine: engine,
           tagName: tag,
-          // Object literal data — keys are evaluated eagerly per render
+          // Object literal staticData — keys are evaluated eagerly per render
           // (each-context-aware). Outside of #each, this is documented as
           // non-reactive. Mutating the source signal should NOT re-render
           // for this exact pattern.
-          template: "{>template name='child' data={label: getLabel}}",
+          template: "{>template name='child' staticData={label: getLabel}}",
           defaultState: { version: 0 },
           createComponent: ({ state }) => ({
             getLabel: () => `v${state.version.get()}`,

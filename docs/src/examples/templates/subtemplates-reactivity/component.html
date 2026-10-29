@@ -1,8 +1,8 @@
 <ui-button class="add">Add to cart</ui-button>
 
-<h2>data: frozen at first render</h2>
+<h2>data: follows the signal</h2>
+{> template name='badge' count=cart}
 {> template name='badge' data={count: cart}}
 
-<h2>shorthand or reactiveData: follows the signal</h2>
-{> template name='badge' count=cart}
-{> template name='badge' reactiveData={count: cart}}
+<h2>staticData: frozen at first render</h2>
+{> template name='badge' staticData={count: cart}}
