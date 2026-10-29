@@ -26,7 +26,7 @@ async function mountTemplate({ template = '<div></div>', ...opts } = {}) {
     ...opts,
   });
   tpl.initialize();
-  // every door stamps the element it mounts into, and update bookkeeping lands only on a stamped element
+  // simulate mounted host element so updateScheduled is tracked
   host.template = tpl;
   await tpl.attach(host);
   return {

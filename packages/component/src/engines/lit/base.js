@@ -73,7 +73,6 @@ class LitWebComponentBase extends LitElement {
         data: this.getData(),
         element: this,
       });
-      // the element hands its store before initialize, the native base's order
       this.template.settings = this.settings;
       this.template.initialize();
       this.template.attach(this.renderRoot);

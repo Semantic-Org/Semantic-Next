@@ -682,7 +682,7 @@ export interface QuerySettings { // extends QueryOptions
 }
 
 export interface AttachSettings {
-  /** A region the template owns. Its anchors become the template's range and `detach` clears it. */
+  /** DynamicRegion owned by this template. Sets `startNode` and `endNode` to the region's anchors and clears the region on `detach()`. */
   region?: DynamicRegion;
   /** The parent node to which the template's content should be attached. Defaults to renderRoot. */
   parentNode?: HTMLElement | ShadowRoot;
@@ -704,11 +704,9 @@ export interface MountSettings {
   /** Unmounts the template when aborted. Throws if already aborted at mount time. */
   signal?: AbortSignal;
   /**
-   * Mounts the template as a range before `anchor` inside `target`, `null` to append. `target`
-   * is then a container: it is not upgraded, keeps its own children, and may hold several
-   * mounts. The mounted template's element is the container and its parent is the enclosing
-   * component's template, if there is one. A tagged component is refused with
-   * `unsupportedAnchor`: create its element and insert that instead.
+   * Mounts the template as a DOM range before `anchor` inside `target` (or appends when `null`).
+   * Leaves `target` unupgraded with its existing children intact so multiple ranges can share a container.
+   * Throws `unsupportedAnchor` if the template defines a custom element `tagName`.
    */
   anchor?: Node | null;
 }
@@ -783,7 +781,7 @@ export class Template {
   region?: DynamicRegion;
   /** The reactive state of the template. */
   state: Record<string, Signal<any>>;
-  /** Settings proxy, present on a template with a store of its own: a subtemplate, a range mount, or a bare root that declares `defaultSettings`. */
+  /** Reactive settings proxy when the template declares `defaultSettings`. */
   settings?: Record<string, any>;
   /** Shadow signals backing `settings`, created as each setting is read or written. */
   settingsVars?: Map<string, Signal<any>>;
@@ -922,15 +920,13 @@ export class Template {
   mount(target: Element | ShadowRoot, options?: MountSettings): Template;
 
   /**
-   * Unmounts a mounted template. A component element owns the mount it carries and tears
-   * down with it, restoring itself. A range mount is the template's own and removes only
-   * its nodes. Subsequent calls are no-ops.
+   * Unmounts a mounted template, destroying the instance, removing its rendered DOM,
+   * and restoring the target element if it was upgraded. Subsequent calls are no-ops.
    */
   unmount(): void;
 
   /**
-   * The inverse of `attach`: clears a region the template owns and forgets the render root,
-   * parent node and range. Runs at the end of `onDestroyed`.
+   * Clears any owned `DynamicRegion` and resets attachment references (`renderRoot`, `parentNode`, `startNode`, `endNode`).
    */
   detach(): void;
 

@@ -189,7 +189,6 @@ describe('Subtemplate without defaultSettings', () => {
   });
 
   it('creates its own settings store on a root with defaultSettings and no element store', () => {
-    // a bare render() root, like a range mount, has no element store to read, so it makes one
     const template = new Template({
       template: '<div></div>',
       renderingEngine: realEngine,
@@ -201,7 +200,6 @@ describe('Subtemplate without defaultSettings', () => {
   });
 
   it('keeps a settings store assigned before initialize', () => {
-    // the server hands its template the data as the store before initialize runs
     const template = new Template({
       template: '<div></div>',
       renderingEngine: realEngine,

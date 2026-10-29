@@ -790,7 +790,6 @@ describe('Template.mount', () => {
     });
 
     it('unmounts without an engine verb, and resolution leaves the engine object as it was', () => {
-      // an engine only mounts; tearing down is the template's own or its element's
       const engine = { renderer: Renderer, mount: NativeEngine.mount };
       const Half = defineComponent({
         renderingEngine: engine,
@@ -968,8 +967,6 @@ describe('Template.mount', () => {
   });
 
   describe('at an anchor', () => {
-    // with anchor the target is a container: nothing is upgraded, the template renders as a
-    // range before the anchor, and the caller's own children stay where they are
     const definePage = () =>
       defineComponent({
         template: '<p class="row">{label} {bumps}</p>{>kid}',

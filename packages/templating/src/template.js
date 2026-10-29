@@ -261,8 +261,7 @@ export const Template = class Template {
     let instance;
     this.instance = {};
 
-    // a component element hands its store to its template before initialize; every other
-    // template that declares settings makes its own
+    // create own settings store when not provided by a component element
     const declaresSettings = this.defaultSettings && Object.keys(this.defaultSettings).length > 0;
     if (!this.settings && declaresSettings) {
       this.createSubtemplateSettings();
@@ -345,7 +344,7 @@ export const Template = class Template {
       this.removeEvents();
       this.removeObservers();
       this.removeParent();
-      // destroyed rises from the rendered nodes, so a range the template owns leaves last
+      // fire onDestroyed before detaching so callbacks can still query rendered DOM
       try {
         each(this.plugins, (plugin) => plugin.onDestroyed());
         this.call(this.onDestroyedCallback);
@@ -375,15 +374,13 @@ export const Template = class Template {
     // the overlay so every declared setting already has its signal
     if (this.element) {
       const el = this.element;
-      // a subtemplate answers to its own store only, never its borrowed element's
       const ownElement = !this.isSubtemplate() && el;
       const settingsVars = this.settingsVars || ownElement?.settingsVars;
       const updateReaction = reaction(() => {
         each(this.state, (signal) => signal.dependency.depend());
         each(settingsVars, (signal) => signal.dependency.depend());
         if (this.rendered && !this.destroyed) {
-          // only an element that carries a template waits on updated; a range mount's
-          // container is the caller's and gets no bookkeeping
+          // skip unupgraded range containers
           if (el.template) {
             el.updateScheduled = true;
           }
@@ -408,8 +405,6 @@ export const Template = class Template {
     if (this.renderRoot == renderRoot) {
       return;
     }
-    // a region handed here is the template's own: its anchors are the range and
-    // detach clears it. a subtemplate renders into its block's region and gets anchors
     if (region) {
       this.region = region;
       startNode = region.anchor;
@@ -429,8 +424,6 @@ export const Template = class Template {
     }
   }
 
-  // the inverse of attach: a region the template owns leaves the tree and the
-  // attachment is forgotten
   detach() {
     if (this.region) {
       this.region.clear();
@@ -453,8 +446,6 @@ export const Template = class Template {
     return nonreactive(() => engine.mount(this, target, options));
   }
 
-  // a component element owns the mount it carries and tears down with it; a range is
-  // the template's own, so it tears itself down
   unmount() {
     if (!this.mounted) {
       return;
@@ -486,8 +477,7 @@ export const Template = class Template {
     const settings = this.settings || ownElement?.settings;
     const settingsVars = this.settingsVars || ownElement?.settingsVars;
     if (settings && settingsVars) {
-      // an own store creates a signal on first read, so every declared key is read before its
-      // signal is overlaid
+      // prime lazy signals for declared defaults before overlaying settingsVars
       if (this.settingsVars) {
         each(this.defaultSettings, (_, name) => {
           settings[name];

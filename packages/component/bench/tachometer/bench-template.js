@@ -528,10 +528,6 @@ destroy();
       Template mount
 *******************************/
 
-// The two doors a tagless template mounts through, one instance at a time
-// a thousand times, mount and unmount in the window. The element door
-// upgrades a div with the component class and restores it; the range door
-// renders between two anchors in the container and removes them.
 const benchMountRow = defineComponent({
   renderingEngine: 'native',
   template: '<div class="row"><span>{label}</span><span>{index}</span></div>',
@@ -539,7 +535,7 @@ const benchMountRow = defineComponent({
   defaultState: { index: 0 },
 });
 
-// purpose: Mounts and unmounts a tagless template on a fresh div 1000 times, the prototype swap and restore on every cycle.
+// purpose: Mount and unmount a tagless template on a fresh div 1000 times (prototype upgrade + restore).
 performance.mark(startMark('element-mount-1k'));
 for (let i = 0; i < 1000; i++) {
   const el = document.createElement('div');
@@ -549,7 +545,7 @@ for (let i = 0; i < 1000; i++) {
 performance.measure('element-mount-1k', startMark('element-mount-1k'));
 destroy();
 
-// purpose: Mounts and unmounts a tagless template as a range appended into one container 1000 times, two anchors per cycle and no upgrade.
+// purpose: Mount and unmount a tagless template as a range inside a container 1000 times (DynamicRegion anchors, no element upgrade).
 performance.mark(startMark('range-mount-1k'));
 for (let i = 0; i < 1000; i++) {
   benchMountRow.mount(container, { anchor: null, settings: { label: `r${i}` } }).unmount();

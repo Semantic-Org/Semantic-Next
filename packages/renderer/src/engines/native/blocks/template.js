@@ -289,7 +289,7 @@ function cloneInstance({ template, templateName, templateData, self, parentData,
 }
 
 function attachToRenderRoot(instance, region, self, { startNode } = {}) {
-  // a nested subtemplate attaches after it renders, so its children fall back to its element's root
+  // nested subtemplates attach after render so fall back to the host element's renderRoot
   const renderRoot = self.parentTemplate?.renderRoot ?? self.parentTemplate?.element?.renderRoot;
   if (!renderRoot) { return; }
   instance.attach(renderRoot, {

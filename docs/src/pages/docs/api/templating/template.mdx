@@ -152,7 +152,7 @@ template.mount(target, options);
 #### Parameters
 | Name    | Type                  | Description                                        |
 |---------|-----------------------|----------------------------------------------------|
-| target  | Element \| ShadowRoot | Element or shadow root. Its contents are replaced and it becomes the component, or with `anchor` it is a container |
+| target  | Element \| ShadowRoot | Target element or shadow root (upgraded in place, or treated as a container when `anchor` is passed) |
 | options | Object                | Optional mount configuration                       |
 
 ##### Options
@@ -186,7 +186,7 @@ el.name = 'Grace';
 
 #### Mounting at an anchor
 
-With `anchor`, `target` is a container that keeps its own children. The template renders as a range before the anchor, the way `insertBefore` reads, and `null` appends. The container is not upgraded, so several templates can share it beside static content. The mounted template's element is the container, and when the container sits inside a component, that component is the template's parent for `findParent` and `findChildren`.
+When `anchor` is passed, `target` is treated as a container and keeps its existing children. The template renders as a DOM range before `anchor` (or at the end of `target` when `anchor` is `null`), matching `insertBefore`. Because `target` is not upgraded, multiple templates can mount inside the same container alongside static markup.
 
 ```javascript
 const main = document.querySelector('main');
@@ -199,7 +199,7 @@ page.update({ route: '/about/team' });
 page.unmount(); // removes exactly the nodes it placed, the marker survives
 ```
 
-A tagged component is refused at an anchor, since its element already places itself: create the element and insert it before the anchor.
+Components with a `tagName` cannot be mounted at an anchor — create the custom element and insert it before `anchor` directly.
 
 ### unmount
 

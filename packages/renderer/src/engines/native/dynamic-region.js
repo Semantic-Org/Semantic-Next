@@ -33,9 +33,7 @@ export class DynamicRegion {
   }
 
   // isNodeInTemplate uses strict "between" compareDocumentPosition, so a
-  // trailing anchor is required for the last content node to fall inside
-  // the range. on an empty range the end anchor sits right after the start
-  // anchor, which lets a template attach to the region before it is filled
+  // trailing anchor is required for the last content node to fall inside the range
   placeEndAnchor() {
     const lastNode = this.ownedNodes[this.ownedNodes.length - 1] || this.anchor;
     if (!this.endAnchor) {
