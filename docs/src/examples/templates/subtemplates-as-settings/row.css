@@ -1,7 +1,7 @@
+tr:nth-child(even) {
+  background-color: var(--primary-5);
+}
 td {
   border: var(--solid-border);
   padding: 8px 10px;
-}
-td:first-child {
-  font-weight: var(--bold);
 }

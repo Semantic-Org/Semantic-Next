@@ -1,8 +1,7 @@
 tr:nth-child(even) {
-  background-color: var(--primary-5);
+  background-color: var(--red-5);
 }
 td {
   border: var(--solid-border);
-  padding: 10px 12px;
-  color: var(--primary-text-color);
+  padding: 8px 10px;
 }
