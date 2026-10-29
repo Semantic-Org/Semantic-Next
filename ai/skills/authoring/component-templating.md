@@ -354,8 +354,9 @@ Render a separate `defineComponent` (without `tagName`) from inside another temp
 |------|--------|-----------------|
 | **Shorthand** | `{>templateName prop=value}` | Reactive per prop |
 | **Shorthand + data** | `{>templateName data=(getData user)}` | Reactive as a unit |
+| **Verbose + inline props** | `{>template name=expr prop=value}` | Reactive per prop |
 | **Verbose + data expression** | `{>template name='templateName' data=getData}` | Reactive as a unit |
-| **Verbose + data object** | `{>template name='templateName' data={...}}` | Static, `reactiveData` opts values in |
+| **Verbose + data object** | `{>template name='templateName' data={...}}` | Static, inline props or `reactiveData` opt values in |
 | **Inherits data** | `{>templateName prop=value inheritsData}` | The caller's context per key, the props on top |
 
 ```html
@@ -365,20 +366,21 @@ Render a separate `defineComponent` (without `tagName`) from inside another temp
 <!-- Verbose: explicit name + data object, static -->
 {>template name='userProfile' data={name: user.name}}
 
-<!-- Dynamic template name (verbose only) -->
-{>template name=(getProfileTemplate user) data={name: user.name}}
+<!-- Dynamic template name with reactive inline props -->
+{>template name=(getProfileTemplate user) age=user.age}
 ```
 
 ### Verbose Reactive Data
 
-Opt in to reactivity in verbose syntax with `reactiveData`:
+Pass inline `key=value` props or use `reactiveData` to opt in to per-prop reactivity when `data={...}` is static:
 
 ```html
-<!-- ❌ WRONG: expecting verbose data to be reactive -->
+<!-- ❌ WRONG: expecting verbose data={} object to be reactive -->
 {>template name='profile' data={status: getStatus}}
 
-<!-- ✅ RIGHT: use reactiveData for values that should re-render -->
-{>template name='profile' reactiveData={status: getStatus} data={name: user.name}}
+<!-- ✅ RIGHT: pass inline props or use reactiveData for values that should re-render -->
+{>template name='profile' status=getStatus data={name: user.name}}
+{>template name='profile' reactiveData={name: user.name, status: getStatus}}
 ```
 
 ### Registering Subtemplates

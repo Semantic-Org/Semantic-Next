@@ -233,17 +233,32 @@ Represents an async block that handles asynchronous operations with loading, suc
 
 ### Template
 
-Represents a nested template or partial.
+Represents a nested subtemplate or snippet call. Shorthand `key=value` props (in both `{>partialName key=val}` and `{>template name=expr key=val}`) and `reactiveData={...}` compile to `reactiveData`; `data=` compiles to `data`.
 
 #### Example
 ```javascript
 {
   type: 'template',
-  name: 'partialName',
-  data: {
+  name: "'partialName'",
+  reactiveData: {
     key1: 'value1',
     key2: 'value2'
   }
+}
+```
+
+#### Example (verbose with static data and `inheritsData`)
+```javascript
+{
+  type: 'template',
+  name: 'rowTemplate',
+  data: {
+    role: "'member'"
+  },
+  reactiveData: {
+    label: 'title'
+  },
+  inheritsData: true
 }
 ```
 

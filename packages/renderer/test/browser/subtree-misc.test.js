@@ -460,6 +460,37 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('inactive');
         expect(shadowText(el)).not.toContain('Alice');
       });
+
+      it('should update verbose {>template} when shorthand reactive props change', async () => {
+        const tag = uniqueTag();
+        const row = defineComponent({
+          renderingEngine: engine,
+          template: '{#if visible}<span>{label}</span>{/if}',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>template name=rowTemplate label=title visible=show}',
+          defaultSettings: {
+            rowTemplate: row,
+            title: 'hello',
+            show: false,
+          },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(shadowText(el)).toBe('');
+
+        el.show = true;
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('hello');
+
+        el.title = 'updated';
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('updated');
+      });
     });
 
     /*******************************

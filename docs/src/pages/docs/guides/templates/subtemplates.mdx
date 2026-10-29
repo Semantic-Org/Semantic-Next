@@ -154,14 +154,12 @@ In verbose syntax, inline data objects using `data={...}` are **static** — the
 }
 ```
 
-To make individual values in a verbose object reactive, use `reactiveData`:
+To make individual values reactive in verbose syntax, pass them as inline props or use `reactiveData`:
 
 ```sui
 {> template
   name='userProfile'
-  reactiveData={
-    isLoggedIn: getLoginStatus
-  }
+  isLoggedIn=getLoginStatus
   data={
     name: getFullname(user.id),
     age: user.age
@@ -169,7 +167,17 @@ To make individual values in a verbose object reactive, use `reactiveData`:
 }
 ```
 
-Here `isLoggedIn` will update when the signal changes, while `name` and `age` remain fixed at their initial values.
+Here `isLoggedIn` updates when the signal changes, while `name` and `age` remain fixed at their initial values. Use `reactiveData={...}` when grouping reactive keys or passing a prop named `name` or `data`:
+
+```sui
+{> template
+  name='userProfile'
+  reactiveData={
+    name: getFullname(user.id),
+    isLoggedIn: getLoginStatus
+  }
+}
+```
 
 Verbose syntax also supports reactive data expressions, which behave the same as the shorthand `data=` form — the entire object re-evaluates as a unit:
 

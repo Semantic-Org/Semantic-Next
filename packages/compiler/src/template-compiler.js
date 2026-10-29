@@ -779,7 +779,12 @@ class TemplateCompiler {
       each(matches, (match, index) => {
         const property = match[1];
         const value = TemplateCompiler.getObjectFromString(match[2]);
-        templateInfo[property] = value;
+        if (['name', 'data', 'reactiveData'].includes(property)) {
+          templateInfo[property] = isPlainObject(value) ? { ...templateInfo[property], ...value } : value;
+        }
+        else {
+          templateInfo.reactiveData = { ...templateInfo.reactiveData, [property]: value };
+        }
       });
     }
     else {

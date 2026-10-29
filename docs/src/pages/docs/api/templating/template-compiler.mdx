@@ -64,11 +64,11 @@ console.log(ast);
 
 ### parseTemplateString
 
-Parses a template string, typically used for partial templates or snippets.
+Parses the inner expression of a `{> ...}` subtemplate or snippet tag into its AST fields (`name`, `reactiveData`, `data`, `inheritsData`).
 
 #### Syntax
 ```javascript
-TemplateCompiler.parseTemplateString(expression)
+compiler.parseTemplateString(expression)
 ```
 
 #### Parameters
@@ -77,12 +77,15 @@ TemplateCompiler.parseTemplateString(expression)
 | expression | string | The template string to parse     |
 
 #### Returns
-`Object` - An object containing parsed template information.
+`Object` - `{ name, reactiveData, data, inheritsData }`.
 
 #### Usage
 ```javascript
-const templateInfo = TemplateCompiler.parseTemplateString('{{> partialName data1=value1 data2=value2}}');
-console.log(templateInfo);
+const shorthand = compiler.parseTemplateString('partialName data1=value1 data2=value2');
+// { name: "'partialName'", reactiveData: { data1: 'value1', data2: 'value2' } }
+
+const verbose = compiler.parseTemplateString('template name=rowTemplate label=title data={role: role}');
+// { name: 'rowTemplate', reactiveData: { label: 'title' }, data: { role: 'role' } }
 ```
 
 ### detectSyntax

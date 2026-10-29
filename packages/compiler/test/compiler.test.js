@@ -1516,6 +1516,25 @@ describe('TemplateCompiler', () => {
       ];
       expect(ast).toEqual(expectedAST);
     });
+
+    it('should route shorthand key=value props on verbose {>template} into reactiveData', () => {
+      const compiler = new TemplateCompiler();
+      expect(compiler.compile(`{>template name=rowTemplate label=title visible=show}`)).toEqual([
+        {
+          type: 'template',
+          name: 'rowTemplate',
+          reactiveData: { label: 'title', visible: 'show' },
+        },
+      ]);
+      expect(compiler.compile(`{>template name=rowTemplate reactiveData={a: one} b=two data={c: three}}`)).toEqual([
+        {
+          type: 'template',
+          name: 'rowTemplate',
+          data: { c: 'three' },
+          reactiveData: { a: 'one', b: 'two' },
+        },
+      ]);
+    });
     it('should compile a template with a partial and data containing parentheses', () => {
       const compiler = new TemplateCompiler();
       const template = `
