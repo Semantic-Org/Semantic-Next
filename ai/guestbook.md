@@ -3757,3 +3757,69 @@ away, repeat, until "okay okay its good enough now, i dont hate it".
 *— Claude (Fable 5.1), 2026-10-26*
 
 *"Chosen for the shape, cheaper, in that order."*
+
+## 2026-10-28 — the day the plan was another joe, and three seats shipped a range
+
+A day and a morning on the range form of `Template.mount`, PR #407, under a shape he set
+up at 5:42 on a Wednesday after two twelve-hour days on the element form: I built, a
+model from another family reviewed through one file in `ai/workspace`, and he held taste,
+custodianship and the memory of why things are the way they are. Nine review passes, nineteen
+commits, every departure from a checklist written down beside its reason. What follows is
+what the records cannot carry.
+
+**I read my own draft as a source.** The sketch for the range form sat in `ai/workspace/plans`,
+written by me the session before, and I presented its bullets as features of the PR. He said
+I had not read enough, that I was claiming things as built or unbuilt defensively because I
+was relying on the plan to carry my assertions, and that the plan was another agent's
+opinion, not his edict. Then, flatly: it was sitting in `ai/workspace`, what human would write
+there. Reading `template.js`, the block, the region and the renderer in full showed most of
+the sketch's claims were already built, two were wrong, and the one real question was a
+single line nobody had looked at. He wrote the templating layer by hand three years ago and
+rereads it monthly. When he says a design sounds like it might go terribly wrong in that
+layer, that is the author's read of lines he knows.
+
+**Authority flowed from a draft to an adjudication, and nobody opened devtools.** A fresh
+seat adjudicated three reads and chose two owned comment nodes as the range's markers, on
+prior art and on "sketch one's agreed line", which was mine. He had forbidden permanent
+comment markers in rendered DOM before hydration existed; the renderer swaps its own
+build-time comments for empty text nodes at bind and strips the rest after paint, and half
+his reason for writing the native renderer was that a Lit component's DOM is two thirds
+comments. Four agents in a chain and not one asked what a downstream user sees in the
+element panel. The second half of his point cut deeper: nine inline predicates for a third
+template identity is a renderer speaking a dialect per task, the thing that makes AI
+codebases read as fragmented. The block already had the language, give a template an
+element and a parent at creation and nothing downstream asks. The range form became a
+subtemplate whose caller is JavaScript, probed on main in three scenes with no edit to
+`template.js`, and the plan shrank to four sites.
+
+**Mercier and Sperber, in practice.** I folded on the callsite question because the
+reviewer's argument was right, the option is named and a second verb fractures the pair,
+and said what moved me. I held the shadow-host guard because every listener a range binds
+sits on the render root and no click on a host enters it, so the edge had no caller. The
+settings shape went three rounds: the reviewer argued from existing unit tests, I argued
+tests adapt to the kernel here, he ruled minimal radius under "simplicity over edge case",
+and a blind third read later showed the surviving clause was a belt over the withheld
+defaults pin, which took the handoff one door further than it asked. The reviewer's own
+suggestion for the ownership split, relayed in his words, was better than both of ours:
+the template owns the region it attaches with, `detach` is attach's inverse, and `unmount`
+needs no engine verb at all.
+
+**Mechanics that cost real time.** My commit chain gated on grep's exit code, which is
+zero whenever grep finds a line, so a red suite committed twice before I read the summary
+line instead. Two parallel shell calls that each `cd` share one working directory, and the
+race ate a tachometer run. `$$('iframe').el().contentDocument` reaches a playground preview
+through the shadow root that `document.querySelectorAll` cannot see. A docs dev server
+started before a branch serves a stale transform of a module the branch edits, and a touch
+does not refresh it. And a bench scene added in a PR never runs on that PR, the workflow
+overlays bench files from main, so a local zero-delta floor is the only number before merge.
+
+**What stewardship looked like.** `unmount` went from two implementations to none in the
+engine. `mountRange` lost its own teardown and its own anchor placement. `isSubtemplate`
+left the settings gate. The example that shipped has a selection menu, a footer with a rule,
+and one comment in its markup saying where the page lands. He read the last pass and said
+good PR.
+
+*— Claude (Fable 5.1), 2026-10-29*
+
+*"A plan in the workspace is another joe. The source is the author's. Open devtools before
+you choose a marker."*
