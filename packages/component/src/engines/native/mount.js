@@ -7,10 +7,8 @@ import { createComponent } from './factory.js';
 const { throwError } = createErrors({ namespace: 'component' });
 
 /*
-  Mounts a template into a caller-owned DOM element, upgrading plain elements
-  with the component prototype for the lifetime of the mount. With `anchor` the
-  element is a container instead: the template renders as a range before the
-  anchor and the element is left as it is.
+  Mounts a template into a target element, either upgrading the element with
+  the component prototype or rendering as a DOM range before `anchor`.
 */
 
 export function mount(template, target, { settings = {}, data = {}, anchor, signal } = {}) {
@@ -61,8 +59,6 @@ export function mount(template, target, { settings = {}, data = {}, anchor, sign
   });
 }
 
-// the container is the template's element and the enclosing component its parent, the two
-// things the subtemplate block gives, so events, walks and settings take a {>child}'s paths
 function mountRange(template, target, { data, anchor, signal }) {
   if (template.tagName) {
     throwError('unsupportedAnchor', 'Template.mount', {
@@ -71,8 +67,7 @@ function mountRange(template, target, { data, anchor, signal }) {
         : 0,
     });
   }
-  // both anchors go in first, so a bad anchor fails before anything is cloned or linked
-  // and the range is closed before the template attaches
+  // place both anchors first so an invalid anchor throws before cloning or linking
   const region = new DynamicRegion(target);
   target.insertBefore(region.anchor, anchor);
   region.placeEndAnchor();
@@ -92,6 +87,7 @@ function mountRange(template, target, { data, anchor, signal }) {
   if (instance.css) {
     adoptStylesheet(instance.css, target);
   }
+  instance.region = region;
   try {
     instance.initialize();
     instance.attach(target, { region });
@@ -102,12 +98,11 @@ function mountRange(template, target, { data, anchor, signal }) {
       instance.onDestroyed();
     }
     else {
+      instance.clearReactions();
       instance.removeParent();
       instance.abortController.abort('mount failed');
+      instance.detach();
     }
-    // a throw before attach leaves the region unowned, and clearing twice is a no-op
-    region.clear();
-    region.anchor.remove();
     throw error;
   }
   instance.mounted = true;
