@@ -1,5 +1,5 @@
 import { adoptStylesheet, each, isArray, isClient, isPlainObject, isString } from '@semantic-ui/utils';
-import resetCSS from './css/reset-css.js';
+import resetCSS from './css/reset.js';
 
 const registeredCSS = new Map();
 const defaultBaseCSS = new Set();
@@ -13,9 +13,11 @@ export const registerCSS = (name, css, { default: isDefault } = {}) => {
     return;
   }
   registeredCSS.set(name, css);
+  // drop any cached CSSStyleSheet so overwriting a preset like 'reset' takes effect on next mount
   if (isClient && document.cachedStylesheets?.[name]) {
     delete document.cachedStylesheets[name];
   }
+  // only mutate default membership when explicitly passed so overwriting 'reset' keeps it default
   if (isDefault === true) {
     defaultBaseCSS.add(name);
   }
@@ -32,6 +34,7 @@ const adoptEntry = (entry, renderRoot) => {
     return;
   }
   if (isString(entry)) {
+    // registered names use the name as the cache key to avoid hashing large framework sheets
     if (registeredCSS.has(entry)) {
       const sheetCSS = registeredCSS.get(entry);
       if (sheetCSS) {
@@ -46,6 +49,7 @@ const adoptEntry = (entry, renderRoot) => {
     each(entry, (item) => adoptEntry(item, renderRoot));
   }
   else if (isPlainObject(entry)) {
+    // { [id]: css } inline map keys the stylesheet cache by id
     each(entry, (sheetCSS, id) => {
       if (sheetCSS) {
         adoptStylesheet(sheetCSS, renderRoot, { hash: id });
@@ -61,6 +65,7 @@ export const adoptBaseCSS = (baseCSS, renderRoot) => {
   if (baseCSS === false || baseCSS === null) {
     return;
   }
+  // allow [false, 'bootstrap'] to opt out of default sheets while adopting explicit entries
   const skipDefaults = isArray(baseCSS) && baseCSS[0] === false;
   if (!skipDefaults) {
     defaultBaseCSS.forEach((name) => {

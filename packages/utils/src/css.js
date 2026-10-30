@@ -612,6 +612,7 @@ export const adoptStylesheet = (css, adoptedElement, {
   if (isServer) {
     return;
   }
+  // normalize a passed CSSStyleSheet to its rule text so hashing and caching share one path
   if (css?.cssRules) {
     css = Array.from(css.cssRules).map(rule => rule.cssText).join('\n');
   }

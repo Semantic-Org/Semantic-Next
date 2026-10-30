@@ -312,6 +312,7 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.renderRoot = this.shadowRoot;
 
+    // adopt base sheets before component css so component rules win in cascade order
     adoptBaseCSS(this.baseCSS, this.shadowRoot);
 
     if (this.css) {

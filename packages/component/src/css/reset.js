@@ -1,3 +1,6 @@
+// wrapped in @layer global.reset so unlayered component css and primitive layers always win
+// :host sets border-box so inherit works inside shadow roots even when the host page has no reset
+// form and input rules normalize UA font inheritance and Safari / iOS WebKit appearance quirks
 export default `@layer global.reset {
   :host {
     box-sizing: border-box;
