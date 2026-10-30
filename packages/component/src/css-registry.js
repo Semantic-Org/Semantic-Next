@@ -96,7 +96,7 @@ const adoptEntry = (entry, renderRoot) => {
       }
     });
   }
-  else if (typeof CSSStyleSheet !== 'undefined' && entry instanceof CSSStyleSheet) {
+  else if (entry?.cssRules) {
     adoptStylesheet(entry, renderRoot);
   }
 };
