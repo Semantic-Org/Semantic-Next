@@ -1,5 +1,5 @@
 import { adoptStylesheet, each, isArray, isClient, isPlainObject, isString } from '@semantic-ui/utils';
-import resetCSS from './css/reset.js';
+import resetCSS from './css/reset-css.js';
 
 const registeredCSS = new Map();
 const defaultBaseCSS = new Set();
