@@ -1,0 +1,17 @@
+.panel {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  padding: var(--padding);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+
+  .badge {
+    padding: var(--padding-2xs) var(--padding-xs);
+    border-radius: var(--border-radius);
+    background: var(--standard-15);
+    font-weight: var(--bold);
+    font-size: var(--small);
+  }
+}
