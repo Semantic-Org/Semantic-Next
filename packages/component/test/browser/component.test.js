@@ -3,14 +3,7 @@ import { TemplateHelpers } from '@semantic-ui/templating';
 import { adoptStylesheet } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WebComponentBase } from '../../src/engines/native/base.js';
-import {
-  defineComponent,
-  getRegisteredCSS,
-  hasRegisteredCSS,
-  registerCSS,
-  registerHelper,
-  registerHelpers,
-} from '../../src/index.js';
+import { defineComponent, getCSS, hasCSS, registerCSS, registerHelper, registerHelpers } from '../../src/index.js';
 
 // Basic component tests that don't require a real DOM
 describe('Component', () => {
@@ -1935,7 +1928,7 @@ describe('interval and timeout lifecycle cleanup', () => {
 });
 
 describe('baseCSS and registerCSS', () => {
-  const defaultReset = getRegisteredCSS('reset');
+  const defaultReset = getCSS('reset');
 
   afterEach(() => {
     registerCSS('reset', defaultReset, { default: true });
@@ -1993,7 +1986,7 @@ describe('baseCSS and registerCSS', () => {
 
   it('registers named stylesheets and shares the constructed CSSStyleSheet across components', async () => {
     registerCSS('test-shared-grid', '.grid { display: grid; color: rgb(11, 22, 33); }');
-    expect(hasRegisteredCSS('test-shared-grid')).toBe(true);
+    expect(hasCSS('test-shared-grid')).toBe(true);
 
     defineComponent({
       tagName: 'test-grid-one',

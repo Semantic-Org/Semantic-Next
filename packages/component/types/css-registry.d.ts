@@ -15,9 +15,9 @@ export function registerCSS(sheets: Record<string, string>, options?: RegisterCS
 /**
  * Looks up a registered stylesheet by name.
  */
-export function getRegisteredCSS(name: string): string | undefined;
+export function getCSS(name: string): string | undefined;
 
 /**
  * Whether a stylesheet is registered under the given name.
  */
-export function hasRegisteredCSS(name: string): boolean;
+export function hasCSS(name: string): boolean;
