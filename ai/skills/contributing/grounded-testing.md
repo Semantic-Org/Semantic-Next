@@ -101,7 +101,7 @@ Use whenever you're writing tests for behavior with any user-facing surface:
 - Signal/Reaction methods and options
 - Query methods
 - Public spec and helper APIs
-- Documented build/SSR/CDN behavior
+- Documented build/SSR/CDN behavior. An import map pointed at raw source is a user path, and `packages/utils/test/entry.test.js` is the shape of its pin, walking the browser entry's graph and asserting every import is relative
 
 And ESPECIALLY when given an open-ended request like *"fill in the testing gap in templating"* or *"add more tests for X"*. That's the request shape this skill exists to handle.
 
