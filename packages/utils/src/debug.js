@@ -1,10 +1,18 @@
-import { formatServerLog } from '#debug-server';
 import { isServer } from './environment.js';
 import { isArray, isFunction } from './types.js';
 
 /*-------------------
        Logging
 --------------------*/
+
+// the server formatter never enters this graph, so a raw src/index.js loads in
+// a browser with nothing but the package mapped. index.node.js installs it
+// where the "node" export condition selects that entry
+let formatServerLog = null;
+
+export const setServerLogFormatter = (formatter) => {
+  formatServerLog = formatter;
+};
 
 const levelConfig = {
   debug: { method: 'debug', titleColor: '#666666' },
@@ -63,9 +71,10 @@ export const log = (
     logFormat = formatServerLog(message, level, options);
   }
   else {
+    const plain = noColor || isServer;
     if (timestamp) {
       const time = new Date().toISOString().split('T')[1].slice(0, 12);
-      if (noColor) {
+      if (plain) {
         logFormat += `[${time}] `;
       }
       else {
@@ -75,7 +84,7 @@ export const log = (
     }
 
     if (title && showTitle) {
-      if (noColor) {
+      if (plain) {
         logFormat += `${title} `;
       }
       else {

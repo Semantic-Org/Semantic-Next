@@ -1,7 +1,7 @@
 ---
 title: Build System Reference
 description: Build architecture, scripts, wireit orchestration, export conditions, and generated file pipeline for contributing to Semantic UI.
-keywords: [build system, esbuild, wireit, CSS bundling, specs, export conditions, CDN, build-ui-deps]
+keywords: [build system, esbuild, wireit, CSS bundling, specs, export conditions, node entry, CDN, build-ui-deps]
 audience: contributing
 skill: build-system
 type: skill
@@ -165,6 +165,31 @@ export default {
 ```
 
 `"import"` points to **source** (not dist) — enables tree-shaking in bundlers.
+
+### Node-only behavior (e.g., `@semantic-ui/utils`)
+
+A package that behaves differently under Node keeps that behavior out of the browser graph and installs it from a second entry selected by the `node` condition:
+
+```json
+{
+  ".": {
+    "types": "./types/index.d.ts",
+    "node": "./src/index.node.js",
+    "import": "./src/index.js",
+    "browser": "./dist/bundle/utils.min.js",
+    "importmap": "./dist/cdn/utils.min.js"
+  }
+}
+```
+
+- `src/index.js` stays plain relative ESM. Its static graph never imports a node-only file, so a raw `src/index.js` loads from an import map or a CDN file URL with nothing but the package mapped.
+- The browser-safe module holds a slot and exports a setter (`setServerLogFormatter` in `debug.js`). Internal importers read the slot, so one install reaches every caller, which a swapped file cannot.
+- `src/index.node.js` imports the node-only file, calls the setter, and re-exports `./index.js`. `node` sits before `import` because resolvers take the first key they recognize, and Node, Bun, Deno, Vite SSR and esbuild's node platform all carry `node`.
+- `"sideEffects": ["./src/index.node.js"]` keeps the install under bundlers that shortcut a side-effect-free barrel straight to its re-export targets.
+
+The default path needs no resolver intelligence. Package `imports` (`#subpath`) and the `browser` field map both require a package-aware resolver, so they stay off the path a raw file URL takes. `packages/utils/test/entry.test.js` pins the browser entry's graph to relative imports.
+
+Inside this repo, esbuild resolves `@semantic-ui/*` through the root `tsconfig.json` `paths` alias to the package directory and reads `module`, so in-repo builds and bench bundles get the browser entry whatever the conditions say. Probe export conditions from a fixture outside the repo.
 
 ### Core (`@semantic-ui/core`)
 

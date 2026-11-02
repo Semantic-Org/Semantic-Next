@@ -1,6 +1,16 @@
-import { createErrors, createLogger, error, isServer, log, throwError } from '@semantic-ui/utils';
+import {
+  createErrors,
+  createLogger,
+  error,
+  isServer,
+  log,
+  setServerLogFormatter,
+  throwError,
+} from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { formatServerLog } from '../src/debug-server.js';
 
 // the node project runs without a window, so isServer is true here — this
 // file pins log's server posture; test/dom/debug.test.js covers the browser
@@ -105,6 +115,28 @@ describe('log (server posture)', () => {
       level: 'log',
       namespace: 'test',
       message: 'message',
+    });
+  });
+
+  // the node entry installed the ANSI formatter before this file ran, so the
+  // ANSI pins above double as the pin that the "node" condition resolved
+  describe('setServerLogFormatter', () => {
+    afterEach(() => {
+      setServerLogFormatter(formatServerLog);
+    });
+
+    it('should route standard output through the installed formatter', () => {
+      const installed = vi.fn(() => 'formatted');
+      setServerLogFormatter(installed);
+      log('message', 'info', { namespace: 'sync' });
+      expect(installed).toHaveBeenCalledWith('message', 'info', expect.objectContaining({ namespace: 'sync' }));
+      expect(consoleSpy.info).toHaveBeenCalledWith('formatted');
+    });
+
+    it('should fall back to a plain line when cleared', () => {
+      setServerLogFormatter(null);
+      log('message', 'info', { namespace: 'sync' });
+      expect(consoleSpy.info).toHaveBeenCalledWith('sync message');
     });
   });
 });
