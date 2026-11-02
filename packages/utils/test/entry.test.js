@@ -12,8 +12,9 @@ const src = resolve(dirname(fileURLToPath(import.meta.url)), '../src');
 
 const specifiers = (file) => {
   const code = readFileSync(file, 'utf8');
-  const pattern = /^(?:import|export)\b[^'"]*?\bfrom\s+['"]([^'"]+)['"]|^import\s+['"]([^'"]+)['"]/gm;
-  return [...code.matchAll(pattern)].map((match) => match[1] ?? match[2]);
+  const pattern =
+    /^(?:import\b|export\s*(?:\*|\{))[^'";]*?\bfrom\s+['"]([^'"]+)['"]|^import\s+['"]([^'"]+)['"]|(?<!\.)\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/gm;
+  return [...code.matchAll(pattern)].map((match) => match[1] ?? match[2] ?? match[3]);
 };
 
 const graph = (entry) => {

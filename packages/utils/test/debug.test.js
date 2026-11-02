@@ -133,9 +133,9 @@ describe('log (server posture)', () => {
       expect(consoleSpy.info).toHaveBeenCalledWith('formatted');
     });
 
-    it('should fall back to the browser-style line when cleared', () => {
+    it('should fall back to a plain line when cleared', () => {
       setServerLogFormatter(null);
-      log('message', 'info', { namespace: 'sync', noColor: true });
+      log('message', 'info', { namespace: 'sync' });
       expect(consoleSpy.info).toHaveBeenCalledWith('sync message');
     });
   });

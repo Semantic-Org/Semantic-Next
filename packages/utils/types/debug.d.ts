@@ -220,7 +220,7 @@ export function log(message: string, level?: LogLevel, options?: LogOptions): vo
 /**
  * Formats one standard-output log line on the server. The node entry installs
  * the ANSI formatter; pass your own to take over terminal output, or `null`
- * to fall back to the browser-style line
+ * to fall back to a plain line
  */
 export type ServerLogFormatter = (message: string, level: LogLevel, options: LogOptions) => string;
 

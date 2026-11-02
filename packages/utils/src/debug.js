@@ -71,9 +71,10 @@ export const log = (
     logFormat = formatServerLog(message, level, options);
   }
   else {
+    const plain = noColor || isServer;
     if (timestamp) {
       const time = new Date().toISOString().split('T')[1].slice(0, 12);
-      if (noColor) {
+      if (plain) {
         logFormat += `[${time}] `;
       }
       else {
@@ -83,7 +84,7 @@ export const log = (
     }
 
     if (title && showTitle) {
-      if (noColor) {
+      if (plain) {
         logFormat += `${title} `;
       }
       else {
