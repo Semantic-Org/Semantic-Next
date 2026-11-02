@@ -151,12 +151,9 @@ jobs:
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
             BASELINE_SHA=$(git rev-parse FETCH_HEAD)
           fi
-          # source and manifests travel together: resolution fields such as
-          # exports and imports live in package.json
           SRC=$(git ls-tree -d --name-only "$BASELINE_SHA" -- packages/*/src)
-          MANIFESTS=$(git ls-tree --name-only "$BASELINE_SHA" -- packages/*/package.json)
           if [ -n "$SRC" ]; then
-            git checkout "$BASELINE_SHA" -- $SRC $MANIFESTS
+            git checkout "$BASELINE_SHA" -- $SRC
           fi
           ADDED=$(git diff --name-only --diff-filter=A "$BASELINE_SHA" HEAD -- packages/*/src || true)
           if [ -n "$ADDED" ]; then
@@ -164,7 +161,7 @@ jobs:
             echo "$ADDED" | xargs -r -n1 dirname | sort -ur | xargs -r rmdir -p --ignore-fail-on-non-empty 2>/dev/null || true
           fi
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
-          git checkout HEAD -- packages/*/src/ packages/*/package.json
+          git checkout HEAD -- packages/*/src/
           mkdir -p results
           echo "$BASELINE_SHA" > results/baseline-sha.txt
 
