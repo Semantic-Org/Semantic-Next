@@ -5,7 +5,21 @@ export default defineConfig({
     watch: false,
     pool: 'threads',
     reporters: ['default'],
-    include: ['test/**/*.test.js'],
-    environment: 'node',
+    projects: [
+      {
+        test: {
+          name: 'node',
+          environment: 'node',
+          include: ['test/*.test.js'],
+        },
+      },
+      {
+        test: {
+          name: 'jsdom',
+          environment: 'jsdom',
+          include: ['test/dom/**/*.test.js'],
+        },
+      },
+    ],
   },
 });

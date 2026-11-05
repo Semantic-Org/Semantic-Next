@@ -43,6 +43,28 @@ describe('buildFiles', () => {
     expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
   });
 
+  it('opens the preview bridge first in the head of documents only', async () => {
+    const headHTML = '<meta name="host">';
+    const result = await buildFiles({
+      cdnBaseUrl,
+      importMap,
+      headHTML,
+      sessionId: 'abc',
+      files: [
+        {
+          name: 'index.html',
+          content: '<!doctype html><html><head></head><body></body></html>',
+          contentType: 'text/html',
+        },
+        { name: 'component.html', content: '<b>Count: {count}</b>', contentType: 'text/html' },
+      ],
+    });
+    const page = find(result, 'index.html').content;
+    expect(page).toContain(`sessionId: "abc"`);
+    expect(page.indexOf('sui-playground-preview')).toBeLessThan(page.indexOf(headHTML));
+    expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
+  });
+
   it('does not mistake a fragment containing <header> for a document', async () => {
     const content = '<header class="hero">{title}</header>';
     const result = await buildFiles({

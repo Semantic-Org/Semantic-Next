@@ -1,4 +1,5 @@
 import { getContentType, isHTMLFile, isScriptFile, isTypescriptFile } from '../files.js';
+import { previewBridge } from '../preview/bridge.js';
 import { rewriteBareImports } from './resolve.js';
 
 /*
@@ -77,7 +78,15 @@ const injectHeadHTML = (html, headHTML) => {
   return insertInHead(html, headHTML);
 };
 
-export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML }) => {
+/* first in <head>, so the preview channel is open before any app script runs */
+const injectBridge = (html, sessionId) => {
+  if (!sessionId || !isDocument(html)) {
+    return html;
+  }
+  return insertInHead(html, previewBridge(sessionId));
+};
+
+export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, sessionId }) => {
   const dependencies = readDependencies(files);
   const projectMap = importMap ?? readImportMap(files);
   const diagnostics = {};
@@ -100,7 +109,10 @@ export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML }) => 
       continue;
     }
     if (isHTMLFile(file.name)) {
-      output.push({ ...file, content: injectHeadHTML(injectImportMap(file.content, projectMap), headHTML) });
+      let html = injectImportMap(file.content, projectMap);
+      html = injectHeadHTML(html, headHTML);
+      html = injectBridge(html, sessionId);
+      output.push({ ...file, content: html });
       continue;
     }
     // everything else serves verbatim — runtime relative fetches (getText et al) depend on it

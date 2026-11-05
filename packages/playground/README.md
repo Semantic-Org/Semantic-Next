@@ -32,6 +32,27 @@ The service worker holds sessions fully materialized. Its failure model is recov
 
 An app that owns its URLs (a client-side router at `/team/acme`) has paths that are not files. `new PlaygroundProject({ fallback: 'index.html' })` serves that document for any navigation whose path has no file, so a reload, an "open in new tab" or a shared preview link lands in the app, and `previewUrl` itself opens it at its root. Only document loads fall back; a fetch for a missing asset still 404s.
 
+## Preview
+
+`PlaygroundPreview` binds a project to an iframe the host owns. Every served document carries a small bridge script, injected at build time like the import map, that reports the document's location and uncaught errors to the parent and takes navigation commands. The host never reaches into the frame's window or depends on what the app exposes as globals.
+
+```js
+import { PlaygroundPreview, PlaygroundProject } from '@semantic-ui/playground';
+
+const project = new PlaygroundProject({ files, fallback: 'index.html' });
+const preview = new PlaygroundPreview({ project, frame: iframe, path: '/' });
+
+preview.on('navigate', ({ path, canGoBack, canGoForward }) => urlBar.textContent = path);
+preview.on('error', ({ message }) => status.textContent = message);
+preview.reload();            // also what every build does: in place, on the route the app is on
+preview.navigate('/team/acme');
+preview.back(); preview.forward();
+preview.url;                 // the sandbox url of the current route, for an open-in-new-tab link
+project.build();
+```
+
+A frame whose document never reported (a navigation that never committed, the missing-session page) is replaced rather than reloaded, so the host should read `preview.frame` rather than keep its own reference. Attributes on the frame carry over.
+
 ## Resolution
 
 Import-map entries pass through untouched — the map is injected into served documents and the browser resolves natively, which is what lets mapped packages fetch sibling assets (wasm, fonts). Bare specifiers outside the map rewrite to CDN ESM URLs (jsdelivr `/+esm` semantics), versioned from the project's `package.json` when present.
