@@ -124,7 +124,7 @@ export class Signal {
 
   /* Dependencies */
   hasDependents() {
-    return this.dependency.subscribers.size > 0;
+    return this.dependency.hasSubscribers();
   }
 
   depend() {

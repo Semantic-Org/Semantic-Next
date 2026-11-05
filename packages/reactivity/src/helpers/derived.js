@@ -80,7 +80,7 @@ export const match = (source, matchFn = (key, value) => key === value) => {
     currentValue = nextValue;
     const valueChanged = nextValue !== previousValue;
     for (const [key, dep] of keyDeps) {
-      if (dep.subscribers.size === 0) {
+      if (!dep.hasSubscribers()) {
         keyDeps.delete(key);
         continue;
       }

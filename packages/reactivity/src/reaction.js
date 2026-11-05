@@ -11,7 +11,10 @@ export class Reaction {
 
   constructor(callback, { context, firstRun = true } = {}) {
     this.callback = callback;
-    this.dependencies = new Set();
+    // parallel to dependencies, the slot this reaction holds in each one's
+    // subscribers. null until the first read, see Dependency.depend
+    this.dependencies = null;
+    this.dependencySlots = null;
     this.cleanups = null; // lazy only use if cleanup registered
     this.async = null; // lazy only use if async
     this.runs = 0; // started executions, a magnitude probe for overreactivity
@@ -44,6 +47,20 @@ export class Reaction {
     for (let i = 0; i < callbacks.length; i++) {
       callbacks[i]();
     }
+  }
+
+  // drop every edge from both sides. run() re-tracks from zero, stop() ends here
+  clearDependencies() {
+    const dependencies = this.dependencies;
+    if (dependencies === null) {
+      return;
+    }
+    const slots = this.dependencySlots;
+    for (let i = 0; i < dependencies.length; i++) {
+      dependencies[i].remove(slots[i]);
+    }
+    this.dependencies = null;
+    this.dependencySlots = null;
   }
 
   setContext(additionalContext = {}) {
@@ -94,10 +111,7 @@ export class Reaction {
     Scheduler.current = this;
     let result;
     try {
-      for (const dep of this.dependencies) {
-        dep.remove(this);
-      }
-      this.dependencies.clear();
+      this.clearDependencies();
       result = this.callback(this);
     }
     finally {
@@ -234,8 +248,7 @@ export class Reaction {
       this.async.rerun = false;
       // an in-flight run stays in settlingReactions, its body is still executing so settled() waits
     }
-    this.dependencies.forEach(dep => dep.remove(this));
-    this.dependencies.clear();
+    this.clearDependencies();
     this.fireCleanups();
   }
 }

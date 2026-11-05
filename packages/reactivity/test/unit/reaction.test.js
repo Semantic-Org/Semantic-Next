@@ -580,18 +580,18 @@ describe('Reaction — public API contract', () => {
   *******************************/
 
   describe('dependencies', () => {
-    it('exposes a Set of tracked dependencies', () => {
+    it('exposes the tracked dependencies', () => {
       const value = new Signal(0);
       let observed;
       reaction((r) => {
         value.get();
         observed = r.dependencies;
       });
-      expect(observed).toBeInstanceOf(Set);
-      expect(observed.size).toBe(1);
+      expect(observed).toBeInstanceOf(Array);
+      expect(observed.length).toBe(1);
     });
 
-    it('rebuilds its dependency set on each run (drops signals not read in the new run)', () => {
+    it('rebuilds its dependencies on each run (drops signals not read in the new run)', () => {
       const a = new Signal(true);
       const b = new Signal('B');
       const c = new Signal('C');
@@ -608,12 +608,12 @@ describe('Reaction — public API contract', () => {
         lastDeps = r.dependencies;
       });
 
-      expect(lastDeps.size).toBe(2); // a + b
+      expect(lastDeps.length).toBe(2); // a + b
 
       a.set(false);
       flush();
 
-      expect(lastDeps.size).toBe(2); // a + c
+      expect(lastDeps.length).toBe(2); // a + c
 
       // b should no longer notify the reaction
       const callback = vi.fn();
@@ -1192,7 +1192,7 @@ describe('Reaction — public API contract', () => {
       });
 
       // No dependency registered because value.get() never reached on first run
-      expect(r.dependencies.size).toBe(0);
+      expect(r.dependencies).toBe(null);
       expect(value.hasDependents()).toBe(false);
     });
 

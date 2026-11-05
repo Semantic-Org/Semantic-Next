@@ -378,7 +378,7 @@ describe('Dependency', () => {
   it('depend() outside a reaction is a no-op', () => {
     const dep = new Dependency();
     expect(() => dep.depend()).not.toThrow();
-    expect(dep.subscribers.size).toBe(0);
+    expect(dep.subscribers).toBe(null);
   });
 
   it('changed() with no subscribers does not throw or allocate', () => {
@@ -631,7 +631,7 @@ describe('guard()', () => {
       flush();
     }
 
-    expect(counter.dependency.subscribers.size).toBe(1);
+    expect(counter.dependency.subscribers.length).toBe(1);
   });
 
   it('stops the inner reaction when the outer reaction stops', () => {
@@ -639,10 +639,10 @@ describe('guard()', () => {
     const outer = reaction(() => {
       guard(() => counter.get());
     });
-    expect(counter.dependency.subscribers.size).toBe(1);
+    expect(counter.dependency.subscribers.length).toBe(1);
 
     outer.stop();
-    expect(counter.dependency.subscribers.size).toBe(0);
+    expect(counter.dependency.subscribers).toBe(null);
   });
 
   it('propagates value changes after the first f() throws', () => {
