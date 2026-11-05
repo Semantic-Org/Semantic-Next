@@ -22,7 +22,17 @@ beforeAll(async () => {
 });
 
 const files = [
-  { name: 'index.html', content: '<!doctype html><main id="app"></main>', contentType: 'text/html; charset=utf-8' },
+  {
+    name: 'index.html',
+    content:
+      '<!doctype html><html><head><script type="module" src="./app.js"></script></head><body><main id="app"></main></body></html>',
+    contentType: 'text/html; charset=utf-8',
+  },
+  {
+    name: 'own-base.html',
+    content: '<html><head><base href="/elsewhere/"></head></html>',
+    contentType: 'text/html; charset=utf-8',
+  },
   { name: 'app.js', content: 'export const app = 1;', contentType: 'application/javascript; charset=utf-8' },
 ];
 
@@ -58,12 +68,15 @@ describe('service worker', () => {
     expect(response.status).toBe(404);
   });
 
-  it('serves the fallback document for a navigation to a path with no file', async () => {
+  it('serves the fallback document for a navigation to a path with no file, based at the session root', async () => {
     connect('app', { fallback: 'index.html' });
     const response = await fetch('app', 'team/acme', { mode: 'navigate' });
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe('text/html; charset=utf-8');
-    expect(await response.text()).toContain('<main id="app">');
+    const html = await response.text();
+    expect(html).toContain('<main id="app">');
+    // relative urls in the document must keep resolving from the root, not from team/
+    expect(html).toContain('<head><base href="/sandbox/sui-playground-v1/app/"><script');
   });
 
   it('serves the fallback at the session root', async () => {
@@ -71,6 +84,12 @@ describe('service worker', () => {
     const response = await fetch('app', '', { mode: 'navigate' });
     expect(response.status).toBe(200);
     expect(await response.text()).toContain('<main id="app">');
+  });
+
+  it('leaves a fallback document that sets its own base alone', async () => {
+    connect('app', { fallback: 'own-base.html' });
+    const html = await (await fetch('app', 'team/acme', { mode: 'navigate' })).text();
+    expect(html).toBe(files[1].content);
   });
 
   it('keeps 404s for asset fetches of missing files', async () => {
@@ -84,9 +103,9 @@ describe('service worker', () => {
     expect((await fetch('app', 'team/acme', { mode: 'navigate' })).status).toBe(404);
   });
 
-  it('serves an existing file ahead of the fallback', async () => {
+  it('serves an existing file ahead of the fallback, byte-identical', async () => {
     connect('app', { fallback: 'index.html' });
-    const response = await fetch('app', 'app.js', { mode: 'navigate' });
-    expect(await response.text()).toBe('export const app = 1;');
+    expect(await (await fetch('app', 'app.js', { mode: 'navigate' })).text()).toBe('export const app = 1;');
+    expect(await (await fetch('app', 'index.html', { mode: 'navigate' })).text()).toBe(files[0].content);
   });
 });

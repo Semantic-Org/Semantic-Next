@@ -96,10 +96,33 @@ const parseSessionUrl = (url) => {
   if (parts[0] !== namespace || !parts[1]) {
     return null;
   }
-  return { sessionId: parts[1], filePath: parts.slice(2).join('/') };
+  return {
+    sessionId: parts[1],
+    filePath: parts.slice(2).join('/'),
+    root: `${scopePath}${namespace}/${parts[1]}/`,
+  };
 };
 
-const respond = async ({ sessionId, filePath }, request) => {
+/*
+  A fallback document served for a deep path keeps its relative urls (./app.js)
+  resolving from the session root, where the author wrote them against. A
+  document that sets its own base is left alone
+*/
+const withBase = (file, root) => {
+  if (!file || /<base\s/i.test(file.content)) {
+    return file;
+  }
+  const base = `<base href="${root}">`;
+  const headMatch = file.content.match(/<head(\s[^>]*)?>/i);
+  const content = headMatch
+    ? `${file.content.slice(0, headMatch.index + headMatch[0].length)}${base}${
+      file.content.slice(headMatch.index + headMatch[0].length)
+    }`
+    : `${base}${file.content}`;
+  return { ...file, content };
+};
+
+const respond = async ({ sessionId, filePath, root }, request) => {
   let session = sessions.get(sessionId);
   if (!session || session.files.size === 0) {
     await requestRecovery(sessionId);
@@ -113,8 +136,10 @@ const respond = async ({ sessionId, filePath }, request) => {
   }
   // a document load of a path with no file gets the session's fallback, so an
   // app that owns its urls survives a reload or a shared link. asset fetches still 404
-  const file = session.files.get(filePath)
-    ?? (request.mode === 'navigate' && session.fallback ? session.files.get(session.fallback) : undefined);
+  let file = session.files.get(filePath);
+  if (!file && request.mode === 'navigate' && session.fallback) {
+    file = withBase(session.files.get(session.fallback), root);
+  }
   if (!file) {
     return new Response(`File not found: ${filePath}`, { status: 404 });
   }
