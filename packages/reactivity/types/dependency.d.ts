@@ -9,6 +9,13 @@ import type { Reaction } from './reaction.js';
  */
 export class Dependency {
   /**
+   * Grows an edge array by one entry: an exact copy below four entries, a push
+   * after. Shared by both sides of an edge.
+   * @internal
+   */
+  static grow<T>(array: T[], value: T): T[];
+
+  /**
    * The reactions currently subscribed to this dependency, or `null` when there
    * are none. Allocated on the first subscription.
    */
@@ -38,6 +45,15 @@ export class Dependency {
    * @internal
    */
   depend(): void;
+
+  /**
+   * Appends `reaction` to the subscribers and returns the slot it took. Called by
+   * the reaction for a dependency it did not hold last run.
+   * @internal
+   * @param reaction - The new subscriber
+   * @param position - Where the reaction holds this dependency, `-1` for its inline edge
+   */
+  addSubscriber(reaction: Reaction, position: number): number;
 
   /**
    * Whether any reaction currently subscribes to this dependency.
