@@ -109,3 +109,17 @@ describe('service worker', () => {
     expect(await (await fetch('app', 'index.html', { mode: 'navigate' })).text()).toBe(files[0].content);
   });
 });
+
+describe('service worker fallback for links the app lets through', () => {
+  // a router that intercepts only matched routes leaves a link to /nowhere as a
+  // real document load. the app document comes back, boots, and runs its own
+  // not-found view, as a deployed app's spa fallback would let it
+  it('serves the app document for a document load of an unmatched path', async () => {
+    connect('app', { fallback: 'index.html' });
+    const response = await fetch('app', 'nowhere', { mode: 'navigate' });
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain('<main id="app">');
+    expect(html).toContain('<base href="/sandbox/sui-playground-v1/app/">');
+  });
+});
