@@ -412,6 +412,95 @@ describe('Dependency', () => {
     expect(b).toHaveBeenCalledTimes(2);
   });
 
+  it('stopping the middle of three subscribers leaves the other two running once each', () => {
+    const s = new Signal(0);
+    const first = vi.fn();
+    const middle = vi.fn();
+    const last = vi.fn();
+    reaction(() => {
+      s.get();
+      first();
+    });
+    const middleReaction = reaction(() => {
+      s.get();
+      middle();
+    });
+    reaction(() => {
+      s.get();
+      last();
+    });
+    middleReaction.stop();
+
+    s.set(1);
+    flush();
+    expect(first).toHaveBeenCalledTimes(2);
+    expect(middle).toHaveBeenCalledTimes(1);
+    expect(last).toHaveBeenCalledTimes(2);
+  });
+
+  // the subscriber that fills a stopped one's place must still be the one its own stop removes
+  it('a subscriber moved by another’s stop is the one its own stop removes', () => {
+    const s = new Signal(0);
+    const first = vi.fn();
+    const moved = vi.fn();
+    const added = vi.fn();
+    reaction(() => {
+      s.get();
+      first();
+    });
+    const middleReaction = reaction(() => {
+      s.get();
+    });
+    const movedReaction = reaction(() => {
+      s.get();
+      moved();
+    });
+    middleReaction.stop();
+    reaction(() => {
+      s.get();
+      added();
+    });
+    movedReaction.stop();
+
+    s.set(1);
+    flush();
+    expect(first).toHaveBeenCalledTimes(2);
+    expect(moved).toHaveBeenCalledTimes(1);
+    expect(added).toHaveBeenCalledTimes(2);
+  });
+
+  it('a run that stops reading a dependency drops only that edge', () => {
+    const a = new Signal(0);
+    const b = new Signal(0);
+    const c = new Signal(0);
+    const callback = vi.fn();
+    reaction((comp) => {
+      a.get();
+      if (comp.firstRun) {
+        b.get();
+      }
+      c.get();
+      callback();
+    });
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    a.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(2);
+
+    b.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(2);
+    expect(b.hasDependents()).toBe(false);
+
+    c.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(3);
+    a.set(2);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(4);
+  });
+
   it('stop() cleanly unsubscribes all of a reaction’s dependencies', () => {
     const s1 = new Signal(0);
     const s2 = new Signal(0);
