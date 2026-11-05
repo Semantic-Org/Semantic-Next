@@ -1,8 +1,18 @@
-import { grow } from './helpers/grow.js';
 import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
+  // a small edge array grows by copy so it holds exactly its entries. a push onto a
+  // one-element array grows its store to seventeen slots. past four, push amortizes
+  // so a wide fan-out stays linear
+  static grow(array, value) {
+    if (array.length < 4) {
+      return array.concat(value);
+    }
+    array.push(value);
+    return array;
+  }
+
   constructor(...metadata) {
     // edges are parallel arrays on both sides. the subscriber at i holds this
     // dependency at subscriberSlots[i] in its own dependencies, so either side can
@@ -48,8 +58,8 @@ export class Dependency {
     }
     // the slot is the length before growing, past four entries grow pushes in place
     const slot = subscribers.length;
-    this.subscribers = grow(subscribers, reaction);
-    this.subscriberSlots = grow(this.subscriberSlots, position);
+    this.subscribers = Dependency.grow(subscribers, reaction);
+    this.subscriberSlots = Dependency.grow(this.subscriberSlots, position);
     return slot;
   }
 
