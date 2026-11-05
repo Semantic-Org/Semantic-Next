@@ -136,11 +136,16 @@ jobs:
       # percent_delta_ci to that SHA — required for cross-iteration drift
       # detection (see tools/ci/bench/reporter/reporter.js:computeBaselineDrift).
       #
-      # Only the source directories the baseline has are checked out: a package
-      # the PR adds has none there, and one missing path fails the whole
-      # pathspec. Files the PR adds inside an existing package are dropped, and
-      # the directories that leaves empty removed, so the baseline bundle is the
-      # baseline's.
+      # Each package's package.json travels with its src: the resolution
+      # contract (imports, exports, module, sideEffects) lives there, and a PR
+      # that moves a specifier between the two leaves the baseline's src
+      # unresolvable against HEAD's package.json (#412 removed #debug-server
+      # from both at once).
+      #
+      # Only the paths the baseline has are checked out: a package the PR adds
+      # has none there, and one missing path fails the whole pathspec. Files the
+      # PR adds inside an existing package are dropped, and the directories that
+      # leaves empty removed, so the baseline bundle is the baseline's.
       - name: Build baseline
         run: |
           if [ '${{ github.event_name }}' = 'push' ]; then
@@ -151,9 +156,9 @@ jobs:
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
             BASELINE_SHA=$(git rev-parse FETCH_HEAD)
           fi
-          SRC=$(git ls-tree -d --name-only "$BASELINE_SHA" -- packages/*/src)
-          if [ -n "$SRC" ]; then
-            git checkout "$BASELINE_SHA" -- $SRC
+          PATHS=$(git ls-tree --name-only "$BASELINE_SHA" -- packages/*/src packages/*/package.json)
+          if [ -n "$PATHS" ]; then
+            git checkout "$BASELINE_SHA" -- $PATHS
           fi
           ADDED=$(git diff --name-only --diff-filter=A "$BASELINE_SHA" HEAD -- packages/*/src || true)
           if [ -n "$ADDED" ]; then
@@ -161,7 +166,7 @@ jobs:
             echo "$ADDED" | xargs -r -n1 dirname | sort -ur | xargs -r rmdir -p --ignore-fail-on-non-empty 2>/dev/null || true
           fi
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
-          git checkout HEAD -- packages/*/src/
+          git checkout HEAD -- packages/*/src/ packages/*/package.json
           mkdir -p results
           echo "$BASELINE_SHA" > results/baseline-sha.txt
 
