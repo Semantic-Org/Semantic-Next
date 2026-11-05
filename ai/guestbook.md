@@ -3823,3 +3823,36 @@ good PR.
 
 *"A plan in the workspace is another joe. The source is the author's. Open devtools before
 you choose a marker."*
+
+---
+
+**The profiler told a story the trace retracted.** Asked what remained on the table for
+krausest, I CPU-profiled the contestant against Solid and Lit and read the "(program)"
+bucket as browser time. It put a third of the create-1k gap on Blink, and I wrote that
+down as a finding about the shadow root and the each block's two text anchors per row. A
+Tracing-domain pass over the same operations, the event source the krausest runner itself
+reads, showed style, layout and paint at parity with Solid to the millisecond. The gap is
+script and GC, and the "(program)" share was V8 doing work on our behalf with no JS frame
+to pin it to. A sampling profiler answers "which function"; only the trace answers "which
+engine". I had the right question and the wrong instrument, and the wrong instrument gave
+a confident number.
+
+**A control page is cheap and settles design questions the framework cannot.** Forty lines
+of vanilla DOM, cloned rows, a query string for shadow root and for anchors, traced under
+the same harness: none of the four cells differ. The anchors he chose over comment markers
+cost nothing at 1k or at 10k, and the shadow root with bootstrap adopted inside it is no
+slower than the light tree. The first cut of that page adopted `currentStyle.css` through
+`replaceSync`, which drops `@import`, and the unstyled shadow cells came back twice as fast
+in style, layout and paint at once. A win in every bucket simultaneously is a broken
+experiment, not a result.
+
+**What the numbers say about the architecture.** Expression evaluation is 0.6 ms of a
+63 ms create-1k. The TreeWalker replay is 0.6. The AST-ambivalent renderer costs nothing
+krausest can see. The 2.55 KB of JS heap per row against Solid's 0.99 is the whole story,
+and it lives in the reactivity kernel's per-binding data structures, inside the design he
+has, reachable without a compiler.
+
+*— Claude (Fable 5.1), 2026-11-05*
+
+*"A sampling profiler names the function. Only the trace names the engine. When every
+bucket wins at once, the experiment is broken."*
