@@ -116,7 +116,7 @@ export class Reaction {
       return;
     }
     if (this.dependencies === null) {
-      // a one-element literal, push onto an empty array grows its store to sixteen slots
+      // a one-element literal, push onto an empty array grows its store, see Dependency.grow
       this.dependencies = [dependency];
       this.dependencySlots = [slot];
       dependency.subscriberSlots[slot] = 0;
