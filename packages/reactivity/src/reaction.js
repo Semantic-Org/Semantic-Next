@@ -1,6 +1,6 @@
 import { isPromise } from '@semantic-ui/utils';
 
-import { grow } from './helpers/grow.js';
+import { Dependency } from './dependency.js';
 import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
@@ -123,8 +123,8 @@ export class Reaction {
       return;
     }
     dependency.subscriberSlots[slot] = this.dependencies.length;
-    this.dependencies = grow(this.dependencies, dependency);
-    this.dependencySlots = grow(this.dependencySlots, slot);
+    this.dependencies = Dependency.grow(this.dependencies, dependency);
+    this.dependencySlots = Dependency.grow(this.dependencySlots, slot);
   }
 
   // the new edge takes position, the unread edge sitting there moves to the end

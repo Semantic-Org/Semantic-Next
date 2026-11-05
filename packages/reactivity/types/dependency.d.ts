@@ -9,6 +9,13 @@ import type { Reaction } from './reaction.js';
  */
 export class Dependency {
   /**
+   * Grows an edge array by one entry: an exact copy below four entries, a push
+   * after. Shared by both sides of an edge.
+   * @internal
+   */
+  static grow<T>(array: T[], value: T): T[];
+
+  /**
    * The reactions currently subscribed to this dependency, or `null` when there
    * are none. Allocated on the first subscription.
    */
