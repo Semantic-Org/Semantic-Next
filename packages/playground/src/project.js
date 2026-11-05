@@ -40,6 +40,9 @@ export class PlaygroundProject {
     fallback,
     // package whose jsx-runtime .jsx and .tsx files compile against, i.e. 'preact'
     jsxImportSource = 'react',
+    // markup injected first into the <head> of every served document: the bridge a
+    // PlaygroundPreview talks through, which sets it. empty, documents serve as before
+    bridge = '',
     sessionId = generateId(),
   } = {}) {
     const scope = sandboxUrl.endsWith('/') ? sandboxUrl : `${sandboxUrl}/`;
@@ -49,6 +52,7 @@ export class PlaygroundProject {
     this.headHTML = headHTML;
     this.fallback = fallback;
     this.jsxImportSource = jsxImportSource;
+    this.bridge = bridge;
     this.files = normalizeFiles(files);
     this.diagnostics = {};
     this.listeners = new Map();
@@ -124,6 +128,7 @@ export class PlaygroundProject {
         cdnBaseUrl: this.cdnBaseUrl,
         headHTML: this.headHTML,
         jsxImportSource: this.jsxImportSource,
+        bridge: this.bridge,
       }, { timeout: 30000 });
       if (sequence !== this.buildCounter) {
         return;

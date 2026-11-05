@@ -1,4 +1,4 @@
-import { previewCommandType, previewMessageType } from './bridge.js';
+import { previewBridge, previewCommandType, previewMessageType } from './bridge.js';
 
 /*
   PlaygroundPreview — binds a project to an iframe. Loads the session at an
@@ -34,6 +34,15 @@ export class PlaygroundPreview {
     ];
     this.onMessage = (event) => this.receive(event);
     window.addEventListener('message', this.onMessage);
+    // served documents need the bridge, which a plain project leaves out. a build
+    // already started or done is redone, and its buildDone brings the first load
+    if (!project.bridge) {
+      project.bridge = previewBridge(project.sessionId);
+      if (project.buildCounter > 0) {
+        project.buildCoalesced();
+        return;
+      }
+    }
     if (project.previewUrl) {
       this.reload();
     }

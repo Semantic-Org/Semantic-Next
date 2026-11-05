@@ -185,3 +185,15 @@ describe('transpile jsx', () => {
     expect(tsx.code).not.toContain('any');
   });
 });
+
+describe('transpile plain typescript', () => {
+  it('emits the same output whatever the jsx runtime', () => {
+    const source =
+      `interface Point { x: number }\nexport const p: Point = { x: 1 };\nconst id = <T,>(v: T) => v;\nexport const n = id(2);`;
+    const plain = transpile(source, 'index.ts');
+    const withRuntime = transpile(source, 'index.ts', { jsxImportSource: 'preact' });
+    expect(withRuntime.code).toBe(plain.code);
+    expect(plain.code).not.toContain('jsx-runtime');
+    expect(plain.diagnostics).toEqual([]);
+  });
+});

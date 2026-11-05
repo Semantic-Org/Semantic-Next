@@ -34,7 +34,7 @@ An app that owns its URLs (a client-side router at `/team/acme`) has paths that 
 
 ## Preview
 
-`PlaygroundPreview` binds a project to an iframe the host owns. Every served document carries a small bridge script, injected at build time like the import map, that reports the document's location and uncaught errors to the parent and takes navigation commands. The host never reaches into the frame's window or depends on what the app exposes as globals.
+`PlaygroundPreview` binds a project to an iframe the host owns. It sets the project's `bridge` option to a small script that every served document then carries, injected at build time like the import map, which reports the document's location and uncaught errors to the parent and takes navigation commands. The host never reaches into the frame's window or depends on what the app exposes as globals. The option is empty by default, so a project without a preview serves documents exactly as before and ships none of the bridge, and the preview rebuilds a project that had already built.
 
 ```js
 import { PlaygroundPreview, PlaygroundProject } from '@semantic-ui/playground';

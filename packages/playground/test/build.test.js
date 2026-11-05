@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { previewBridge } from '../src/preview/bridge.js';
 import { buildFiles } from '../src/worker/build.js';
 
 const cdnBaseUrl = 'https://cdn.jsdelivr.net/npm';
@@ -49,7 +50,7 @@ describe('buildFiles', () => {
       cdnBaseUrl,
       importMap,
       headHTML,
-      sessionId: 'abc',
+      bridge: previewBridge('abc'),
       files: [
         {
           name: 'index.html',
@@ -63,6 +64,25 @@ describe('buildFiles', () => {
     expect(page).toContain(`sessionId: "abc"`);
     expect(page.indexOf('sui-playground-preview')).toBeLessThan(page.indexOf(headHTML));
     expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
+  });
+
+  it('serves documents exactly as before unless the bridge is asked for', async () => {
+    const headHTML = '<meta name="host">';
+    const result = await buildFiles({
+      cdnBaseUrl,
+      importMap,
+      headHTML,
+      files: [{
+        name: 'index.html',
+        content: '<!doctype html><html><head></head><body></body></html>',
+        contentType: 'text/html',
+      }],
+    });
+    expect(find(result, 'index.html').content).toBe(
+      `<!doctype html><html><head>\n${headHTML}\n<script type="importmap">${
+        JSON.stringify(importMap)
+      }</script></head><body></body></html>`,
+    );
   });
 
   it('does not mistake a fragment containing <header> for a document', async () => {

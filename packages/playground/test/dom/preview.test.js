@@ -5,11 +5,13 @@ import { PlaygroundPreview, toPath, toUrl } from '../../src/preview/preview.js';
 
 const previewUrl = '/sandbox/sui-playground-v1/abc/';
 
-/* a project stub with the surface the preview uses: events, previewUrl, sessionId, build */
-const createProject = ({ built = true } = {}) => {
+/* a project stub with the surface the preview uses: events, previewUrl, sessionId, bridge, builds */
+const createProject = ({ built = true, bridge = true } = {}) => {
   const listeners = new Map();
   return {
     sessionId: 'abc',
+    bridge: bridge ? '<script>bridge</script>' : '',
+    buildCounter: built ? 1 : 0,
     previewUrl: built ? previewUrl : undefined,
     on(event, callback) {
       listeners.set(event, callback);
@@ -19,6 +21,7 @@ const createProject = ({ built = true } = {}) => {
       listeners.get(event)?.();
     },
     build: vi.fn(async () => ({ files: [] })),
+    buildCoalesced: vi.fn(),
   };
 };
 
@@ -66,6 +69,25 @@ describe('PlaygroundPreview', () => {
     preview = new PlaygroundPreview({ project: createProject(), frame });
     expect(frame.src).toBe(`http://localhost:3000${previewUrl}`);
     expect(preview.url).toBe(previewUrl);
+  });
+
+  it('turns the project bridge on, rebuilding a project that already built', () => {
+    const project = createProject({ bridge: false });
+    const frame = mount();
+    preview = new PlaygroundPreview({ project, frame });
+    expect(project.bridge).toContain(`sessionId: "abc"`);
+    expect(project.buildCoalesced).toHaveBeenCalledTimes(1);
+    // the rebuild's buildDone brings the first load, bridged
+    expect(frame.src).toBe('');
+    project.emit('buildDone');
+    expect(preview.frame.src).toBe(`http://localhost:3000${previewUrl}`);
+  });
+
+  it('leaves an unbuilt project to its first build after turning the bridge on', () => {
+    const project = createProject({ bridge: false, built: false });
+    preview = new PlaygroundPreview({ project, frame: mount() });
+    expect(project.bridge).toContain('sui-playground-preview');
+    expect(project.buildCoalesced).not.toHaveBeenCalled();
   });
 
   it('waits for the first build before loading', () => {

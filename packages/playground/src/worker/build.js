@@ -1,5 +1,4 @@
 import { getContentType, isHTMLFile, isScriptFile, needsTranspile } from '../files.js';
-import { previewBridge } from '../preview/bridge.js';
 import { rewriteBareImports } from './resolve.js';
 
 /*
@@ -81,15 +80,19 @@ const injectHeadHTML = (html, headHTML) => {
   return insertInHead(html, headHTML);
 };
 
-/* first in <head>, so the preview channel is open before any app script runs */
-const injectBridge = (html, sessionId) => {
-  if (!sessionId || !isDocument(html)) {
+/*
+  The preview bridge, when a project carries one, goes first in <head> so its
+  channel is open before any app script runs. The markup comes from the page
+  side, so the worker ships none of it for projects without a preview.
+*/
+const injectBridge = (html, bridge) => {
+  if (!bridge || !isDocument(html)) {
     return html;
   }
-  return insertInHead(html, previewBridge(sessionId));
+  return insertInHead(html, bridge);
 };
 
-export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, sessionId, jsxImportSource }) => {
+export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, jsxImportSource, bridge }) => {
   const dependencies = readDependencies(files);
   const projectMap = importMap ?? readImportMap(files);
   const diagnostics = {};
@@ -114,7 +117,7 @@ export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, sessi
     if (isHTMLFile(file.name)) {
       let html = injectImportMap(file.content, projectMap);
       html = injectHeadHTML(html, headHTML);
-      html = injectBridge(html, sessionId);
+      html = injectBridge(html, bridge);
       output.push({ ...file, content: html });
       continue;
     }

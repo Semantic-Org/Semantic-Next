@@ -41,11 +41,11 @@ const rpc = createRpc({
   },
 });
 
-rpc.handle('build', async ({ sessionId, files, importMap, cdnBaseUrl, headHTML, jsxImportSource }) => {
+rpc.handle('build', async ({ sessionId, files, importMap, cdnBaseUrl, headHTML, jsxImportSource, bridge }) => {
   const session = getSession(sessionId);
   session.files = files;
   session.languageService?.bumpVersion();
-  return buildFiles({ files, importMap, cdnBaseUrl, headHTML, sessionId, jsxImportSource });
+  return buildFiles({ files, importMap, cdnBaseUrl, headHTML, jsxImportSource, bridge });
 });
 
 rpc.handle('updateFile', ({ sessionId, name, content }) => {
