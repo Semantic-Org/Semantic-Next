@@ -54,6 +54,11 @@ export const isTypescriptFile = (name) => {
   return ['ts', 'tsx'].includes(getExtension(name));
 };
 
+/* files a browser cant run as written: typescript, and jsx in either language */
+export const needsTranspile = (name) => {
+  return ['ts', 'tsx', 'jsx'].includes(getExtension(name));
+};
+
 export const isHTMLFile = (name) => {
   return getExtension(name) === 'html';
 };

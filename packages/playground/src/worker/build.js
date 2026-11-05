@@ -1,11 +1,14 @@
-import { getContentType, isHTMLFile, isScriptFile, isTypescriptFile } from '../files.js';
+import { getContentType, isHTMLFile, isScriptFile, needsTranspile } from '../files.js';
 import { previewBridge } from '../preview/bridge.js';
 import { rewriteBareImports } from './resolve.js';
 
 /*
   Transforms a project's files into servable output. JS files get bare-import
-  rewriting only (fast path, no TypeScript load). TS files load the TypeScript
-  module lazily — render-only sessions with plain JS never pay its parse cost.
+  rewriting only (fast path, no TypeScript load). TS and JSX files load the
+  TypeScript module lazily — render-only sessions with plain JS never pay its
+  parse cost. JSX compiles to the automatic runtime, so React and Preact apps
+  need no compiler of their own: the runtime import resolves like any other
+  bare specifier.
 */
 
 let typescriptModule;
@@ -86,7 +89,7 @@ const injectBridge = (html, sessionId) => {
   return insertInHead(html, previewBridge(sessionId));
 };
 
-export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, sessionId }) => {
+export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, sessionId, jsxImportSource }) => {
   const dependencies = readDependencies(files);
   const projectMap = importMap ?? readImportMap(files);
   const diagnostics = {};
@@ -95,16 +98,16 @@ export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, sessi
   for (const file of files) {
     if (isScriptFile(file.name)) {
       let source = file.content;
-      if (isTypescriptFile(file.name)) {
+      if (needsTranspile(file.name)) {
         const typescript = await loadTypescript();
-        const transpiled = typescript.transpile(source, file.name);
+        const transpiled = typescript.transpile(source, file.name, { jsxImportSource });
         source = transpiled.code;
         if (transpiled.diagnostics?.length) {
           diagnostics[file.name] = transpiled.diagnostics;
         }
       }
       source = rewriteBareImports({ source, importMap: projectMap, cdnBaseUrl, dependencies });
-      const name = file.name.replace(/\.tsx?$/, '.js');
+      const name = file.name.replace(/\.(tsx?|jsx)$/, '.js');
       output.push({ name, content: source, contentType: getContentType(name) });
       continue;
     }

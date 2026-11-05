@@ -38,6 +38,8 @@ export class PlaygroundProject {
     // document served for a navigation to a path with no file, i.e. 'index.html'
     // for an app that owns its own urls
     fallback,
+    // package whose jsx-runtime .jsx and .tsx files compile against, i.e. 'preact'
+    jsxImportSource = 'react',
     sessionId = generateId(),
   } = {}) {
     const scope = sandboxUrl.endsWith('/') ? sandboxUrl : `${sandboxUrl}/`;
@@ -46,6 +48,7 @@ export class PlaygroundProject {
     this.cdnBaseUrl = cdnBaseUrl;
     this.headHTML = headHTML;
     this.fallback = fallback;
+    this.jsxImportSource = jsxImportSource;
     this.files = normalizeFiles(files);
     this.diagnostics = {};
     this.listeners = new Map();
@@ -120,6 +123,7 @@ export class PlaygroundProject {
         importMap: this.importMap,
         cdnBaseUrl: this.cdnBaseUrl,
         headHTML: this.headHTML,
+        jsxImportSource: this.jsxImportSource,
       }, { timeout: 30000 });
       if (sequence !== this.buildCounter) {
         return;

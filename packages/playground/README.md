@@ -59,7 +59,9 @@ Import-map entries pass through untouched — the map is injected into served do
 
 ## Build shape
 
-JS files take the fast path: `es-module-lexer` scan plus import rewriting, no TypeScript load. The TypeScript module (a ~3.5MB lazy chunk) loads only when a project contains `.ts` files or requests completions/hover/diagnostics — render-only sessions never pay for it.
+JS files take the fast path: `es-module-lexer` scan plus import rewriting, no TypeScript load. The TypeScript module (a ~3.5MB lazy chunk) loads only when a project contains `.ts`, `.tsx` or `.jsx` files or requests completions/hover/diagnostics — render-only sessions never pay for it.
+
+JSX compiles through TypeScript's automatic runtime: `.jsx` and `.tsx` files emit `import { jsx } from 'react/jsx-runtime'`, which resolves like any bare specifier (CDN, or the import map). `new PlaygroundProject({ jsxImportSource: 'preact' })` points it at another runtime. Outputs rename to `.js`, so imports between files use the `.js` name, as with TypeScript. Frameworks whose JSX needs their own compiler (Solid, Vue) are out of scope: the build's one compiler is TypeScript.
 
 ## Host head injection
 

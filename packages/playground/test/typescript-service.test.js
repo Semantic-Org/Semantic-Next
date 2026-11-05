@@ -174,3 +174,14 @@ describe('createLanguageService', () => {
     service.dispose();
   });
 });
+
+describe('transpile jsx', () => {
+  it('emits the automatic runtime for jsx in either language', () => {
+    const jsx = transpile(`export const App = () => <p>Hi</p>;`, 'App.jsx');
+    const tsx = transpile(`export const App = (): any => <p>Hi</p>;`, 'App.tsx', { jsxImportSource: 'preact' });
+    expect(jsx.code).toContain('from "react/jsx-runtime"');
+    expect(jsx.diagnostics).toEqual([]);
+    expect(tsx.code).toContain('from "preact/jsx-runtime"');
+    expect(tsx.code).not.toContain('any');
+  });
+});

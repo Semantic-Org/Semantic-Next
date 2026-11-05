@@ -114,6 +114,38 @@ describe('buildFiles', () => {
     expect(output.content).toContain('const p = { x: 1 }');
   });
 
+  it('compiles jsx to the automatic runtime and resolves it through the cdn', async () => {
+    const result = await buildFiles({
+      cdnBaseUrl,
+      files: [{
+        name: 'App.jsx',
+        content: `export const App = () => <h1 className="title">Hi</h1>;`,
+        contentType: 'application/javascript',
+      }],
+    });
+    const output = find(result, 'App.js');
+    expect(output).toBeDefined();
+    expect(output.content).toContain('react@latest/jsx-runtime/+esm');
+    expect(output.content).toContain('className: "title"');
+    expect(output.content).not.toContain('<h1');
+  });
+
+  it('points jsx at another runtime through jsxImportSource', async () => {
+    const result = await buildFiles({
+      cdnBaseUrl,
+      jsxImportSource: 'preact',
+      files: [
+        {
+          name: 'package.json',
+          content: '{ "dependencies": { "preact": "^10.26.0" } }',
+          contentType: 'application/json',
+        },
+        { name: 'App.tsx', content: `export const App = (): any => <p>Hi</p>;`, contentType: 'application/javascript' },
+      ],
+    });
+    expect(find(result, 'App.js').content).toContain('preact@10.26.0/jsx-runtime/+esm');
+  });
+
   it('reads dependency versions from a project package.json', async () => {
     const result = await buildFiles({
       cdnBaseUrl,
