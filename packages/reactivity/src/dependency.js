@@ -2,9 +2,16 @@ import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
-  // a small edge array grows by copy so it holds exactly its entries. a push onto a
-  // one-element array grows its store to seventeen slots. past four, push amortizes
-  // so a wide fan-out stays linear
+  // edge arrays grow by exact copy below four entries and by push after. a push onto
+  // a full backing store grows it by half plus sixteen slots, so the second entry
+  // pushed onto a one-element literal lands in a seventeen-slot store, larger than
+  // the Set these arrays replaced. measured 2026-11-05, Chrome 156 headless, pointer
+  // compression, 100k containers each, forced GC, retained bytes per container with
+  // the held objects subtracted: one-element literal 36, plus one push 116, plus one
+  // exact copy 48, two-element literal 48. Set with one entry 84, with two 92.
+  // literal plus four pushes 140, exact copies to four plus one push 156. past four
+  // the exact copy loses a little, so push takes over there and a wide fan-out
+  // stays amortized.
   static grow(array, value) {
     switch (array.length) {
       case 1:
@@ -55,8 +62,7 @@ export class Dependency {
   // returned so the reaction can record it
   addSubscriber(reaction, position) {
     const subscribers = this.subscribers;
-    // the first edge is a one-element literal. push onto an empty array grows its
-    // store to sixteen slots, more than the Set these arrays replaced
+    // a one-element literal, push onto an empty array grows its store, see grow
     if (subscribers === null) {
       this.subscribers = [reaction];
       this.subscriberSlots = [position];
