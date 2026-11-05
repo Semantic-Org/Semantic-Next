@@ -1,4 +1,4 @@
-import { RangeSetBuilder, StateEffect, StateField } from '@codemirror/state';
+import { Facet, RangeSetBuilder, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 
 /*
@@ -13,6 +13,9 @@ import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 
   Modes: 'on' (hide and fold), 'off' (regions visible, markers hidden),
   'off-visible' (markers shown as literal text).
+
+  The field also keeps the ranges it took out of view, so a gutter can number
+  the lines the reader sees instead of the document's.
 */
 
 const keywords = {
@@ -115,12 +118,13 @@ class FoldWidget extends WidgetType {
 
 const buildDecorations = ({ doc, mode, expanded }) => {
   const builder = new RangeSetBuilder();
+  const hidden = [];
   if (mode === 'off-visible') {
-    return builder.finish();
+    return { decorations: builder.finish(), hidden };
   }
   const text = doc.toString();
   if (!hasMarkers(text)) {
-    return builder.finish();
+    return { decorations: builder.finish(), hidden };
   }
   const { regions, orphans } = findRegions(text);
   const ranges = [];
@@ -155,33 +159,56 @@ const buildDecorations = ({ doc, mode, expanded }) => {
       continue;
     }
     builder.add(range.from, range.to, range.decoration);
+    hidden.push({ from: range.from, to: range.to });
     coveredTo = range.to;
   }
-  return builder.finish();
+  return { decorations: builder.finish(), hidden };
 };
 
-export const pragmas = (mode = 'on') => {
-  const field = StateField.define({
-    create(state) {
-      return { expanded: new Set(), decorations: buildDecorations({ doc: state.doc, mode, expanded: new Set() }) };
-    },
-    update(value, transaction) {
-      /* expanded folds are keyed by start-marker position, mapped through edits */
-      let expanded = value.expanded;
-      if (transaction.docChanged && expanded.size) {
-        expanded = new Set([...expanded].map(position => transaction.changes.mapPos(position)));
+const pragmaMode = Facet.define({ combine: values => values[0] ?? 'on' });
+
+const pragmaField = StateField.define({
+  create(state) {
+    return {
+      expanded: new Set(),
+      ...buildDecorations({ doc: state.doc, mode: state.facet(pragmaMode), expanded: new Set() }),
+    };
+  },
+  update(value, transaction) {
+    /* expanded folds are keyed by start-marker position, mapped through edits */
+    let expanded = value.expanded;
+    if (transaction.docChanged && expanded.size) {
+      expanded = new Set([...expanded].map(position => transaction.changes.mapPos(position)));
+    }
+    for (const effect of transaction.effects) {
+      if (effect.is(expandFold)) {
+        expanded = new Set(expanded).add(effect.value);
       }
-      for (const effect of transaction.effects) {
-        if (effect.is(expandFold)) {
-          expanded = new Set(expanded).add(effect.value);
-        }
-      }
-      if (!transaction.docChanged && expanded === value.expanded) {
-        return value;
-      }
-      return { expanded, decorations: buildDecorations({ doc: transaction.newDoc, mode, expanded }) };
-    },
-    provide: (self) => EditorView.decorations.from(self, value => value.decorations),
-  });
-  return [field];
+    }
+    if (!transaction.docChanged && expanded === value.expanded) {
+      return value;
+    }
+    const mode = transaction.state.facet(pragmaMode);
+    return { expanded, ...buildDecorations({ doc: transaction.newDoc, mode, expanded }) };
+  },
+  provide: (field) => EditorView.decorations.from(field, value => value.decorations),
+});
+
+export const pragmas = (mode = 'on') => [pragmaMode.of(mode), pragmaField];
+
+/*
+  Line number as the reader sees it: the document line less the line breaks
+  hidden before it, so numbering reads continuously across hidden regions
+*/
+export const visibleLineNumber = (state, lineNumber) => {
+  let removed = 0;
+  for (const range of state.field(pragmaField, false)?.hidden ?? []) {
+    const fromLine = state.doc.lineAt(range.from).number;
+    if (lineNumber <= fromLine) {
+      break;
+    }
+    const toLine = state.doc.lineAt(range.to).number;
+    removed += Math.min(lineNumber, toLine) - fromLine;
+  }
+  return lineNumber - removed;
 };

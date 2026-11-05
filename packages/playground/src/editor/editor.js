@@ -17,7 +17,7 @@ import { adoptStylesheet } from '@semantic-ui/utils';
 
 import { highlightStyle } from './highlight.js';
 import { getLanguage, getLanguageFamily } from './languages.js';
-import { pragmas } from './pragmas.js';
+import { pragmas, visibleLineNumber } from './pragmas.js';
 
 /*
   Editor adapter — CodeMirror binding. The surface speaks filenames, plain
@@ -59,8 +59,12 @@ export const measureEditor = (element) => {
 };
 
 /* classed markers so hosts can style open/closed states — CM's defaults are bare text */
-const gutters = () => [
-  cmLineNumbers(),
+const gutters = (lineNumbers) => [
+  cmLineNumbers(
+    lineNumbers === 'continuous'
+      ? { formatNumber: (lineNumber, state) => String(visibleLineNumber(state, lineNumber)) }
+      : {},
+  ),
   foldGutter({
     markerDOM(open) {
       const marker = document.createElement('span');
@@ -73,6 +77,7 @@ const gutters = () => [
 
 export const createEditor = ({
   parent,
+  // true, or 'continuous' to number the lines the reader sees, with no gap at a hidden region
   lineNumbers = false,
   lineWrapping = false,
   readonly = false,
@@ -133,7 +138,7 @@ export const createEditor = ({
       ...completionKeymap,
       indentWithTab,
     ]),
-    compartments.lineNumbers.of(lineNumbers ? gutters() : []),
+    compartments.lineNumbers.of(lineNumbers ? gutters(lineNumbers) : []),
     compartments.lineWrapping.of(lineWrapping ? EditorView.lineWrapping : []),
     compartments.readonly.of(readonly ? EditorState.readOnly.of(true) : []),
   ];
@@ -211,7 +216,7 @@ export const createEditor = ({
     },
 
     setLineNumbers(enabled) {
-      view.dispatch({ effects: compartments.lineNumbers.reconfigure(enabled ? gutters() : []) });
+      view.dispatch({ effects: compartments.lineNumbers.reconfigure(enabled ? gutters(enabled) : []) });
     },
 
     setLineWrapping(enabled) {

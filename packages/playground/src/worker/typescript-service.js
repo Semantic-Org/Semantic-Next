@@ -25,9 +25,14 @@ const compilerOptions = {
   isolatedModules: true,
 };
 
-export const transpile = (source, fileName) => {
+/*
+  Emits jsx against the automatic runtime so React and Preact apps run with no
+  compiler of their own. The language service keeps jsx preserved: a runtime
+  it cant resolve would otherwise error on every tag
+*/
+export const transpile = (source, fileName, { jsxImportSource } = {}) => {
   const result = ts.transpileModule(source, {
-    compilerOptions,
+    compilerOptions: { ...compilerOptions, jsx: ts.JsxEmit.ReactJSX, jsxImportSource },
     fileName,
     reportDiagnostics: true,
   });

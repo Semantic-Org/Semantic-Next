@@ -2,9 +2,11 @@ import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { describe, expect, it } from 'vitest';
 
-import { pragmas } from '../src/editor/pragmas.js';
+import { pragmas, visibleLineNumber } from '../src/editor/pragmas.js';
 
 const create = (doc, mode = 'on') => EditorState.create({ doc, extensions: pragmas(mode) });
+
+const numbering = (state, lines) => lines.map(line => visibleLineNumber(state, line));
 
 const decorationRanges = (state) => {
   const ranges = [];
@@ -62,5 +64,43 @@ describe('pragmas', () => {
   it('renders nothing in off-visible mode', () => {
     const state = create(`/* sui-hide */x/* sui-hide-end */`, 'off-visible');
     expect(decorationRanges(state)).toHaveLength(0);
+  });
+});
+
+describe('visibleLineNumber', () => {
+  const doc = [
+    'import { router } from "nav-router";',
+    '',
+    '/* playground-hide */',
+    'const base = "/sandbox";',
+    'history.replaceState(null, "", base);',
+    '/* playground-hide-end */',
+    'const app = router({ base });',
+    'await app.start();',
+  ].join('\n');
+
+  it('numbers the lines the reader sees continuously across a hidden region', () => {
+    const state = create(doc);
+    expect(numbering(state, [1, 2, 7, 8])).toEqual([1, 2, 3, 4]);
+  });
+
+  it('counts only the line breaks inside a region that starts mid-line', () => {
+    const state = create(`a /* playground-hide */b\nc/* playground-hide-end */ d\ne`);
+    expect(numbering(state, [1, 3])).toEqual([1, 2]);
+  });
+
+  it('closes the gap a hidden marker line leaves when regions are shown', () => {
+    const state = create(doc, 'off');
+    expect(numbering(state, [1, 2, 4, 5, 7, 8])).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
+  it('keeps document numbering when nothing is hidden', () => {
+    expect(numbering(create(doc, 'off-visible'), [1, 7, 8])).toEqual([1, 7, 8]);
+    expect(numbering(create('one\ntwo'), [1, 2])).toEqual([1, 2]);
+  });
+
+  it('follows edits above a hidden region', () => {
+    const state = create(doc).update({ changes: { from: 0, insert: 'const x = 1;\n' } }).state;
+    expect(numbering(state, [1, 2, 3, 8, 9])).toEqual([1, 2, 3, 4, 5]);
   });
 });

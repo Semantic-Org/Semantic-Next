@@ -33,12 +33,13 @@ self.addEventListener('message', (event) => {
 
 const connectSession = (sessionId, port) => {
   // reconnect replaces any prior port — idempotent registration, never two live ports
-  const session = { port, files: new Map() };
+  const session = { port, files: new Map(), fallback: undefined };
   sessions.set(sessionId, session);
   port.onmessage = (event) => {
-    const { type, requestId, files } = event.data ?? {};
+    const { type, requestId, files, fallback } = event.data ?? {};
     if (type === 'setFiles') {
       session.files = new Map(files.map(file => [file.name, file]));
+      session.fallback = fallback;
       settleRecovery(sessionId);
       port.postMessage({ type: 'ack', requestId });
     }
@@ -95,10 +96,33 @@ const parseSessionUrl = (url) => {
   if (parts[0] !== namespace || !parts[1]) {
     return null;
   }
-  return { sessionId: parts[1], filePath: parts.slice(2).join('/') };
+  return {
+    sessionId: parts[1],
+    filePath: parts.slice(2).join('/'),
+    root: `${scopePath}${namespace}/${parts[1]}/`,
+  };
 };
 
-const respond = async ({ sessionId, filePath }) => {
+/*
+  A fallback document served for a deep path keeps its relative urls (./app.js)
+  resolving from the session root, where the author wrote them against. A
+  document that sets its own base is left alone
+*/
+const withBase = (file, root) => {
+  if (!file || /<base\s/i.test(file.content)) {
+    return file;
+  }
+  const base = `<base href="${root}">`;
+  const headMatch = file.content.match(/<head(\s[^>]*)?>/i);
+  const content = headMatch
+    ? `${file.content.slice(0, headMatch.index + headMatch[0].length)}${base}${
+      file.content.slice(headMatch.index + headMatch[0].length)
+    }`
+    : `${base}${file.content}`;
+  return { ...file, content };
+};
+
+const respond = async ({ sessionId, filePath, root }, request) => {
   let session = sessions.get(sessionId);
   if (!session || session.files.size === 0) {
     await requestRecovery(sessionId);
@@ -110,7 +134,12 @@ const respond = async ({ sessionId, filePath }) => {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   }
-  const file = session.files.get(filePath);
+  // a document load of a path with no file gets the session's fallback, so an
+  // app that owns its urls survives a reload or a shared link. asset fetches still 404
+  let file = session.files.get(filePath);
+  if (!file && request.mode === 'navigate' && session.fallback) {
+    file = withBase(session.files.get(session.fallback), root);
+  }
   if (!file) {
     return new Response(`File not found: ${filePath}`, { status: 404 });
   }
@@ -136,6 +165,6 @@ self.addEventListener('fetch', (event) => {
   }
   const parsed = parseSessionUrl(event.request.url);
   if (parsed) {
-    event.respondWith(respond(parsed));
+    event.respondWith(respond(parsed, event.request));
   }
 });

@@ -35,6 +35,14 @@ export class PlaygroundProject {
     // HTML injected into the <head> of every served document at build time,
     // including documents the project authors itself — editor source is untouched
     headHTML,
+    // document served for a navigation to a path with no file, i.e. 'index.html'
+    // for an app that owns its own urls
+    fallback,
+    // package whose jsx-runtime .jsx and .tsx files compile against, i.e. 'preact'
+    jsxImportSource = 'react',
+    // markup injected first into the <head> of every served document: the bridge a
+    // PlaygroundPreview talks through, which sets it. empty, documents serve as before
+    bridge = '',
     sessionId = generateId(),
   } = {}) {
     const scope = sandboxUrl.endsWith('/') ? sandboxUrl : `${sandboxUrl}/`;
@@ -42,6 +50,9 @@ export class PlaygroundProject {
     this.importMap = importMap;
     this.cdnBaseUrl = cdnBaseUrl;
     this.headHTML = headHTML;
+    this.fallback = fallback;
+    this.jsxImportSource = jsxImportSource;
+    this.bridge = bridge;
     this.files = normalizeFiles(files);
     this.diagnostics = {};
     this.listeners = new Map();
@@ -116,12 +127,14 @@ export class PlaygroundProject {
         importMap: this.importMap,
         cdnBaseUrl: this.cdnBaseUrl,
         headHTML: this.headHTML,
+        jsxImportSource: this.jsxImportSource,
+        bridge: this.bridge,
       }, { timeout: 30000 });
       if (sequence !== this.buildCounter) {
         return;
       }
       this.diagnostics = result.diagnostics;
-      await this.session.setFiles(result.files);
+      await this.session.setFiles(result.files, { fallback: this.fallback });
       // the push can take seconds during session recovery — a newer build may have started
       if (sequence !== this.buildCounter) {
         return;

@@ -174,3 +174,26 @@ describe('createLanguageService', () => {
     service.dispose();
   });
 });
+
+describe('transpile jsx', () => {
+  it('emits the automatic runtime for jsx in either language', () => {
+    const jsx = transpile(`export const App = () => <p>Hi</p>;`, 'App.jsx');
+    const tsx = transpile(`export const App = (): any => <p>Hi</p>;`, 'App.tsx', { jsxImportSource: 'preact' });
+    expect(jsx.code).toContain('from "react/jsx-runtime"');
+    expect(jsx.diagnostics).toEqual([]);
+    expect(tsx.code).toContain('from "preact/jsx-runtime"');
+    expect(tsx.code).not.toContain('any');
+  });
+});
+
+describe('transpile plain typescript', () => {
+  it('emits the same output whatever the jsx runtime', () => {
+    const source =
+      `interface Point { x: number }\nexport const p: Point = { x: 1 };\nconst id = <T,>(v: T) => v;\nexport const n = id(2);`;
+    const plain = transpile(source, 'index.ts');
+    const withRuntime = transpile(source, 'index.ts', { jsxImportSource: 'preact' });
+    expect(withRuntime.code).toBe(plain.code);
+    expect(plain.code).not.toContain('jsx-runtime');
+    expect(plain.diagnostics).toEqual([]);
+  });
+});
