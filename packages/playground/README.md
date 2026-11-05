@@ -67,6 +67,10 @@ JSX compiles through TypeScript's automatic runtime: `.jsx` and `.tsx` files emi
 
 `new PlaygroundProject({ headHTML })` injects host-supplied HTML into the `<head>` of every served document at build time, alongside the import map — including documents the project authors itself. Fragments serve byte-identical and editor source is untouched, so an embedding host can sync its theme into previews, add instrumentation, or set a `<base>` without polluting what the user reads and edits. Mechanism lives here; policy (what to inject) stays with the host.
 
+## Editor theming
+
+`createEditor({ theme })` adopts CSS text into the editor's root. Nest rules under `.cm-editor` (`.cm-editor .cm-gutters { … }`, `.cm-editor .cm-cursor { … }`): CodeMirror's base theme scopes its own rules under a generated class at that same specificity, and the adopted sheet comes later in the cascade, so nested rules win. A flat `.cm-gutters { … }` loses on specificity and needs `!important`.
+
 ## Pragmas
 
 Special comments shape what the editor shows without changing what builds:
