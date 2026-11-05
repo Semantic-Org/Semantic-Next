@@ -3,7 +3,7 @@
   session ports. Implements the ServingAdapter contract:
 
     connect() → Promise<void>
-    createSession(sessionId, { onRecover }) → { baseUrl, setFiles, destroy }
+    createSession(sessionId, { onRecover }) → { baseUrl, setFiles(files, { fallback }), destroy }
     destroy()
 
   baseUrl is opaque to consumers. A cross-origin implementation (separate sandbox
@@ -122,7 +122,7 @@ export const createServingAdapter = ({
 
   const createSession = (sessionId, { onRecover } = {}) => {
     let portPromise = openPort(sessionId);
-    let lastFiles = null;
+    let lastSetFiles = null;
     let requestCounter = 0;
 
     const sendOnce = async (message, timeout) => {
@@ -159,16 +159,17 @@ export const createServingAdapter = ({
       }
       catch {
         portPromise = openPort(sessionId);
-        const retry = message.type === 'setFiles' ? { ...message, files: lastFiles } : message;
+        const retry = message.type === 'setFiles' ? lastSetFiles : message;
         return sendOnce(retry, 10000);
       }
     };
 
     const session = {
       baseUrl: `${scope}${namespace}/${sessionId}/`,
-      async setFiles(files) {
-        lastFiles = files;
-        await send({ type: 'setFiles', files });
+      // fallback: the document served for navigations to paths with no file
+      async setFiles(files, { fallback } = {}) {
+        lastSetFiles = { type: 'setFiles', files, fallback };
+        await send(lastSetFiles);
       },
       async destroy() {
         sessions.delete(sessionId);
@@ -177,8 +178,8 @@ export const createServingAdapter = ({
       /* service worker restarted and lost state — reconnect and re-push */
       recover() {
         portPromise = openPort(sessionId);
-        if (lastFiles) {
-          send({ type: 'setFiles', files: lastFiles })
+        if (lastSetFiles) {
+          send(lastSetFiles)
             .then(() => onRecover?.())
             .catch((error) => {
               // the 404 recovery page remains the backstop; surface the failure instead of wedging silently

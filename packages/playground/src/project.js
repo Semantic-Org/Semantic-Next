@@ -35,6 +35,9 @@ export class PlaygroundProject {
     // HTML injected into the <head> of every served document at build time,
     // including documents the project authors itself — editor source is untouched
     headHTML,
+    // document served for a navigation to a path with no file, i.e. 'index.html'
+    // for an app that owns its own urls
+    fallback,
     sessionId = generateId(),
   } = {}) {
     const scope = sandboxUrl.endsWith('/') ? sandboxUrl : `${sandboxUrl}/`;
@@ -42,6 +45,7 @@ export class PlaygroundProject {
     this.importMap = importMap;
     this.cdnBaseUrl = cdnBaseUrl;
     this.headHTML = headHTML;
+    this.fallback = fallback;
     this.files = normalizeFiles(files);
     this.diagnostics = {};
     this.listeners = new Map();
@@ -121,7 +125,7 @@ export class PlaygroundProject {
         return;
       }
       this.diagnostics = result.diagnostics;
-      await this.session.setFiles(result.files);
+      await this.session.setFiles(result.files, { fallback: this.fallback });
       // the push can take seconds during session recovery — a newer build may have started
       if (sequence !== this.buildCounter) {
         return;

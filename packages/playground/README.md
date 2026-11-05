@@ -30,6 +30,8 @@ Every project file gets a real URL at `{sandboxUrl}sui-playground-v1/{sessionId}
 
 The service worker holds sessions fully materialized. Its failure model is recovery, not prevention: a terminated or replaced worker broadcasts for the owning page, which reconnects and re-pushes; a session port that stops answering is reopened and the send retried. Previews recover by iframe replacement, never reload.
 
+An app that owns its URLs (a client-side router at `/team/acme`) has paths that are not files. `new PlaygroundProject({ fallback: 'index.html' })` serves that document for any navigation whose path has no file, so a reload, an "open in new tab" or a shared preview link lands in the app, and `previewUrl` itself opens it at its root. Only document loads fall back; a fetch for a missing asset still 404s.
+
 ## Resolution
 
 Import-map entries pass through untouched — the map is injected into served documents and the browser resolves natively, which is what lets mapped packages fetch sibling assets (wasm, fonts). Bare specifiers outside the map rewrite to CDN ESM URLs (jsdelivr `/+esm` semantics), versioned from the project's `package.json` when present.

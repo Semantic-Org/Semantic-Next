@@ -33,12 +33,13 @@ self.addEventListener('message', (event) => {
 
 const connectSession = (sessionId, port) => {
   // reconnect replaces any prior port — idempotent registration, never two live ports
-  const session = { port, files: new Map() };
+  const session = { port, files: new Map(), fallback: undefined };
   sessions.set(sessionId, session);
   port.onmessage = (event) => {
-    const { type, requestId, files } = event.data ?? {};
+    const { type, requestId, files, fallback } = event.data ?? {};
     if (type === 'setFiles') {
       session.files = new Map(files.map(file => [file.name, file]));
+      session.fallback = fallback;
       settleRecovery(sessionId);
       port.postMessage({ type: 'ack', requestId });
     }
@@ -98,7 +99,7 @@ const parseSessionUrl = (url) => {
   return { sessionId: parts[1], filePath: parts.slice(2).join('/') };
 };
 
-const respond = async ({ sessionId, filePath }) => {
+const respond = async ({ sessionId, filePath }, request) => {
   let session = sessions.get(sessionId);
   if (!session || session.files.size === 0) {
     await requestRecovery(sessionId);
@@ -110,7 +111,10 @@ const respond = async ({ sessionId, filePath }) => {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   }
-  const file = session.files.get(filePath);
+  // a document load of a path with no file gets the session's fallback, so an
+  // app that owns its urls survives a reload or a shared link. asset fetches still 404
+  const file = session.files.get(filePath)
+    ?? (request.mode === 'navigate' && session.fallback ? session.files.get(session.fallback) : undefined);
   if (!file) {
     return new Response(`File not found: ${filePath}`, { status: 404 });
   }
@@ -136,6 +140,6 @@ self.addEventListener('fetch', (event) => {
   }
   const parsed = parseSessionUrl(event.request.url);
   if (parsed) {
-    event.respondWith(respond(parsed));
+    event.respondWith(respond(parsed, event.request));
   }
 });
