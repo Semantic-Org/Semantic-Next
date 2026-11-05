@@ -12,6 +12,7 @@ import {
   scheduleFlush,
   Scheduler,
   setStackCapture,
+  settled,
   setTracing,
   Signal,
 } from '@semantic-ui/reactivity';
@@ -605,6 +606,282 @@ describe('Dependency', () => {
     flush();
     expect(third).toHaveBeenCalledTimes(3);
     expect(b.dependency.subscribers.length).toBe(2);
+  });
+
+  describe('edges across runs', () => {
+    it('a stable re-run touches no edge array on either side', () => {
+      const a = new Signal(0);
+      const b = new Signal(0);
+      const c = new Signal(0);
+      const signals = [a, b, c];
+      const r = reaction(() => {
+        a.get();
+        b.get();
+        c.get();
+      });
+      const before = signals.map((
+        s,
+      ) => [s.dependency.subscribers, s.dependency.subscriberSlots, s.dependency.subscriberSlots[0]]);
+      const dependencies = r.dependencies;
+      const slots = r.dependencySlots;
+      const removeAt = vi.spyOn(Dependency.prototype, 'removeAt');
+
+      a.set(1);
+      flush();
+
+      expect(removeAt).not.toHaveBeenCalled();
+      removeAt.mockRestore();
+      expect(r.dependency).toBe(a.dependency);
+      expect(r.dependencies).toBe(dependencies);
+      expect(r.dependencySlots).toBe(slots);
+      signals.forEach((s, i) => {
+        expect(s.dependency.subscribers).toBe(before[i][0]);
+        expect(s.dependency.subscriberSlots).toBe(before[i][1]);
+        expect(s.dependency.subscriberSlots[0]).toBe(before[i][2]);
+      });
+    });
+
+    it('reading the same dependencies in a new order keeps every edge once with correct slots', () => {
+      const a = new Signal(0);
+      const b = new Signal(0);
+      const c = new Signal(0);
+      const signals = [a, b, c];
+      // two earlier subscribers per signal: stopping the first moves the reaction
+      // within that signal's subscribers, and its own stop must still hit its slot
+      const firsts = signals.map((s) =>
+        reaction(() => {
+          s.get();
+        })
+      );
+      const seconds = signals.map((s) => {
+        const ran = vi.fn();
+        reaction(() => {
+          s.get();
+          ran();
+        });
+        return ran;
+      });
+      let reversed = false;
+      const runs = vi.fn();
+      const r = reaction(() => {
+        runs();
+        if (reversed) {
+          c.get();
+          b.get();
+          a.get();
+        }
+        else {
+          a.get();
+          b.get();
+          c.get();
+        }
+      });
+
+      reversed = true;
+      a.set(1);
+      flush();
+      expect(runs).toHaveBeenCalledTimes(2);
+      expect(r.dependency).toBe(c.dependency);
+      expect(r.dependencies.length).toBe(2);
+      expect(r.dependencies[0]).toBe(b.dependency);
+      expect(r.dependencies[1]).toBe(a.dependency);
+      for (const s of signals) {
+        expect(s.dependency.subscribers.length).toBe(3);
+      }
+
+      for (const first of firsts) {
+        first.stop();
+      }
+      r.stop();
+      for (const ran of seconds) {
+        ran.mockClear();
+      }
+      a.set(2);
+      b.set(2);
+      c.set(2);
+      flush();
+      expect(runs).toHaveBeenCalledTimes(2);
+      for (const ran of seconds) {
+        expect(ran).toHaveBeenCalledTimes(1);
+      }
+      for (const s of signals) {
+        expect(s.dependency.subscribers.length).toBe(1);
+      }
+    });
+
+    it('alternating reads drop exactly the unread edge and add exactly the new one', () => {
+      const toggle = new Signal(true);
+      const a = new Signal(0);
+      const b = new Signal(0);
+      const runs = vi.fn();
+      const r = reaction(() => {
+        runs();
+        if (toggle.get()) {
+          a.get();
+        }
+        else {
+          b.get();
+        }
+      });
+      expect(a.hasDependents()).toBe(true);
+      expect(b.hasDependents()).toBe(false);
+      const removeAt = vi.spyOn(Dependency.prototype, 'removeAt');
+
+      toggle.set(false);
+      flush();
+
+      expect(removeAt).toHaveBeenCalledTimes(1);
+      removeAt.mockRestore();
+      expect(a.hasDependents()).toBe(false);
+      expect(b.dependency.subscribers.length).toBe(1);
+      expect(r.dependency).toBe(toggle.dependency);
+      expect(r.dependencies.length).toBe(1);
+      expect(r.dependencies[0]).toBe(b.dependency);
+
+      a.set(1);
+      flush();
+      expect(runs).toHaveBeenCalledTimes(2);
+      b.set(1);
+      flush();
+      expect(runs).toHaveBeenCalledTimes(3);
+    });
+
+    it('a run that throws keeps last run’s edges, so a fix to an unread input re-triggers it', () => {
+      const a = new Signal(0);
+      const b = new Signal(0);
+      let shouldThrow = false;
+      const runs = vi.fn();
+      reaction(() => {
+        runs();
+        a.get();
+        if (shouldThrow) {
+          throw new Error('boom');
+        }
+        b.get();
+      });
+
+      shouldThrow = true;
+      a.set(1);
+      expect(() => flush()).toThrow('boom');
+      expect(runs).toHaveBeenCalledTimes(2);
+
+      shouldThrow = false;
+      b.set(1);
+      flush();
+      expect(runs).toHaveBeenCalledTimes(3);
+    });
+
+    it('an async run sweeps at settle, so an edge read after an await survives the sync body', async () => {
+      const a = new Signal(0);
+      const b = new Signal(0);
+      let release;
+      const runs = vi.fn();
+      reaction(async (comp) => {
+        a.get();
+        runs();
+        await new Promise((resolve) => {
+          release = resolve;
+        });
+        comp.track(() => b.get());
+      });
+      release();
+      await settled();
+      expect(b.hasDependents()).toBe(true);
+
+      a.set(1);
+      flush();
+      expect(runs).toHaveBeenCalledTimes(2);
+      // the second run has read a and is waiting, b is unread so far and still subscribed
+      expect(b.hasDependents()).toBe(true);
+      release();
+      await settled();
+      expect(b.hasDependents()).toBe(true);
+
+      b.set(1);
+      flush();
+      expect(runs).toHaveBeenCalledTimes(3);
+      release();
+      await settled();
+    });
+
+    // past four subscribers the array grows in place, the fifth and later slots must still be right
+    it('the fifth and later subscribers record the slot they actually took', () => {
+      const s = new Signal(0);
+      const runs = [];
+      const reactions = [];
+      for (let i = 0; i < 7; i++) {
+        const ran = vi.fn();
+        runs.push(ran);
+        reactions.push(reaction(() => {
+          s.get();
+          ran();
+        }));
+      }
+
+      // stopping the sixth must drop the sixth, not whoever sits at the slot it recorded
+      reactions[5].stop();
+      s.set(1);
+      flush();
+      runs.forEach((ran, i) => {
+        expect(ran).toHaveBeenCalledTimes(i === 5 ? 1 : 2);
+      });
+      expect(s.dependency.subscribers.length).toBe(6);
+    });
+
+    // a seeded walk over random read sets, stops and re-runs, checking after each
+    // step that every edge is recorded the same way on both sides
+    it('edge records on both sides agree under random read orders, stops and re-runs', () => {
+      let seed = 7;
+      const random = () => {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      const pick = (n) => Math.floor(random() * n);
+      const signals = [new Signal(0), new Signal(0), new Signal(0)];
+      const reactions = [];
+      const check = () => {
+        for (const r of reactions) {
+          const count = r.dependencyCount();
+          expect(r.cursor).toBe(count);
+          for (let position = 0; position < count; position++) {
+            const dependency = r.dependencyAt(position);
+            const slot = r.slotAt(position);
+            expect(dependency.subscribers[slot]).toBe(r);
+            expect(dependency.subscriberSlots[slot]).toBe(position === 0 ? -1 : position - 1);
+          }
+        }
+        for (const s of signals) {
+          const { subscribers, subscriberSlots } = s.dependency;
+          for (let slot = 0; subscribers !== null && slot < subscribers.length; slot++) {
+            const position = subscriberSlots[slot] === -1 ? 0 : subscriberSlots[slot] + 1;
+            expect(subscribers[slot].dependencyAt(position)).toBe(s.dependency);
+            expect(subscribers[slot].slotAt(position)).toBe(slot);
+          }
+        }
+      };
+
+      for (let step = 0; step < 300; step++) {
+        const roll = random();
+        if (roll < 0.25 || reactions.length < 3) {
+          reactions.push(reaction(() => {
+            const reads = 1 + pick(3);
+            for (let i = 0; i < reads; i++) {
+              signals[pick(3)].get();
+            }
+          }));
+        }
+        else if (roll < 0.8) {
+          signals[pick(3)].set(random());
+          flush();
+        }
+        else {
+          const index = pick(reactions.length);
+          reactions[index].stop();
+          reactions.splice(index, 1);
+        }
+        check();
+      }
+    });
   });
 
   it('stop() cleanly unsubscribes all of a reaction’s dependencies', () => {
