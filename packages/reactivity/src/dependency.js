@@ -31,11 +31,27 @@ export class Dependency {
     this.lastSubscriber = reaction;
     this.lastRun = reaction.runs;
     const subscribers = this.subscribers;
-    const dependencies = reaction.dependencies;
     const subscriberSlot = subscribers === null ? 0 : subscribers.length;
-    const dependencySlot = dependencies === null ? 0 : dependencies.length;
-    // the first edge is a one-element literal. push onto an empty array grows its
-    // store to sixteen slots, more than the Set these arrays replaced
+    // a reaction keeps its first dependency inline and records it here as slot -1,
+    // nearly every render binding reads one signal and allocates no arrays
+    let dependencySlot;
+    if (reaction.dependency === null) {
+      reaction.dependency = this;
+      reaction.dependencySlot = subscriberSlot;
+      dependencySlot = -1;
+    }
+    else if (reaction.dependencies === null) {
+      // the first array edge is a one-element literal. push onto an empty array
+      // grows its store to sixteen slots, more than the Set these arrays replaced
+      reaction.dependencies = [this];
+      reaction.dependencySlots = [subscriberSlot];
+      dependencySlot = 0;
+    }
+    else {
+      dependencySlot = reaction.dependencies.length;
+      reaction.dependencies.push(this);
+      reaction.dependencySlots.push(subscriberSlot);
+    }
     if (subscribers === null) {
       this.subscribers = [reaction];
       this.subscriberSlots = [dependencySlot];
@@ -43,14 +59,6 @@ export class Dependency {
     else {
       subscribers.push(reaction);
       this.subscriberSlots.push(dependencySlot);
-    }
-    if (dependencies === null) {
-      reaction.dependencies = [this];
-      reaction.dependencySlots = [subscriberSlot];
-    }
-    else {
-      dependencies.push(this);
-      reaction.dependencySlots.push(subscriberSlot);
     }
   }
 
@@ -102,7 +110,12 @@ export class Dependency {
     if (slot < subscribers.length) {
       subscribers[slot] = last;
       slots[slot] = lastSlot;
-      last.dependencySlots[lastSlot] = slot;
+      if (lastSlot === -1) {
+        last.dependencySlot = slot;
+      }
+      else {
+        last.dependencySlots[lastSlot] = slot;
+      }
     }
     if (subscribers.length === 0) {
       this.subscribers = null;

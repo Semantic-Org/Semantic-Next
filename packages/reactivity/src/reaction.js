@@ -11,8 +11,11 @@ export class Reaction {
 
   constructor(callback, { context, firstRun = true } = {}) {
     this.callback = callback;
-    // parallel to dependencies, the slot this reaction holds in each one's
-    // subscribers. null until the first read, see Dependency.depend
+    // the first dependency lives inline with the slot this reaction holds in its
+    // subscribers, further ones go to the parallel arrays. null until read, see
+    // Dependency.depend
+    this.dependency = null;
+    this.dependencySlot = -1;
     this.dependencies = null;
     this.dependencySlots = null;
     this.cleanups = null; // lazy only use if cleanup registered
@@ -51,6 +54,11 @@ export class Reaction {
 
   // drop every edge from both sides. run() re-tracks from zero, stop() ends here
   clearDependencies() {
+    if (this.dependency !== null) {
+      this.dependency.remove(this.dependencySlot);
+      this.dependency = null;
+      this.dependencySlot = -1;
+    }
     const dependencies = this.dependencies;
     if (dependencies === null) {
       return;
