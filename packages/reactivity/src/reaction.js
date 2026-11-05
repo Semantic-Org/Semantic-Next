@@ -11,7 +11,13 @@ export class Reaction {
 
   constructor(callback, { context, firstRun = true } = {}) {
     this.callback = callback;
-    this.dependencies = new Set();
+    // the first dependency lives inline with the slot this reaction holds in its
+    // subscribers, further ones go to the parallel arrays. null until read, see
+    // Dependency.depend
+    this.dependency = null;
+    this.dependencySlot = -1;
+    this.dependencies = null;
+    this.dependencySlots = null;
     this.cleanups = null; // lazy only use if cleanup registered
     this.async = null; // lazy only use if async
     this.runs = 0; // started executions, a magnitude probe for overreactivity
@@ -43,6 +49,57 @@ export class Reaction {
     this.cleanups = null;
     for (let i = 0; i < callbacks.length; i++) {
       callbacks[i]();
+    }
+  }
+
+  // drop every edge from both sides. run() re-tracks from zero, stop() ends here
+  clearDependencies() {
+    if (this.dependency !== null) {
+      this.dependency.removeAt(this.dependencySlot);
+      this.dependency = null;
+      this.dependencySlot = -1;
+    }
+    const dependencies = this.dependencies;
+    if (dependencies === null) {
+      return;
+    }
+    const slots = this.dependencySlots;
+    for (let i = 0; i < dependencies.length; i++) {
+      dependencies[i].removeAt(slots[i]);
+    }
+    this.dependencies = null;
+    this.dependencySlots = null;
+  }
+
+  // drop one edge from this side, the mirror of Dependency.removeAt for a manual
+  // Dependency.remove. slot is where this reaction sat in that dependency's subscribers
+  dropDependency(dependency, slot) {
+    if (this.dependency === dependency && this.dependencySlot === slot) {
+      this.dependency = null;
+      this.dependencySlot = -1;
+      return;
+    }
+    const dependencies = this.dependencies;
+    if (dependencies === null) {
+      return;
+    }
+    const slots = this.dependencySlots;
+    for (let i = 0; i < dependencies.length; i++) {
+      if (dependencies[i] !== dependency || slots[i] !== slot) {
+        continue;
+      }
+      const last = dependencies.pop();
+      const lastSlot = slots.pop();
+      if (i < dependencies.length) {
+        dependencies[i] = last;
+        slots[i] = lastSlot;
+        last.subscriberSlots[lastSlot] = i;
+      }
+      if (dependencies.length === 0) {
+        this.dependencies = null;
+        this.dependencySlots = null;
+      }
+      return;
     }
   }
 
@@ -94,10 +151,7 @@ export class Reaction {
     Scheduler.current = this;
     let result;
     try {
-      for (const dep of this.dependencies) {
-        dep.remove(this);
-      }
-      this.dependencies.clear();
+      this.clearDependencies();
       result = this.callback(this);
     }
     finally {
@@ -234,8 +288,7 @@ export class Reaction {
       this.async.rerun = false;
       // an in-flight run stays in settlingReactions, its body is still executing so settled() waits
     }
-    this.dependencies.forEach(dep => dep.remove(this));
-    this.dependencies.clear();
+    this.clearDependencies();
     this.fireCleanups();
   }
 }

@@ -378,7 +378,7 @@ describe('Dependency', () => {
   it('depend() outside a reaction is a no-op', () => {
     const dep = new Dependency();
     expect(() => dep.depend()).not.toThrow();
-    expect(dep.subscribers.size).toBe(0);
+    expect(dep.subscribers).toBe(null);
   });
 
   it('changed() with no subscribers does not throw or allocate', () => {
@@ -410,6 +410,201 @@ describe('Dependency', () => {
     flush();
     expect(a).toHaveBeenCalledTimes(1);
     expect(b).toHaveBeenCalledTimes(2);
+  });
+
+  it('stopping the middle of three subscribers leaves the other two running once each', () => {
+    const s = new Signal(0);
+    const first = vi.fn();
+    const middle = vi.fn();
+    const last = vi.fn();
+    reaction(() => {
+      s.get();
+      first();
+    });
+    const middleReaction = reaction(() => {
+      s.get();
+      middle();
+    });
+    reaction(() => {
+      s.get();
+      last();
+    });
+    middleReaction.stop();
+
+    s.set(1);
+    flush();
+    expect(first).toHaveBeenCalledTimes(2);
+    expect(middle).toHaveBeenCalledTimes(1);
+    expect(last).toHaveBeenCalledTimes(2);
+  });
+
+  // the subscriber that fills a stopped one's place must still be the one its own stop removes
+  it('a subscriber moved by another’s stop is the one its own stop removes', () => {
+    const s = new Signal(0);
+    const first = vi.fn();
+    const moved = vi.fn();
+    const added = vi.fn();
+    reaction(() => {
+      s.get();
+      first();
+    });
+    const middleReaction = reaction(() => {
+      s.get();
+    });
+    const movedReaction = reaction(() => {
+      s.get();
+      moved();
+    });
+    middleReaction.stop();
+    reaction(() => {
+      s.get();
+      added();
+    });
+    movedReaction.stop();
+
+    s.set(1);
+    flush();
+    expect(first).toHaveBeenCalledTimes(2);
+    expect(moved).toHaveBeenCalledTimes(1);
+    expect(added).toHaveBeenCalledTimes(2);
+  });
+
+  it('a run that stops reading a dependency drops only that edge', () => {
+    const a = new Signal(0);
+    const b = new Signal(0);
+    const c = new Signal(0);
+    const callback = vi.fn();
+    reaction((comp) => {
+      a.get();
+      if (comp.firstRun) {
+        b.get();
+      }
+      c.get();
+      callback();
+    });
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    a.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(2);
+
+    b.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(2);
+    expect(b.hasDependents()).toBe(false);
+
+    c.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(3);
+    a.set(2);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(4);
+  });
+
+  // invalidate() aborts an in-flight async run, and an abort listener is user code
+  // that can stop a subscriber while changed() is still walking the array
+  it('a subscriber stopping itself from its abort listener hides no later subscriber from the change', async () => {
+    const s = new Signal(0);
+    let release;
+    const inFlight = new Promise((resolve) => {
+      release = resolve;
+    });
+    const first = reaction((comp) => {
+      s.get();
+      comp.abortSignal.addEventListener('abort', () => first.stop());
+      return inFlight;
+    });
+    const second = vi.fn();
+    reaction(() => {
+      s.get();
+      second();
+    });
+    const third = vi.fn();
+    reaction(() => {
+      s.get();
+      third();
+    });
+
+    s.set(1);
+    flush();
+    expect(second).toHaveBeenCalledTimes(2);
+    expect(third).toHaveBeenCalledTimes(2);
+
+    release();
+    await inFlight;
+  });
+
+  it('remove(reaction) drops that reaction alone and leaves its later stop harmless', () => {
+    const dep = new Dependency();
+    const kept = vi.fn();
+    const dropped = vi.fn();
+    const keeper = reaction(() => {
+      dep.depend();
+      kept();
+    });
+    const watcher = reaction(() => {
+      dep.depend();
+      dropped();
+    });
+    // a third subscriber so the removal moves one into the vacated slot
+    const other = reaction(() => {
+      dep.depend();
+    });
+
+    dep.remove(watcher);
+    dep.remove(watcher);
+    dep.changed();
+    flush();
+    expect(dropped).toHaveBeenCalledTimes(1);
+    expect(kept).toHaveBeenCalledTimes(2);
+
+    watcher.stop();
+    other.stop();
+    dep.changed();
+    flush();
+    expect(kept).toHaveBeenCalledTimes(3);
+
+    keeper.stop();
+    expect(dep.subscribers).toBe(null);
+  });
+
+  // the reaction's own entry for the dependency goes too, and the entry that moves
+  // into its place keeps the dependency's record of it correct for later moves
+  it('remove(reaction) unlinks a dependency held in the reaction’s array so later moves stay correct', () => {
+    const a = new Signal(0);
+    const dep = new Dependency();
+    const b = new Signal(0);
+    const other = reaction(() => {
+      b.get();
+    });
+    const third = vi.fn();
+    reaction(() => {
+      b.get();
+      third();
+    });
+    const callback = vi.fn();
+    const r = reaction(() => {
+      a.get();
+      dep.depend();
+      b.get();
+      callback();
+    });
+
+    dep.remove(r);
+    expect(dep.subscribers).toBe(null);
+    expect(r.dependencies.length).toBe(1);
+    expect(r.dependencies[0]).toBe(b.dependency);
+
+    // other's stop moves r within b's subscribers, then r re-runs and re-tracks b
+    other.stop();
+    b.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(2);
+    expect(third).toHaveBeenCalledTimes(2);
+    b.set(2);
+    flush();
+    expect(third).toHaveBeenCalledTimes(3);
+    expect(b.dependency.subscribers.length).toBe(2);
   });
 
   it('stop() cleanly unsubscribes all of a reaction’s dependencies', () => {
@@ -542,7 +737,7 @@ describe('guard()', () => {
       flush();
     }
 
-    expect(counter.dependency.subscribers.size).toBe(1);
+    expect(counter.dependency.subscribers.length).toBe(1);
   });
 
   it('stops the inner reaction when the outer reaction stops', () => {
@@ -550,10 +745,10 @@ describe('guard()', () => {
     const outer = reaction(() => {
       guard(() => counter.get());
     });
-    expect(counter.dependency.subscribers.size).toBe(1);
+    expect(counter.dependency.subscribers.length).toBe(1);
 
     outer.stop();
-    expect(counter.dependency.subscribers.size).toBe(0);
+    expect(counter.dependency.subscribers).toBe(null);
   });
 
   it('propagates value changes after the first f() throws', () => {

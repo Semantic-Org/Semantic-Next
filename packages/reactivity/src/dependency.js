@@ -1,19 +1,80 @@
 import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
+// a small edge array grows by copy so it holds exactly its entries. a push onto a
+// one-element array grows its store to seventeen slots. past four, push amortizes
+// so a wide fan-out stays linear
+const grow = (array, value) => {
+  if (array.length < 4) {
+    return array.concat(value);
+  }
+  array.push(value);
+  return array;
+};
+
 export class Dependency {
   constructor(...metadata) {
-    this.subscribers = new Set();
+    // edges are parallel arrays on both sides. the subscriber at i holds this
+    // dependency at subscriberSlots[i] in its own dependencies, so either side can
+    // drop an edge by swap-pop. null until the first edge, an unread dependency
+    // allocates nothing
+    this.subscribers = null;
+    this.subscriberSlots = null;
+    // the last subscriber and the run it subscribed in, so a second read in the
+    // same run adds no edge
+    this.lastSubscriber = null;
+    this.lastRun = -1;
     if (isTracing()) {
       this.setContext(metadata);
     }
   }
 
   depend() {
-    if (Scheduler.current) {
-      this.subscribers.add(Scheduler.current);
-      Scheduler.current.dependencies.add(this);
+    const reaction = Scheduler.current;
+    if (!reaction) {
+      return;
     }
+    // one edge per run. the stamp misses a parent that reads this again after a
+    // nested reaction read it, that duplicate edge is harmless and clears with the rest
+    if (reaction === this.lastSubscriber && reaction.runs === this.lastRun) {
+      return;
+    }
+    this.lastSubscriber = reaction;
+    this.lastRun = reaction.runs;
+    const subscribers = this.subscribers;
+    const subscriberSlot = subscribers === null ? 0 : subscribers.length;
+    // a reaction keeps its first dependency inline and records it here as slot -1,
+    // nearly every render binding reads one signal and allocates no arrays
+    let dependencySlot;
+    if (reaction.dependency === null) {
+      reaction.dependency = this;
+      reaction.dependencySlot = subscriberSlot;
+      dependencySlot = -1;
+    }
+    else if (reaction.dependencies === null) {
+      // the first array edge is a one-element literal. push onto an empty array
+      // grows its store to sixteen slots, more than the Set these arrays replaced
+      reaction.dependencies = [this];
+      reaction.dependencySlots = [subscriberSlot];
+      dependencySlot = 0;
+    }
+    else {
+      dependencySlot = reaction.dependencies.length;
+      reaction.dependencies = grow(reaction.dependencies, this);
+      reaction.dependencySlots = grow(reaction.dependencySlots, subscriberSlot);
+    }
+    if (subscribers === null) {
+      this.subscribers = [reaction];
+      this.subscriberSlots = [dependencySlot];
+    }
+    else {
+      this.subscribers = grow(subscribers, reaction);
+      this.subscriberSlots = grow(this.subscriberSlots, dependencySlot);
+    }
+  }
+
+  hasSubscribers() {
+    return this.subscribers !== null;
   }
 
   // Cheap context naming on tracing; stack capture only on stack mode.
@@ -26,8 +87,11 @@ export class Dependency {
   }
 
   changed(context) {
-    // Skip tracing-context bookkeeping when no subscribers are listening.
-    if (this.subscribers.size === 0) { return; }
+    const subscribers = this.subscribers;
+    // nobody listening, skip the tracing bookkeeping too
+    if (subscribers === null) {
+      return;
+    }
     if (isTracing()) {
       if (context) {
         this.context = context;
@@ -37,12 +101,55 @@ export class Dependency {
       }
     }
     const ctx = this.context;
-    for (const subscriber of this.subscribers) {
-      subscriber.invalidate(ctx);
+    // invalidate() can run a user abort listener synchronously, and that listener
+    // may stop or add a subscriber here. the downward walk keeps both safe: a
+    // swap-popped survivor lands on an index already visited, and a subscriber
+    // added mid-loop sits past the start and is skipped, it just read the current value
+    for (let i = subscribers.length - 1; i >= 0; i--) {
+      if (i < subscribers.length) {
+        subscribers[i].invalidate(ctx);
+      }
     }
   }
 
+  // the documented form. finds the reaction by scan and drops that edge from both
+  // sides, a no-op when it is not subscribed. the kernel removes by slot
   remove(reaction) {
-    this.subscribers.delete(reaction);
+    const subscribers = this.subscribers;
+    if (subscribers === null) {
+      return;
+    }
+    const slot = subscribers.indexOf(reaction);
+    if (slot === -1) {
+      return;
+    }
+    reaction.dropDependency(this, slot);
+    this.removeAt(slot);
+  }
+
+  // swap-pop the edge at slot, the subscriber that moves into it learns its new slot
+  removeAt(slot) {
+    const subscribers = this.subscribers;
+    const slots = this.subscriberSlots;
+    // a stopped reaction must not stay reachable from a long-lived dependency
+    if (subscribers[slot] === this.lastSubscriber) {
+      this.lastSubscriber = null;
+    }
+    const last = subscribers.pop();
+    const lastSlot = slots.pop();
+    if (slot < subscribers.length) {
+      subscribers[slot] = last;
+      slots[slot] = lastSlot;
+      if (lastSlot === -1) {
+        last.dependencySlot = slot;
+      }
+      else {
+        last.dependencySlots[lastSlot] = slot;
+      }
+    }
+    if (subscribers.length === 0) {
+      this.subscribers = null;
+      this.subscriberSlots = null;
+    }
   }
 }

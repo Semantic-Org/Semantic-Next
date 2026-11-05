@@ -14,6 +14,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 // correctly, server content is preserved (no flash), and
 // reactivity works after hydration.
 
+// live subscribers on a signal, the array is null when nobody subscribes
+function subscriberCount(signal) {
+  return signal.dependency.subscribers?.length ?? 0;
+}
+
 let tagCounter = 0;
 function uniqueTag() {
   return `ssr-hydration-${++tagCounter}`;
@@ -408,7 +413,7 @@ describe('SSR hydration — each loops', () => {
       template,
       defaultState: { items: ['x'], emptyLabel: 'None' },
     });
-    const baseline = control.template.state.emptyLabel.dependency.subscribers.size;
+    const baseline = subscriberCount(control.template.state.emptyLabel);
 
     const el = await ssrAndHydrate({
       template,
@@ -419,7 +424,7 @@ describe('SSR hydration — each loops', () => {
     // subscribe — without the elseScope reactions even existing, the
     // delta below would be vacuous.
     expect(shadowHTML(el)).toBe('<p class="None">None (None)</p>');
-    expect(el.template.state.emptyLabel.dependency.subscribers.size).toBeGreaterThan(baseline);
+    expect(subscriberCount(el.template.state.emptyLabel)).toBeGreaterThan(baseline);
 
     const updated = $(el).onNext('updated');
     el.template.state.items.push('x');
@@ -429,7 +434,7 @@ describe('SSR hydration — each loops', () => {
     // Pin: the empty→non-empty transition must dispose the elseScope so
     // its bindings unsubscribe synchronously. Equality with the control
     // baseline proves no orphan reactions remain on emptyLabel.
-    expect(el.template.state.emptyLabel.dependency.subscribers.size).toBe(baseline);
+    expect(subscriberCount(el.template.state.emptyLabel)).toBe(baseline);
   });
 
   it('hydrates object iteration', async () => {

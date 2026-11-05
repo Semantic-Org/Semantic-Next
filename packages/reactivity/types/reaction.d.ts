@@ -76,9 +76,27 @@ export class Reaction {
   readonly context: Record<string, any> | undefined;
 
   /**
-   * The set of dependencies tracked by this reaction, rebuilt on every run.
+   * The first dependency read in the current run, or `null` when it has read
+   * none yet. Kept inline so a reaction over one signal allocates no arrays.
    */
-  readonly dependencies: Set<Dependency>;
+  readonly dependency: Dependency | null;
+
+  /**
+   * The slot this reaction holds in `dependency.subscribers`, `-1` when unset.
+   */
+  readonly dependencySlot: number;
+
+  /**
+   * Every dependency after the first, rebuilt on every run, or `null` when the
+   * current run has read at most one. Allocated on the second read.
+   */
+  readonly dependencies: Dependency[] | null;
+
+  /**
+   * Parallel to `dependencies`: the slot this reaction holds in each one's
+   * `subscribers`, so an edge can be dropped from either side in O(1).
+   */
+  readonly dependencySlots: number[] | null;
 
   /**
    * A per-run `AbortSignal`, created on first access and aborted when the run is
