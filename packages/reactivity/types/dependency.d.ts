@@ -40,6 +40,15 @@ export class Dependency {
   depend(): void;
 
   /**
+   * Appends `reaction` to the subscribers and returns the slot it took. Called by
+   * the reaction for a dependency it did not hold last run.
+   * @internal
+   * @param reaction - The new subscriber
+   * @param position - Where the reaction holds this dependency, `-1` for its inline edge
+   */
+  addSubscriber(reaction: Reaction, position: number): number;
+
+  /**
    * Whether any reaction currently subscribes to this dependency.
    */
   hasSubscribers(): boolean;

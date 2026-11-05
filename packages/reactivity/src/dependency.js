@@ -1,16 +1,6 @@
+import { grow } from './helpers/grow.js';
 import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
-
-// a small edge array grows by copy so it holds exactly its entries. a push onto a
-// one-element array grows its store to seventeen slots. past four, push amortizes
-// so a wide fan-out stays linear
-const grow = (array, value) => {
-  if (array.length < 4) {
-    return array.concat(value);
-  }
-  array.push(value);
-  return array;
-};
 
 export class Dependency {
   constructor(...metadata) {
@@ -41,36 +31,26 @@ export class Dependency {
     }
     this.lastSubscriber = reaction;
     this.lastRun = reaction.runs;
+    reaction.trackDependency(this);
+  }
+
+  // a new edge, called by Reaction.trackDependency. position is where the reaction
+  // holds this dependency, -1 for its inline edge, and the slot it took here is
+  // returned so the reaction can record it
+  addSubscriber(reaction, position) {
     const subscribers = this.subscribers;
-    const subscriberSlot = subscribers === null ? 0 : subscribers.length;
-    // a reaction keeps its first dependency inline and records it here as slot -1,
-    // nearly every render binding reads one signal and allocates no arrays
-    let dependencySlot;
-    if (reaction.dependency === null) {
-      reaction.dependency = this;
-      reaction.dependencySlot = subscriberSlot;
-      dependencySlot = -1;
-    }
-    else if (reaction.dependencies === null) {
-      // the first array edge is a one-element literal. push onto an empty array
-      // grows its store to sixteen slots, more than the Set these arrays replaced
-      reaction.dependencies = [this];
-      reaction.dependencySlots = [subscriberSlot];
-      dependencySlot = 0;
-    }
-    else {
-      dependencySlot = reaction.dependencies.length;
-      reaction.dependencies = grow(reaction.dependencies, this);
-      reaction.dependencySlots = grow(reaction.dependencySlots, subscriberSlot);
-    }
+    // the first edge is a one-element literal. push onto an empty array grows its
+    // store to sixteen slots, more than the Set these arrays replaced
     if (subscribers === null) {
       this.subscribers = [reaction];
-      this.subscriberSlots = [dependencySlot];
+      this.subscriberSlots = [position];
+      return 0;
     }
-    else {
-      this.subscribers = grow(subscribers, reaction);
-      this.subscriberSlots = grow(this.subscriberSlots, dependencySlot);
-    }
+    // the slot is the length before growing, past four entries grow pushes in place
+    const slot = subscribers.length;
+    this.subscribers = grow(subscribers, reaction);
+    this.subscriberSlots = grow(this.subscriberSlots, position);
+    return slot;
   }
 
   hasSubscribers() {
@@ -123,7 +103,7 @@ export class Dependency {
     if (slot === -1) {
       return;
     }
-    reaction.dropDependency(this, slot);
+    reaction.dropDependency(this);
     this.removeAt(slot);
   }
 
