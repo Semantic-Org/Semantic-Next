@@ -112,8 +112,23 @@ export class Dependency {
     }
   }
 
+  // the documented form. finds the reaction by scan and drops that edge from both
+  // sides, a no-op when it is not subscribed. the kernel removes by slot
+  remove(reaction) {
+    const subscribers = this.subscribers;
+    if (subscribers === null) {
+      return;
+    }
+    const slot = subscribers.indexOf(reaction);
+    if (slot === -1) {
+      return;
+    }
+    reaction.dropDependency(this, slot);
+    this.removeAt(slot);
+  }
+
   // swap-pop the edge at slot, the subscriber that moves into it learns its new slot
-  remove(slot) {
+  removeAt(slot) {
     const subscribers = this.subscribers;
     const slots = this.subscriberSlots;
     // a stopped reaction must not stay reachable from a long-lived dependency

@@ -55,7 +55,7 @@ export class Reaction {
   // drop every edge from both sides. run() re-tracks from zero, stop() ends here
   clearDependencies() {
     if (this.dependency !== null) {
-      this.dependency.remove(this.dependencySlot);
+      this.dependency.removeAt(this.dependencySlot);
       this.dependency = null;
       this.dependencySlot = -1;
     }
@@ -65,10 +65,42 @@ export class Reaction {
     }
     const slots = this.dependencySlots;
     for (let i = 0; i < dependencies.length; i++) {
-      dependencies[i].remove(slots[i]);
+      dependencies[i].removeAt(slots[i]);
     }
     this.dependencies = null;
     this.dependencySlots = null;
+  }
+
+  // drop one edge from this side, the mirror of Dependency.removeAt for a manual
+  // Dependency.remove. slot is where this reaction sat in that dependency's subscribers
+  dropDependency(dependency, slot) {
+    if (this.dependency === dependency && this.dependencySlot === slot) {
+      this.dependency = null;
+      this.dependencySlot = -1;
+      return;
+    }
+    const dependencies = this.dependencies;
+    if (dependencies === null) {
+      return;
+    }
+    const slots = this.dependencySlots;
+    for (let i = 0; i < dependencies.length; i++) {
+      if (dependencies[i] !== dependency || slots[i] !== slot) {
+        continue;
+      }
+      const last = dependencies.pop();
+      const lastSlot = slots.pop();
+      if (i < dependencies.length) {
+        dependencies[i] = last;
+        slots[i] = lastSlot;
+        last.subscriberSlots[lastSlot] = i;
+      }
+      if (dependencies.length === 0) {
+        this.dependencies = null;
+        this.dependencySlots = null;
+      }
+      return;
+    }
   }
 
   setContext(additionalContext = {}) {

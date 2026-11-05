@@ -534,6 +534,79 @@ describe('Dependency', () => {
     await inFlight;
   });
 
+  it('remove(reaction) drops that reaction alone and leaves its later stop harmless', () => {
+    const dep = new Dependency();
+    const kept = vi.fn();
+    const dropped = vi.fn();
+    const keeper = reaction(() => {
+      dep.depend();
+      kept();
+    });
+    const watcher = reaction(() => {
+      dep.depend();
+      dropped();
+    });
+    // a third subscriber so the removal moves one into the vacated slot
+    const other = reaction(() => {
+      dep.depend();
+    });
+
+    dep.remove(watcher);
+    dep.remove(watcher);
+    dep.changed();
+    flush();
+    expect(dropped).toHaveBeenCalledTimes(1);
+    expect(kept).toHaveBeenCalledTimes(2);
+
+    watcher.stop();
+    other.stop();
+    dep.changed();
+    flush();
+    expect(kept).toHaveBeenCalledTimes(3);
+
+    keeper.stop();
+    expect(dep.subscribers).toBe(null);
+  });
+
+  // the reaction's own entry for the dependency goes too, and the entry that moves
+  // into its place keeps the dependency's record of it correct for later moves
+  it('remove(reaction) unlinks a dependency held in the reaction’s array so later moves stay correct', () => {
+    const a = new Signal(0);
+    const dep = new Dependency();
+    const b = new Signal(0);
+    const other = reaction(() => {
+      b.get();
+    });
+    const third = vi.fn();
+    reaction(() => {
+      b.get();
+      third();
+    });
+    const callback = vi.fn();
+    const r = reaction(() => {
+      a.get();
+      dep.depend();
+      b.get();
+      callback();
+    });
+
+    dep.remove(r);
+    expect(dep.subscribers).toBe(null);
+    expect(r.dependencies.length).toBe(1);
+    expect(r.dependencies[0]).toBe(b.dependency);
+
+    // other's stop moves r within b's subscribers, then r re-runs and re-tracks b
+    other.stop();
+    b.set(1);
+    flush();
+    expect(callback).toHaveBeenCalledTimes(2);
+    expect(third).toHaveBeenCalledTimes(2);
+    b.set(2);
+    flush();
+    expect(third).toHaveBeenCalledTimes(3);
+    expect(b.dependency.subscribers.length).toBe(2);
+  });
+
   it('stop() cleanly unsubscribes all of a reaction’s dependencies', () => {
     const s1 = new Signal(0);
     const s2 = new Signal(0);

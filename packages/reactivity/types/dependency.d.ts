@@ -59,10 +59,18 @@ export class Dependency {
   changed(context?: Record<string, any>): void;
 
   /**
+   * Drops `reaction` from the subscribers, so it no longer re-runs on `changed()`.
+   * A no-op when it is not subscribed. Reactions remove themselves when they stop,
+   * this is for manual lifecycle control.
+   * @param reaction - The reaction to drop
+   */
+  remove(reaction: Reaction): void;
+
+  /**
    * Removes the subscriber at `slot` by swap-pop. Called by a reaction with the
    * slot it recorded when it subscribed.
    * @internal
    * @param slot - The subscriber's index in `subscribers`
    */
-  remove(slot: number): void;
+  removeAt(slot: number): void;
 }
