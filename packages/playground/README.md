@@ -77,6 +77,8 @@ Special comments shape what the editor shows without changing what builds:
 
 `playground-hide` / `playground-fold` are recognized aliases. Pragma comments are never visible — folded or expanded — and decorations never mutate the document.
 
+Hidden regions leave a gap in the document's line numbers (6, then 13). `createEditor({ lineNumbers: 'continuous' })` numbers the lines the reader sees instead, so a sample with hidden scaffolding reads 1 to N.
+
 ## Assets
 
 `npm run build` bundles the two workers into `dist/assets/` as self-contained files. Consumers serve that directory statically at the sandbox path (the docs site copies it into `public/sandbox/` via `docs/scripts/sync-sandbox.mjs`) — the assets must never enter a dev server's transform pipeline.
