@@ -6,11 +6,17 @@ export class Dependency {
   // one-element array grows its store to seventeen slots. past four, push amortizes
   // so a wide fan-out stays linear
   static grow(array, value) {
-    if (array.length < 4) {
-      return array.concat(value);
+    switch (array.length) {
+      case 1:
+        return [array[0], value];
+      case 2:
+        return [array[0], array[1], value];
+      case 3:
+        return [array[0], array[1], array[2], value];
+      default:
+        array.push(value);
+        return array;
     }
-    array.push(value);
-    return array;
   }
 
   constructor(...metadata) {
