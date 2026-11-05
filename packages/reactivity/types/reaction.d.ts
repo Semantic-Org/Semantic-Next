@@ -87,8 +87,10 @@ export class Reaction {
   readonly dependencySlot: number;
 
   /**
-   * Every dependency after the first, rebuilt on every run, or `null` when the
-   * current run has read at most one. Allocated on the second read.
+   * Every dependency after the first, or `null` when the current run has read at
+   * most one. Allocated on the second read. Edges are kept across runs: a run
+   * matches its reads against them in order and sweeps the ones it did not read
+   * once the callback returns.
    */
   readonly dependencies: Dependency[] | null;
 
@@ -97,6 +99,12 @@ export class Reaction {
    * `subscribers`, so an edge can be dropped from either side in O(1).
    */
   readonly dependencySlots: number[] | null;
+
+  /**
+   * How many edges the current run has matched so far, in read order. Positions
+   * at or past it are swept after the callback.
+   */
+  readonly cursor: number;
 
   /**
    * A per-run `AbortSignal`, created on first access and aborted when the run is
@@ -142,8 +150,9 @@ export class Reaction {
   setTrace(): void;
 
   /**
-   * Executes the callback, rebuilding the tracked dependency set. Called
-   * automatically on creation and when dependencies change.
+   * Executes the callback. The dependencies it reads are tracked, and any it read
+   * last run but not this one are dropped afterwards. Called automatically on
+   * creation and when dependencies change.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#run run}
    */
   run(): void;

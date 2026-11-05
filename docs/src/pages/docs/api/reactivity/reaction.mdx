@@ -78,7 +78,7 @@ deferred.run(); // tracks dependencies and logs for the first time
 reaction.run();
 ```
 
-Executes the callback, rebuilding the tracked dependency set from scratch. Called automatically on creation and whenever a dependency changes. Call it manually to force a re-run or to perform the first run of a reaction created with `firstRun: false`.
+Executes the callback. The dependencies it reads are tracked, and any it read last run but not this one are dropped afterwards. Called automatically on creation and whenever a dependency changes. Call it manually to force a re-run or to perform the first run of a reaction created with `firstRun: false`.
 
 ## Lifecycle
 
