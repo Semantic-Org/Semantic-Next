@@ -501,6 +501,39 @@ describe('Dependency', () => {
     expect(callback).toHaveBeenCalledTimes(4);
   });
 
+  // invalidate() aborts an in-flight async run, and an abort listener is user code
+  // that can stop a subscriber while changed() is still walking the array
+  it('a subscriber stopping itself from its abort listener hides no later subscriber from the change', async () => {
+    const s = new Signal(0);
+    let release;
+    const inFlight = new Promise((resolve) => {
+      release = resolve;
+    });
+    const first = reaction((comp) => {
+      s.get();
+      comp.abortSignal.addEventListener('abort', () => first.stop());
+      return inFlight;
+    });
+    const second = vi.fn();
+    reaction(() => {
+      s.get();
+      second();
+    });
+    const third = vi.fn();
+    reaction(() => {
+      s.get();
+      third();
+    });
+
+    s.set(1);
+    flush();
+    expect(second).toHaveBeenCalledTimes(2);
+    expect(third).toHaveBeenCalledTimes(2);
+
+    release();
+    await inFlight;
+  });
+
   it('stop() cleanly unsubscribes all of a reaction’s dependencies', () => {
     const s1 = new Signal(0);
     const s2 = new Signal(0);

@@ -101,10 +101,14 @@ export class Dependency {
       }
     }
     const ctx = this.context;
-    // invalidate() only schedules, nothing runs inside this loop, so the array
-    // holds still under an index walk
-    for (let i = 0; i < subscribers.length; i++) {
-      subscribers[i].invalidate(ctx);
+    // invalidate() can run a user abort listener synchronously, and that listener
+    // may stop or add a subscriber here. the downward walk keeps both safe: a
+    // swap-popped survivor lands on an index already visited, and a subscriber
+    // added mid-loop sits past the start and is skipped, it just read the current value
+    for (let i = subscribers.length - 1; i >= 0; i--) {
+      if (i < subscribers.length) {
+        subscribers[i].invalidate(ctx);
+      }
     }
   }
 
