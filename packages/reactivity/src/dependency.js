@@ -1,9 +1,9 @@
 import { captureStack, isTracing } from './helpers/tracing.js';
 import { Scheduler } from './scheduler.js';
 
-// a small edge array grows by copy so it holds exactly its entries, push would
-// take an array of one to seventeen slots. past four, push amortizes so a wide
-// fan-out stays linear
+// a small edge array grows by copy so it holds exactly its entries. a push onto a
+// one-element array grows its store to seventeen slots. past four, push amortizes
+// so a wide fan-out stays linear
 const grow = (array, value) => {
   if (array.length < 4) {
     return array.concat(value);
