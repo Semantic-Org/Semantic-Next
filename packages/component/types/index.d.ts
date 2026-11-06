@@ -2,12 +2,14 @@ export { registerHelper, registerHelpers } from '@semantic-ui/templating';
 export { adoptStylesheet, extractCSS, getJSON, getText, scopeStyles } from '@semantic-ui/utils';
 
 export { getComponent, hasComponent, registerComponent } from './component-registry.js';
+export { getCSS, hasCSS, registerCSS } from './css-registry.js';
 export { defineComponent } from './define-component.js';
 export { WebComponentBase } from './engines/native/base.js';
 export { NativeEngine } from './engines/native/register.js';
 export { setRecovery, setStackCapture, setTracing } from './helpers.js';
 export { addPlugin, extendData, extendParams, registerPlugin } from './register-plugin.js';
 
+export type { BaseCSSEntry, BaseCSSValue, RegisterCSSOptions } from './css-registry.js';
 export type {
   ComponentConstructor,
   ComponentFactoryOptions,

@@ -16,6 +16,7 @@ export const defineComponent = ({
   ast,
   preserveWhitespace = 'auto',
   css = '',
+  baseCSS,
   pageCSS = '',
   tagName,
   delegatesFocus = false,
@@ -107,7 +108,7 @@ export const defineComponent = ({
 
     const factory = engine.factory;
     webComponent = factory({
-      prototypeTemplate, resolvedProperties, css, delegatesFocus,
+      prototypeTemplate, resolvedProperties, css, baseCSS, delegatesFocus,
       componentSpec, defaultSettings, plural,
       onAttributeChanged, renderingEngine,
     });
