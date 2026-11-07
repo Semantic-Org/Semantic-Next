@@ -152,6 +152,82 @@
           "fastest": "solid"
         }
       }
+    },
+    {
+      "sha": "e0c535c1c",
+      "msg": "Build: Restore baseline package.json for benchmarks (#414)",
+      "timestamp": "2026-11-07T06:00:56.646Z",
+      "wallclock_seconds": 2813,
+      "chrome_version": "156 (puppeteer, system chrome)",
+      "field": {
+        "lit": "3.2.0",
+        "react-hooks": "19.2.5",
+        "solid": "1.9.12",
+        "svelte": "5.42.1",
+        "vue": "3.6.0-alpha.2"
+      },
+      "comparison": {
+        "01_run1k": {
+          "ratio": 1.33,
+          "fastest": "solid"
+        },
+        "02_replace1k": {
+          "ratio": 1.31,
+          "fastest": "solid"
+        },
+        "03_update10th1k_x16": {
+          "ratio": 1.17,
+          "fastest": "solid"
+        },
+        "04_select1k": {
+          "ratio": 1.35,
+          "fastest": "solid"
+        },
+        "05_swap1k": {
+          "ratio": 1.12,
+          "fastest": "svelte"
+        },
+        "06_remove-one-1k": {
+          "ratio": 1.2,
+          "fastest": "solid"
+        },
+        "07_create10k": {
+          "ratio": 1.22,
+          "fastest": "solid"
+        },
+        "08_create1k-after1k_x2": {
+          "ratio": 1.28,
+          "fastest": "svelte"
+        },
+        "09_clear1k_x8": {
+          "ratio": 1.41,
+          "fastest": "svelte"
+        },
+        "21_ready-memory": {
+          "ratio": 2.75,
+          "fastest": "solid"
+        },
+        "22_run-memory": {
+          "ratio": 2.1,
+          "fastest": "solid"
+        },
+        "25_run-clear-memory": {
+          "ratio": 3.49,
+          "fastest": "solid"
+        },
+        "41_size-uncompressed": {
+          "ratio": 26.04,
+          "fastest": "solid"
+        },
+        "42_size-compressed": {
+          "ratio": 15.11,
+          "fastest": "solid"
+        },
+        "43_first-paint": {
+          "ratio": 6.62,
+          "fastest": "solid"
+        }
+      }
     }
   ]
 }
