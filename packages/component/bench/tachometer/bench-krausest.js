@@ -169,6 +169,15 @@ defineComponent({
       },
     };
   },
+  // the contestant's handlers, so the click rows run the delegated event path
+  events: {
+    'click .lbl'({ state, data }) {
+      state.selected.set(data.id);
+    },
+    'click .remove'({ state, data }) {
+      state.rows.removeItem(data.id);
+    },
+  },
 });
 
 /*******************************
@@ -311,6 +320,22 @@ for (let i = 0; i < 40; i++) {
 performance.measure('select-40', startMark('select-40'));
 destroy();
 
+// 40 selects through the delegated click path: Query dispatch, scope resolution
+// and the handler's params, which krausest's select row runs and select-40 skips.
+// anchors are collected before the mark so the query stays out of the measure
+const el12 = await mount();
+el12.component.run(1000);
+await flush();
+const selectAnchors = el12.shadowRoot.querySelectorAll('tbody tr .lbl');
+// purpose: Clicks one row's label at a time across 40 rows, so each highlight runs the delegated click path before the two row updates.
+performance.mark(startMark('select-click-40'));
+for (let i = 0; i < 40; i++) {
+  selectAnchors[i * 25].click();
+  flushWork();
+}
+performance.measure('select-click-40', startMark('select-click-40'));
+destroy();
+
 /*******************************
       Swap Rows
       (krausest 06_swap)
@@ -376,6 +401,22 @@ for (let i = 0; i < 100; i++) {
   flushWork();
 }
 performance.measure('remove-row-back-100', startMark('remove-row-back-100'));
+destroy();
+
+// 20 removes through the delegated click path on whichever row sits fourth,
+// krausest's remove row. the anchors are collected once: after each removal the
+// next collected anchor is the new fourth row
+const el13 = await mount();
+el13.component.run(1000);
+await flush();
+const removeAnchors = el13.shadowRoot.querySelectorAll('tbody tr .remove');
+// purpose: Clicks the remove control on the fourth row 20 times, so each removal runs the delegated click path before the rows below slide up.
+performance.mark(startMark('remove-click-20'));
+for (let i = 0; i < 20; i++) {
+  removeAnchors[3 + i].click();
+  flushWork();
+}
+performance.measure('remove-click-20', startMark('remove-click-20'));
 destroy();
 
 /*******************************
