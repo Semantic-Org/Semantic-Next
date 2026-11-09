@@ -30,6 +30,8 @@ Every project file gets a real URL at `{sandboxUrl}sui-playground-v1/{sessionId}
 
 The service worker holds sessions fully materialized. Its failure model is recovery, not prevention: a terminated or replaced worker broadcasts for the owning page, which reconnects and re-pushes; a session port that stops answering is reopened and the send retried. Previews recover by iframe replacement, never reload.
 
+A sandbox that cannot start rejects with an `Error` carrying a `code`, so a host can word the failure itself and keep the message for logs: `sandbox-unsupported` (no service workers here), `sandbox-install-failed`, `sandbox-activation-timeout`, `sandbox-connect-timeout` and `sandbox-request-timeout`. A project reports it through `buildError`.
+
 An app that owns its URLs (a client-side router at `/team/acme`) has paths that are not files. `new PlaygroundProject({ fallback: 'index.html' })` serves that document for any navigation whose path has no file, so a reload, an "open in new tab" or a shared preview link lands in the app, and `previewUrl` itself opens it at its root. A link the router lets through because no route matches is a document load too: the app boots and its own not-found view runs, as it would behind a deployed server's SPA fallback. Only document loads fall back; a fetch for a missing asset still 404s. A fallback served for a deep path carries a `<base href>` at the session root, so the document's relative `./app.js` resolves the same from `/team/acme` as from the root (the usual `<base>` caveat applies: in-page `#hash` links resolve against the root too).
 
 ## Preview
@@ -70,6 +72,21 @@ JSX compiles through TypeScript's automatic runtime: `.jsx` and `.tsx` files emi
 ## Editor theming
 
 `createEditor({ theme })` adopts CSS text into the editor's root. Nest rules under `.cm-editor` (`.cm-editor .cm-gutters { … }`, `.cm-editor .cm-cursor { … }`): CodeMirror's base theme scopes its own rules under a generated class at that same specificity, and the adopted sheet comes later in the cascade, so nested rules win. A flat `.cm-gutters { … }` loses on specificity and needs `!important`.
+
+## Editor phrases
+
+`createEditor({ phrases })` takes translations keyed by the English phrase, for a host in another language. It covers CodeMirror's own interface (the search panel, fold tooltips, the completion list) and this package's one string, `Show hidden code`. CodeMirror lists its phrases in its [internationalization example](https://codemirror.net/examples/translate/).
+
+```js
+createEditor({
+  parent,
+  phrases: {
+    'Find': 'Suchen',
+    'Fold line': 'Zeile einklappen',
+    'Show hidden code': 'Versteckten Code anzeigen',
+  },
+});
+```
 
 ## Pragmas
 

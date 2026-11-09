@@ -107,7 +107,7 @@ class FoldWidget extends WidgetType {
     const marker = document.createElement('span');
     marker.className = 'cm-foldMarker';
     marker.textContent = '…';
-    marker.title = 'Show hidden code';
+    marker.title = view.state.phrase('Show hidden code');
     marker.onclick = () => view.dispatch({ effects: expandFold.of(this.position) });
     return marker;
   }
