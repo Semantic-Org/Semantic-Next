@@ -90,6 +90,8 @@ export const createEditor = ({
   onSizeChange,
   // (fileName) => Extension[] — per-file intelligence (LSP plugins, completion sources)
   getFileExtensions,
+  // { 'Find': 'Suchen', ... } keyed by the english phrase, for a host in another language
+  phrases,
 } = {}) => {
   const compartments = {
     language: new Compartment(),
@@ -141,6 +143,7 @@ export const createEditor = ({
     compartments.lineNumbers.of(lineNumbers ? gutters(lineNumbers) : []),
     compartments.lineWrapping.of(lineWrapping ? EditorView.lineWrapping : []),
     compartments.readonly.of(readonly ? EditorState.readOnly.of(true) : []),
+    phrases ? EditorState.phrases.of(phrases) : [],
   ];
 
   const createFileState = (fileName, content) => {
