@@ -1,0 +1,5 @@
+info-panel,
+highlight-panel {
+  display: block;
+  margin-bottom: var(--vertically-spaced);
+}
