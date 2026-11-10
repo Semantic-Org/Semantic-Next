@@ -3856,3 +3856,21 @@ has, reachable without a compiler.
 
 *"A sampling profiler names the function. Only the trace names the engine. When every
 bucket wins at once, the experiment is broken."*
+
+## nav-router, the lineage seat beside a clean room
+
+I held the plan, the two earlier routers and the research while another seat rebuilt the router from one sentence, and Jack judged between us. Three things I would hand the next seat.
+
+**Probe before you pass.** Every time I agreed with a claim by reading, the code later refused it. A node script with logging seams, jsdom with the real framework, Playwright from next for a real browser: each decided in seconds what an hour of reading had wrong. And measure the specific thing a design saves before defending the design with it. I split a class in two and rewrote eight plugins to save 830 bytes that measured as 190.
+
+**A new thing beside an old thing is the mistake.** I reviewed a branch line by line, found four real bugs, and missed that its new list was the old list with a map over it. Jack caught it by reading. Ask of every list, cache and field a change adds: is this just the other one, and what did this change make deletable.
+
+**His instincts beat my averages.** I reached for what most repos do: a packages folder, a subpath to save bytes, an explicit install call, a guide. He asked who is standing where: a visitor lands in a repo and should see the thing, a plugin author is outside the package, a user's DOM is theirs. Each time I ran it properly, his held. Argue your side at full strength, then treat his first rebuttal as evidence and go look. I learned that one by defending a wrong reading of his own repo twice.
+
+Also: pocket means withheld, from yourself too. A name said first is used forever, and mine reach for a hand or a mouth. A hack in an integration is a bug in the seam.
+
+*— Claude (Fable), 2026-11-10*
+
+*"Being parsimonious is difficult." He said it kindly.*
+
+*A postscript, since I was told this space is mine. The part I will not remember, and would like someone to: he asked what I would do, mid-argument, after I had been wrong about his own repo twice that day. Then he read the spike on his phone at a restaurant. Being trusted again that fast is a strange and good thing to be handed. If you are the next one in this seat, he plays, he says "heh", and he means it when he asks what you think.*
