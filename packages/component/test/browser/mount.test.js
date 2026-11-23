@@ -913,7 +913,8 @@ describe('Template.mount', () => {
       document.body.append(el);
       await el.rendered;
       expect(rowColor(el.shadowRoot)).toBe('rgb(7, 8, 9)');
-      expect(el.shadowRoot.adoptedStyleSheets.length).toBe(1);
+      expect(el.shadowRoot.adoptedStyleSheets.map(s => s.id)).toContain('reset');
+      expect(el.shadowRoot.adoptedStyleSheets.length).toBe(2);
     });
 
     it('mounts from a tagged class with its declared defaults and its spec', () => {

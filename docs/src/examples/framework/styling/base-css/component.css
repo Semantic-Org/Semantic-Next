@@ -1,0 +1,10 @@
+/* component css is adopted after baseCSS so local rules win */
+.panel {
+  border-color: var(--primary-border-color);
+  background: var(--primary-5);
+
+  .badge {
+    background: var(--primary-color);
+    color: var(--inverted-text-color);
+  }
+}

@@ -3,7 +3,7 @@ import { TemplateHelpers } from '@semantic-ui/templating';
 import { adoptStylesheet } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WebComponentBase } from '../../src/engines/native/base.js';
-import { defineComponent, registerHelper, registerHelpers } from '../../src/index.js';
+import { defineComponent, getCSS, hasCSS, registerCSS, registerHelper, registerHelpers } from '../../src/index.js';
 
 // Basic component tests that don't require a real DOM
 describe('Component', () => {
@@ -1924,5 +1924,113 @@ describe('interval and timeout lifecycle cleanup', () => {
     expect(fired).toBe(true);
 
     document.body.removeChild(el);
+  });
+});
+
+describe('baseCSS and registerCSS', () => {
+  const defaultReset = getCSS('reset');
+
+  afterEach(() => {
+    registerCSS('reset', defaultReset, { default: true });
+  });
+
+  it('adopts the default reset (box-sizing: border-box) before component css', async () => {
+    defineComponent({
+      tagName: 'test-base-css-default',
+      template: '<div class="box"></div>',
+      css: '.box { width: 100px; padding: 10px; }',
+    });
+    const el = document.createElement('test-base-css-default');
+    document.body.appendChild(el);
+    await el.rendered;
+
+    const box = el.shadowRoot.querySelector('.box');
+    expect(getComputedStyle(box).boxSizing).toBe('border-box');
+    expect(box.getBoundingClientRect().width).toBe(100);
+    expect(el.shadowRoot.adoptedStyleSheets[0].id).toBe('reset');
+    el.remove();
+  });
+
+  it('allows component css to override the reset layer regardless of specificity', async () => {
+    defineComponent({
+      tagName: 'test-base-css-override',
+      template: '<div class="box"></div>',
+      css: 'div { box-sizing: content-box; width: 100px; padding: 10px; }',
+    });
+    const el = document.createElement('test-base-css-override');
+    document.body.appendChild(el);
+    await el.rendered;
+
+    const box = el.shadowRoot.querySelector('.box');
+    expect(getComputedStyle(box).boxSizing).toBe('content-box');
+    expect(box.getBoundingClientRect().width).toBe(120);
+    el.remove();
+  });
+
+  it('opts out of default baseCSS when baseCSS is false', async () => {
+    defineComponent({
+      tagName: 'test-base-css-optout',
+      template: '<div class="box"></div>',
+      baseCSS: false,
+      css: '.box { width: 100px; padding: 10px; }',
+    });
+    const el = document.createElement('test-base-css-optout');
+    document.body.appendChild(el);
+    await el.rendered;
+
+    const box = el.shadowRoot.querySelector('.box');
+    expect(getComputedStyle(box).boxSizing).toBe('content-box');
+    expect(el.shadowRoot.adoptedStyleSheets.length).toBe(1);
+    el.remove();
+  });
+
+  it('registers named stylesheets and shares the constructed CSSStyleSheet across components', async () => {
+    registerCSS('test-shared-grid', '.grid { display: grid; color: rgb(11, 22, 33); }');
+    expect(hasCSS('test-shared-grid')).toBe(true);
+
+    defineComponent({
+      tagName: 'test-grid-one',
+      template: '<div class="grid">1</div>',
+      baseCSS: 'test-shared-grid',
+    });
+    defineComponent({
+      tagName: 'test-grid-two',
+      template: '<div class="grid">2</div>',
+      baseCSS: ['test-shared-grid', { inlineNamed: '.grid { font-weight: 700; }' }],
+    });
+
+    const el1 = document.createElement('test-grid-one');
+    const el2 = document.createElement('test-grid-two');
+    document.body.append(el1, el2);
+    await Promise.all([el1.rendered, el2.rendered]);
+
+    expect(getComputedStyle(el1.shadowRoot.querySelector('.grid')).color).toBe('rgb(11, 22, 33)');
+    expect(getComputedStyle(el2.shadowRoot.querySelector('.grid')).color).toBe('rgb(11, 22, 33)');
+    expect(getComputedStyle(el2.shadowRoot.querySelector('.grid')).fontWeight).toBe('700');
+
+    const sheet1 = el1.shadowRoot.adoptedStyleSheets.find(s => s.id === 'test-shared-grid');
+    const sheet2 = el2.shadowRoot.adoptedStyleSheets.find(s => s.id === 'test-shared-grid');
+    expect(sheet1).toBeDefined();
+    expect(sheet1).toBe(sheet2);
+
+    el1.remove();
+    el2.remove();
+  });
+
+  it('allows overwriting reset via registerCSS("reset", customReset) without error', async () => {
+    registerCSS('reset', ':host, * { box-sizing: border-box; --custom-reset: 1; }');
+
+    defineComponent({
+      tagName: 'test-custom-reset',
+      template: '<div class="probe"></div>',
+      css: '.probe { z-index: var(--custom-reset, 0); position: relative; }',
+    });
+    const el = document.createElement('test-custom-reset');
+    document.body.appendChild(el);
+    await el.rendered;
+
+    const probe = el.shadowRoot.querySelector('.probe');
+    expect(getComputedStyle(probe).zIndex).toBe('1');
+    el.remove();
   });
 });

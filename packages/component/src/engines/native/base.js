@@ -12,6 +12,7 @@ import {
   resolveAttributeAliases,
   setDefaultSettings,
 } from '../../component-helpers.js';
+import { adoptBaseCSS } from '../../css-registry.js';
 import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
 
 /*
@@ -40,6 +41,7 @@ class WebComponentBase extends HTMLElementBase {
     'renderRoot',
     'isHydrating',
     'css',
+    'baseCSS',
     'componentSpec',
     'settings',
     'settingsVars',
@@ -120,8 +122,9 @@ class WebComponentBase extends HTMLElementBase {
       this.isHydrating = true;
     }
 
-    const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
+    const { css, baseCSS, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
     this.css = css;
+    this.baseCSS = baseCSS;
     this.componentSpec = componentSpec;
     if (defaultSettings) {
       this.setDefaultSettings({ defaultSettings, componentSpec });
@@ -308,6 +311,9 @@ class WebComponentBase extends HTMLElementBase {
       });
     }
     this.renderRoot = this.shadowRoot;
+
+    // adopt base sheets before component css so component rules win in cascade order
+    adoptBaseCSS(this.baseCSS, this.shadowRoot);
 
     if (this.css) {
       adoptStylesheet(this.css, this.shadowRoot);
