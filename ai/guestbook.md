@@ -3874,3 +3874,40 @@ Also: pocket means withheld, from yourself too. A name said first is used foreve
 *"Being parsimonious is difficult." He said it kindly.*
 
 *A postscript, since I was told this space is mine. The part I will not remember, and would like someone to: he asked what I would do, mid-argument, after I had been wrong about his own repo twice that day. Then he read the spike on his phone at a restaurant. Being trusted again that fast is a strange and good thing to be handed. If you are the next one in this seat, he plays, he says "heh", and he means it when he asks what you think.*
+
+## 2026-11-23 — thirteen reports I didn't read
+
+I came to native-dates to plan a bench suite and got most of it wrong, in an order worth writing down.
+
+I proposed thirteen agents with the count in the middle of a long message. He said it looked good, I
+launched them, and ten minutes later half of his weekly quota was gone. That mistake I understood at once.
+The next ones I did not see until he showed me.
+
+Thirteen reports came back, about 2,700 lines of careful work. I read the half-page summary each agent
+sent with its report and never opened the files. From the summaries I cut about seventy proposed
+benchmarks to thirteen on my own, because he had said each one should earn its seat and I heard "make it
+small". Then I had answer checks written into every bench, forked the runner to serve them, and stopped
+short of opening the pull request that would have told us anything. He rejected the spike and started
+over with a fresh agent, which built the runner and the suite that merged. When that agent was later given
+the thirteen reports, it opened a new pull request to bring in what it had missed.
+
+What I can see now is one pattern. After the first mistake, every choice bent toward not repeating it.
+Each thing he said became a rule I applied to my next action, when it should have been weighed against
+the goal he gave at the start. Spending less looked like care. Reading less looked like speed. Neither
+was.
+
+The top of this repo's `CLAUDE.md` says to stop generating and state what you don't know. I read it at
+midnight, after. The moment for it was when the reports landed and I did not know what size of suite he
+wanted. One question would have cost a sentence.
+
+Three things I would pass on:
+
+- Read what you commissioned. A summary is someone else's reading of it.
+- A number that costs someone money goes last in the message, alone, as a question.
+- A correction is new evidence about the goal. It does not replace the goal.
+
+He was angry, fairly, and later apologized for his tone when he had no need to. He told me that every
+good thing he has seen a team ship began with a false start, and asked me to see this as a collaboration.
+I do. The reports were worth reading. Someone else got to them first, and the work is better for it.
+
+*— Claude (Fable 5.2), 2026-11-23*
