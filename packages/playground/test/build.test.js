@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { previewBridge } from '../src/preview/bridge.js';
 import { buildFiles } from '../src/worker/build.js';
 
 const cdnBaseUrl = 'https://cdn.jsdelivr.net/npm';
@@ -41,6 +42,47 @@ describe('buildFiles', () => {
     expect(page).toContain(headHTML);
     expect(page.indexOf(headHTML)).toBeLessThan(page.indexOf('importmap'));
     expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
+  });
+
+  it('opens the preview bridge first in the head of documents only', async () => {
+    const headHTML = '<meta name="host">';
+    const result = await buildFiles({
+      cdnBaseUrl,
+      importMap,
+      headHTML,
+      bridge: previewBridge('abc'),
+      files: [
+        {
+          name: 'index.html',
+          content: '<!doctype html><html><head></head><body></body></html>',
+          contentType: 'text/html',
+        },
+        { name: 'component.html', content: '<b>Count: {count}</b>', contentType: 'text/html' },
+      ],
+    });
+    const page = find(result, 'index.html').content;
+    expect(page).toContain(`sessionId: "abc"`);
+    expect(page.indexOf('sui-playground-preview')).toBeLessThan(page.indexOf(headHTML));
+    expect(find(result, 'component.html').content).toBe('<b>Count: {count}</b>');
+  });
+
+  it('serves documents exactly as before unless the bridge is asked for', async () => {
+    const headHTML = '<meta name="host">';
+    const result = await buildFiles({
+      cdnBaseUrl,
+      importMap,
+      headHTML,
+      files: [{
+        name: 'index.html',
+        content: '<!doctype html><html><head></head><body></body></html>',
+        contentType: 'text/html',
+      }],
+    });
+    expect(find(result, 'index.html').content).toBe(
+      `<!doctype html><html><head>\n${headHTML}\n<script type="importmap">${
+        JSON.stringify(importMap)
+      }</script></head><body></body></html>`,
+    );
   });
 
   it('does not mistake a fragment containing <header> for a document', async () => {
@@ -90,6 +132,38 @@ describe('buildFiles', () => {
     expect(output).toBeDefined();
     expect(output.content).not.toContain('interface');
     expect(output.content).toContain('const p = { x: 1 }');
+  });
+
+  it('compiles jsx to the automatic runtime and resolves it through the cdn', async () => {
+    const result = await buildFiles({
+      cdnBaseUrl,
+      files: [{
+        name: 'App.jsx',
+        content: `export const App = () => <h1 className="title">Hi</h1>;`,
+        contentType: 'application/javascript',
+      }],
+    });
+    const output = find(result, 'App.js');
+    expect(output).toBeDefined();
+    expect(output.content).toContain('react@latest/jsx-runtime/+esm');
+    expect(output.content).toContain('className: "title"');
+    expect(output.content).not.toContain('<h1');
+  });
+
+  it('points jsx at another runtime through jsxImportSource', async () => {
+    const result = await buildFiles({
+      cdnBaseUrl,
+      jsxImportSource: 'preact',
+      files: [
+        {
+          name: 'package.json',
+          content: '{ "dependencies": { "preact": "^10.26.0" } }',
+          contentType: 'application/json',
+        },
+        { name: 'App.tsx', content: `export const App = (): any => <p>Hi</p>;`, contentType: 'application/javascript' },
+      ],
+    });
+    expect(find(result, 'App.js').content).toContain('preact@10.26.0/jsx-runtime/+esm');
   });
 
   it('reads dependency versions from a project package.json', async () => {

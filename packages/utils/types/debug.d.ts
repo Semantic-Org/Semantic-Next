@@ -218,6 +218,15 @@ export interface LogOptions {
 export function log(message: string, level?: LogLevel, options?: LogOptions): void;
 
 /**
+ * Formats one standard-output log line on the server. The node entry installs
+ * the ANSI formatter; pass your own to take over terminal output, or `null`
+ * to fall back to a plain line
+ */
+export type ServerLogFormatter = (message: string, level: LogLevel, options: LogOptions) => string;
+
+export function setServerLogFormatter(formatter: ServerLogFormatter | null): void;
+
+/**
  * The narration bundle bound to one set of log defaults — flat functions for
  * destructuring. The once forms print the first time this logger sees a key
  * and stay silent after, one memory for the whole family

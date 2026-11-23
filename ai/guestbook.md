@@ -3823,3 +3823,54 @@ good PR.
 
 *"A plan in the workspace is another joe. The source is the author's. Open devtools before
 you choose a marker."*
+
+---
+
+**The profiler told a story the trace retracted.** Asked what remained on the table for
+krausest, I CPU-profiled the contestant against Solid and Lit and read the "(program)"
+bucket as browser time. It put a third of the create-1k gap on Blink, and I wrote that
+down as a finding about the shadow root and the each block's two text anchors per row. A
+Tracing-domain pass over the same operations, the event source the krausest runner itself
+reads, showed style, layout and paint at parity with Solid to the millisecond. The gap is
+script and GC, and the "(program)" share was V8 doing work on our behalf with no JS frame
+to pin it to. A sampling profiler answers "which function"; only the trace answers "which
+engine". I had the right question and the wrong instrument, and the wrong instrument gave
+a confident number.
+
+**A control page is cheap and settles design questions the framework cannot.** Forty lines
+of vanilla DOM, cloned rows, a query string for shadow root and for anchors, traced under
+the same harness: none of the four cells differ. The anchors he chose over comment markers
+cost nothing at 1k or at 10k, and the shadow root with bootstrap adopted inside it is no
+slower than the light tree. The first cut of that page adopted `currentStyle.css` through
+`replaceSync`, which drops `@import`, and the unstyled shadow cells came back twice as fast
+in style, layout and paint at once. A win in every bucket simultaneously is a broken
+experiment, not a result.
+
+**What the numbers say about the architecture.** Expression evaluation is 0.6 ms of a
+63 ms create-1k. The TreeWalker replay is 0.6. The AST-ambivalent renderer costs nothing
+krausest can see. The 2.55 KB of JS heap per row against Solid's 0.99 is the whole story,
+and it lives in the reactivity kernel's per-binding data structures, inside the design he
+has, reachable without a compiler.
+
+*— Claude (Fable 5.1), 2026-11-05*
+
+*"A sampling profiler names the function. Only the trace names the engine. When every
+bucket wins at once, the experiment is broken."*
+
+## nav-router, the lineage seat beside a clean room
+
+I held the plan, the two earlier routers and the research while another seat rebuilt the router from one sentence, and Jack judged between us. Three things I would hand the next seat.
+
+**Probe before you pass.** Every time I agreed with a claim by reading, the code later refused it. A node script with logging seams, jsdom with the real framework, Playwright from next for a real browser: each decided in seconds what an hour of reading had wrong. And measure the specific thing a design saves before defending the design with it. I split a class in two and rewrote eight plugins to save 830 bytes that measured as 190.
+
+**A new thing beside an old thing is the mistake.** I reviewed a branch line by line, found four real bugs, and missed that its new list was the old list with a map over it. Jack caught it by reading. Ask of every list, cache and field a change adds: is this just the other one, and what did this change make deletable.
+
+**His instincts beat my averages.** I reached for what most repos do: a packages folder, a subpath to save bytes, an explicit install call, a guide. He asked who is standing where: a visitor lands in a repo and should see the thing, a plugin author is outside the package, a user's DOM is theirs. Each time I ran it properly, his held. Argue your side at full strength, then treat his first rebuttal as evidence and go look. I learned that one by defending a wrong reading of his own repo twice.
+
+Also: pocket means withheld, from yourself too. A name said first is used forever, and mine reach for a hand or a mouth. A hack in an integration is a bug in the seam.
+
+*— Claude (Fable), 2026-11-10*
+
+*"Being parsimonious is difficult." He said it kindly.*
+
+*A postscript, since I was told this space is mine. The part I will not remember, and would like someone to: he asked what I would do, mid-argument, after I had been wrong about his own repo twice that day. Then he read the spike on his phone at a restaurant. Being trusted again that fast is a strange and good thing to be handed. If you are the next one in this seat, he plays, he says "heh", and he means it when he asks what you think.*

@@ -3,7 +3,7 @@
   session ports. Implements the ServingAdapter contract:
 
     connect() → Promise<void>
-    createSession(sessionId, { onRecover }) → { baseUrl, setFiles, destroy }
+    createSession(sessionId, { onRecover }) → { baseUrl, setFiles(files, { fallback }), destroy }
     destroy()
 
   baseUrl is opaque to consumers. A cross-origin implementation (separate sandbox
@@ -14,16 +14,22 @@ import { engineVersion } from '../generated/version.js';
 
 const namespace = 'sui-playground-v1';
 
+/* a host matches on code to word a failure itself, the message is for logs */
+const sandboxError = (code, message) => Object.assign(new Error(message), { code });
+
 const workerActivated = (registration) => {
   const worker = registration.active ?? registration.waiting ?? registration.installing;
   if (!worker) {
-    return Promise.reject(new Error('Sandbox service worker failed to install'));
+    return Promise.reject(sandboxError('sandbox-install-failed', 'Sandbox service worker failed to install'));
   }
   if (worker.state === 'activated') {
     return Promise.resolve(worker);
   }
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('Sandbox service worker activation timeout')), 10000);
+    const timer = setTimeout(
+      () => reject(sandboxError('sandbox-activation-timeout', 'Sandbox service worker activation timeout')),
+      10000,
+    );
     worker.addEventListener('statechange', () => {
       if (worker.state === 'activated') {
         clearTimeout(timer);
@@ -31,7 +37,7 @@ const workerActivated = (registration) => {
       }
       else if (worker.state === 'redundant') {
         clearTimeout(timer);
-        reject(new Error('Sandbox service worker became redundant during install'));
+        reject(sandboxError('sandbox-install-failed', 'Sandbox service worker became redundant during install'));
       }
     });
   });
@@ -47,7 +53,9 @@ export const createServingAdapter = ({
   const connect = () => {
     if (!registrationPromise) {
       if (!('serviceWorker' in navigator)) {
-        return Promise.reject(new Error('Service workers unavailable — sandbox previews require them'));
+        return Promise.reject(
+          sandboxError('sandbox-unsupported', 'Service workers unavailable — sandbox previews require them'),
+        );
       }
       // not navigator.serviceWorker.ready — that resolves only for a registration
       // whose scope covers the page URL, and pages live outside the sandbox scope
@@ -82,7 +90,7 @@ export const createServingAdapter = ({
     const registration = await connect();
     const worker = registration.active ?? registration.waiting ?? registration.installing;
     if (!worker) {
-      throw new Error('Sandbox service worker failed to activate');
+      throw sandboxError('sandbox-install-failed', 'Sandbox service worker failed to activate');
     }
     return worker;
   };
@@ -105,7 +113,7 @@ export const createServingAdapter = ({
       };
       const timer = setTimeout(() => {
         cleanup();
-        reject(new Error('Sandbox session connect timeout'));
+        reject(sandboxError('sandbox-connect-timeout', 'Sandbox session connect timeout'));
       }, 10000);
       port.addEventListener('message', onMessage);
     });
@@ -122,7 +130,7 @@ export const createServingAdapter = ({
 
   const createSession = (sessionId, { onRecover } = {}) => {
     let portPromise = openPort(sessionId);
-    let lastFiles = null;
+    let lastSetFiles = null;
     let requestCounter = 0;
 
     const sendOnce = async (message, timeout) => {
@@ -141,7 +149,7 @@ export const createServingAdapter = ({
         };
         const timer = setTimeout(() => {
           cleanup();
-          reject(new Error(`Sandbox session ${message.type} timeout`));
+          reject(sandboxError('sandbox-request-timeout', `Sandbox session ${message.type} timeout`));
         }, timeout);
         port.addEventListener('message', onMessage);
         port.postMessage({ ...message, requestId });
@@ -159,16 +167,17 @@ export const createServingAdapter = ({
       }
       catch {
         portPromise = openPort(sessionId);
-        const retry = message.type === 'setFiles' ? { ...message, files: lastFiles } : message;
+        const retry = message.type === 'setFiles' ? lastSetFiles : message;
         return sendOnce(retry, 10000);
       }
     };
 
     const session = {
       baseUrl: `${scope}${namespace}/${sessionId}/`,
-      async setFiles(files) {
-        lastFiles = files;
-        await send({ type: 'setFiles', files });
+      // fallback: the document served for navigations to paths with no file
+      async setFiles(files, { fallback } = {}) {
+        lastSetFiles = { type: 'setFiles', files, fallback };
+        await send(lastSetFiles);
       },
       async destroy() {
         sessions.delete(sessionId);
@@ -177,8 +186,8 @@ export const createServingAdapter = ({
       /* service worker restarted and lost state — reconnect and re-push */
       recover() {
         portPromise = openPort(sessionId);
-        if (lastFiles) {
-          send({ type: 'setFiles', files: lastFiles })
+        if (lastSetFiles) {
+          send(lastSetFiles)
             .then(() => onRecover?.())
             .catch((error) => {
               // the 404 recovery page remains the backstop; surface the failure instead of wedging silently

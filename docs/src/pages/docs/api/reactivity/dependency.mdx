@@ -24,7 +24,7 @@ Track reactions by hand. A `Dependency` records which reactions are listening an
 new Dependency(...metadata);
 ```
 
-Creates a dependency tracker with an empty set of subscribers.
+Creates a dependency tracker with no subscribers.
 
 #### Parameters
 
@@ -69,11 +69,11 @@ reaction(() => {
 dependency.subscribers;
 ```
 
-The live `Set` of reactions currently subscribed. Read it to introspect, do not mutate it directly. Use [`remove`](#remove) to drop a subscriber.
+The reactions currently subscribed, or `null` when nothing is listening. Read it to introspect, do not mutate it directly. Use [`remove`](#remove) to drop a subscriber.
 
 #### Returns
 
-A `Set` of subscribed reactions. Empty when nothing is listening.
+An array of subscribed reactions, or `null` when nothing is listening.
 
 ## Notifying
 
@@ -114,13 +114,13 @@ dep.changed(); // logs 'ran' again
 dependency.remove(reaction);
 ```
 
-Drops a single reaction from the subscriber set. The reaction stops re-running on future [`changed`](#changed) calls. Reactions are removed automatically when they stop, so you only need this for manual lifecycle control.
+Drops a single reaction from the subscribers. The reaction stops re-running on future [`changed`](#changed) calls. A no-op when the reaction is not subscribed. Reactions are removed automatically when they stop, so you only need this for manual lifecycle control.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| reaction | Reaction | The reaction to drop from the subscriber set |
+| reaction | Reaction | The reaction to drop from the subscribers |
 
 #### Usage
 

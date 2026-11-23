@@ -1,10 +1,13 @@
-import { getContentType, isHTMLFile, isScriptFile, isTypescriptFile } from '../files.js';
+import { getContentType, isHTMLFile, isScriptFile, needsTranspile } from '../files.js';
 import { rewriteBareImports } from './resolve.js';
 
 /*
   Transforms a project's files into servable output. JS files get bare-import
-  rewriting only (fast path, no TypeScript load). TS files load the TypeScript
-  module lazily — render-only sessions with plain JS never pay its parse cost.
+  rewriting only (fast path, no TypeScript load). TS and JSX files load the
+  TypeScript module lazily — render-only sessions with plain JS never pay its
+  parse cost. JSX compiles to the automatic runtime, so React and Preact apps
+  need no compiler of their own: the runtime import resolves like any other
+  bare specifier.
 */
 
 let typescriptModule;
@@ -77,7 +80,19 @@ const injectHeadHTML = (html, headHTML) => {
   return insertInHead(html, headHTML);
 };
 
-export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML }) => {
+/*
+  The preview bridge, when a project carries one, goes first in <head> so its
+  channel is open before any app script runs. The markup comes from the page
+  side, so the worker ships none of it for projects without a preview.
+*/
+const injectBridge = (html, bridge) => {
+  if (!bridge || !isDocument(html)) {
+    return html;
+  }
+  return insertInHead(html, bridge);
+};
+
+export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML, jsxImportSource, bridge }) => {
   const dependencies = readDependencies(files);
   const projectMap = importMap ?? readImportMap(files);
   const diagnostics = {};
@@ -86,21 +101,24 @@ export const buildFiles = async ({ files, importMap, cdnBaseUrl, headHTML }) => 
   for (const file of files) {
     if (isScriptFile(file.name)) {
       let source = file.content;
-      if (isTypescriptFile(file.name)) {
+      if (needsTranspile(file.name)) {
         const typescript = await loadTypescript();
-        const transpiled = typescript.transpile(source, file.name);
+        const transpiled = typescript.transpile(source, file.name, { jsxImportSource });
         source = transpiled.code;
         if (transpiled.diagnostics?.length) {
           diagnostics[file.name] = transpiled.diagnostics;
         }
       }
       source = rewriteBareImports({ source, importMap: projectMap, cdnBaseUrl, dependencies });
-      const name = file.name.replace(/\.tsx?$/, '.js');
+      const name = file.name.replace(/\.(tsx?|jsx)$/, '.js');
       output.push({ name, content: source, contentType: getContentType(name) });
       continue;
     }
     if (isHTMLFile(file.name)) {
-      output.push({ ...file, content: injectHeadHTML(injectImportMap(file.content, projectMap), headHTML) });
+      let html = injectImportMap(file.content, projectMap);
+      html = injectHeadHTML(html, headHTML);
+      html = injectBridge(html, bridge);
+      output.push({ ...file, content: html });
       continue;
     }
     // everything else serves verbatim — runtime relative fetches (getText et al) depend on it

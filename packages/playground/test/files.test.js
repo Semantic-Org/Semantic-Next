@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getContentType, isScriptFile, isTypescriptFile, normalizeFiles } from '../src/files.js';
+import { getContentType, isScriptFile, isTypescriptFile, needsTranspile, normalizeFiles } from '../src/files.js';
 
 describe('normalizeFiles', () => {
   it('flattens the consumer file object shape', () => {
@@ -27,6 +27,11 @@ describe('file type predicates', () => {
     expect(isScriptFile('component.css')).toBe(false);
     expect(isTypescriptFile('index.ts')).toBe(true);
     expect(isTypescriptFile('index.js')).toBe(false);
+  });
+
+  it('marks typescript and jsx as needing a transpile', () => {
+    expect(['index.ts', 'App.tsx', 'App.jsx'].map(needsTranspile)).toEqual([true, true, true]);
+    expect(['index.js', 'index.mjs', 'page.html'].map(needsTranspile)).toEqual([false, false, false]);
   });
 
   it('falls back to text/plain for unknown extensions', () => {

@@ -580,22 +580,25 @@ describe('Reaction — public API contract', () => {
   *******************************/
 
   describe('dependencies', () => {
-    it('exposes a Set of tracked dependencies', () => {
-      const value = new Signal(0);
+    it('exposes the tracked dependencies, the first inline and the rest in an array', () => {
+      const first = new Signal(0);
+      const second = new Signal(0);
       let observed;
       reaction((r) => {
-        value.get();
-        observed = r.dependencies;
+        first.get();
+        second.get();
+        observed = r;
       });
-      expect(observed).toBeInstanceOf(Set);
-      expect(observed.size).toBe(1);
+      expect(observed.dependency).toBe(first.dependency);
+      expect(observed.dependencies.length).toBe(1);
+      expect(observed.dependencies[0]).toBe(second.dependency);
     });
 
-    it('rebuilds its dependency set on each run (drops signals not read in the new run)', () => {
+    it('rebuilds its dependencies on each run (drops signals not read in the new run)', () => {
       const a = new Signal(true);
       const b = new Signal('B');
       const c = new Signal('C');
-      let lastDeps;
+      let last;
 
       reaction((r) => {
         // On first run reads a and b; subsequent runs based on a's value
@@ -605,15 +608,19 @@ describe('Reaction — public API contract', () => {
         else {
           c.get();
         }
-        lastDeps = r.dependencies;
+        last = r;
       });
 
-      expect(lastDeps.size).toBe(2); // a + b
+      expect(last.dependency).toBe(a.dependency);
+      expect(last.dependencies.length).toBe(1);
+      expect(last.dependencies[0]).toBe(b.dependency);
 
       a.set(false);
       flush();
 
-      expect(lastDeps.size).toBe(2); // a + c
+      expect(last.dependency).toBe(a.dependency);
+      expect(last.dependencies.length).toBe(1);
+      expect(last.dependencies[0]).toBe(c.dependency);
 
       // b should no longer notify the reaction
       const callback = vi.fn();
@@ -1192,7 +1199,8 @@ describe('Reaction — public API contract', () => {
       });
 
       // No dependency registered because value.get() never reached on first run
-      expect(r.dependencies.size).toBe(0);
+      expect(r.dependency).toBe(null);
+      expect(r.dependencies).toBe(null);
       expect(value.hasDependents()).toBe(false);
     });
 

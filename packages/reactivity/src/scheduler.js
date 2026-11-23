@@ -176,8 +176,8 @@ export class Scheduler {
       console.log('No reactive flush is currently occurring.');
       return;
     }
-    const { context, dependencies } = Scheduler.current;
-    let stack = context.stack || dependencies?.values().next()?.value?.context?.stack;
+    const { context, dependency, dependencies } = Scheduler.current;
+    let stack = context.stack || (dependency ?? dependencies?.[0])?.context?.stack;
     let message;
     if (stack) {
       if (context.message) {

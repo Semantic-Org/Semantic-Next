@@ -259,6 +259,22 @@ Real perf changes have **selective** shape: faster where the PR touched, flat wh
 
 Methodology-shift symptoms also fire the bench-bot's per-PR peak history. The first run after a methodology shift on main will show every metric as either `New Peak` or `Regression from peak` — the prior PR push was on the old methodology, the new one isn't comparable. After a few main commits land on the new methodology, peaks rebuild from those entries and the noise resolves. **Trust the second-run report more than the first.**
 
+### What a bench percentage means in krausest
+
+Calibrated 2026-11-07 against two full krausest runs on one machine, the commit under #415 and main after #417, with the bench's own intervals composed across the two PRs. The bench measures JavaScript up to the next frame; krausest measures click to paint. A bench percentage reaches krausest scaled by the row's JavaScript share, and a row the bench calls flat stays flat.
+
+| Bench row | Realized in krausest | Why |
+|---|---|---|
+| `create-1k`, `create-10k`, `replace-1k`, `append-1k` | flat called, flat measured, within 1.5 points | create rows are about a quarter JavaScript; a 10% kernel change is 2.5 points there |
+| `update-10th-50` | not visible | the krausest row is about a tenth JavaScript |
+| `select-40` | not visible | about a fifth JavaScript, and krausest's own noise on a 14 ms row exceeds the delta |
+| `swap-rows-20` | about a third, noisy | two krausest samples of the same code differed by 12 points |
+| `remove-row-middle-20` | all of it | the browser's removal work fell with the JavaScript |
+| `clear-10k` | about two thirds | the same, at krausest's 1k scale |
+| heap bot `create-1k` retained | about three quarters of krausest run-memory | both weigh the same bytes |
+
+Read a bench win as "this path got faster by this much", and a krausest prediction as that number times the row's share. `select-click-40` and `remove-click-20` run the delegated click path that krausest's select and remove rows include and the method-driven rows skip.
+
 ### Decision tree
 
 ```

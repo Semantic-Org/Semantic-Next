@@ -652,7 +652,7 @@ describe.concurrent('Signal', () => {
       // 1 subscriber: the parent reaction. Each derive() inside spawns an
       // internal reaction scoped to the parent's lifetime, not a long-lived
       // independent observer.
-      expect(source.dependency.subscribers.size).toBe(1);
+      expect(source.dependency.subscribers.length).toBe(1);
     });
 
     it('parent.stop() cascades to the derived internal reaction when derive is called inside a parent', () => {
@@ -662,11 +662,11 @@ describe.concurrent('Signal', () => {
       });
 
       // parent registered itself + spawned a derive reaction subscribing to source
-      expect(source.dependency.subscribers.size).toBe(1);
+      expect(source.dependency.subscribers.length).toBe(1);
 
       outer.stop();
       // both the parent's direct dep and the derive's internal reaction are gone
-      expect(source.dependency.subscribers.size).toBe(0);
+      expect(source.dependency.subscribers).toBe(null);
     });
 
     it('Signal.computed inside a parent reaction does not accumulate subscribers across re-runs', () => {
@@ -681,8 +681,8 @@ describe.concurrent('Signal', () => {
         flush();
       }
 
-      expect(a.dependency.subscribers.size).toBe(1);
-      expect(b.dependency.subscribers.size).toBe(1);
+      expect(a.dependency.subscribers.length).toBe(1);
+      expect(b.dependency.subscribers.length).toBe(1);
     });
   });
 });

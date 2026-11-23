@@ -1,0 +1,134 @@
+{
+  "sha": "3ed380b57",
+  "timestamp": "2026-11-07T03:19:24.096Z",
+  "chrome_version": "156 (puppeteer, system chrome)",
+  "field": {
+    "lit": "3.2.0",
+    "react-hooks": "19.2.5",
+    "solid": "1.9.12",
+    "svelte": "5.42.1",
+    "vue": "3.6.0-alpha.2"
+  },
+  "medians": {
+    "01_run1k": {
+      "lit": 51.6,
+      "react-hooks": 55.2,
+      "semantic-ui": 63.2,
+      "solid": 46.8,
+      "svelte": 48.3,
+      "vue": 54.5
+    },
+    "02_replace1k": {
+      "lit": 56.4,
+      "react-hooks": 63,
+      "semantic-ui": 67.5,
+      "solid": 52.6,
+      "svelte": 55.7,
+      "vue": 59.8
+    },
+    "03_update10th1k_x16": {
+      "lit": 32.6,
+      "react-hooks": 40.2,
+      "semantic-ui": 34.4,
+      "solid": 30.9,
+      "svelte": 34.8,
+      "vue": 37.6
+    },
+    "04_select1k": {
+      "lit": 16.2,
+      "react-hooks": 15.2,
+      "semantic-ui": 13.5,
+      "solid": 10.3,
+      "svelte": 13.6,
+      "vue": 10.9
+    },
+    "05_swap1k": {
+      "lit": 42.4,
+      "react-hooks": 157.4,
+      "semantic-ui": 34.7,
+      "solid": 32,
+      "svelte": 36.3,
+      "vue": 35.7
+    },
+    "06_remove-one-1k": {
+      "lit": 27.6,
+      "react-hooks": 26,
+      "semantic-ui": 26.1,
+      "solid": 24.1,
+      "svelte": 26.6,
+      "vue": 31.1
+    },
+    "07_create10k": {
+      "lit": 544.1,
+      "react-hooks": 634.9,
+      "semantic-ui": 592.4,
+      "solid": 496.8,
+      "svelte": 504.1,
+      "vue": 549.9
+    },
+    "08_create1k-after1k_x2": {
+      "lit": 61.1,
+      "react-hooks": 62.2,
+      "semantic-ui": 68.5,
+      "solid": 53.5,
+      "svelte": 55.1,
+      "vue": 60.8
+    },
+    "09_clear1k_x8": {
+      "lit": 20.6,
+      "react-hooks": 37.9,
+      "semantic-ui": 30.9,
+      "solid": 24.3,
+      "svelte": 23.2,
+      "vue": 26.1
+    },
+    "21_ready-memory": {
+      "lit": 0.72,
+      "react-hooks": 1.18,
+      "semantic-ui": 1.63,
+      "solid": 0.53,
+      "svelte": 0.62,
+      "vue": 0.87
+    },
+    "22_run-memory": {
+      "lit": 2.8,
+      "react-hooks": 4.43,
+      "semantic-ui": 5.34,
+      "solid": 2.68,
+      "svelte": 2.89,
+      "vue": 3.77
+    },
+    "25_run-clear-memory": {
+      "lit": 0.89,
+      "react-hooks": 1.93,
+      "semantic-ui": 2.43,
+      "solid": 0.77,
+      "svelte": 1.01,
+      "vue": 1.21
+    },
+    "41_size-uncompressed": {
+      "lit": 22.1,
+      "react-hooks": 190.3,
+      "semantic-ui": 302.7,
+      "solid": 11.5,
+      "svelte": 34.3,
+      "vue": 63.7
+    },
+    "42_size-compressed": {
+      "lit": 7.3,
+      "react-hooks": 51.4,
+      "semantic-ui": 68.6,
+      "solid": 4.5,
+      "svelte": 12.2,
+      "vue": 22.8
+    },
+    "43_first-paint": {
+      "lit": 68.9,
+      "react-hooks": 292.8,
+      "semantic-ui": 404.3,
+      "solid": 63.4,
+      "svelte": 73.3,
+      "vue": 132.2
+    }
+  }
+}

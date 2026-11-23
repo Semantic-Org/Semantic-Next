@@ -532,7 +532,7 @@ The component-level battery (krausest/todo/template/hydrate) lives in `packages/
 | Package | vitest bench | profile.js | tachometer | Notes |
 |---------|-------------|------------|------------|-------|
 | `packages/utils` | `bench/` | — | — | Bench files covering equality, objects, cloning, strings, types, crypto |
-| `packages/reactivity` | `bench/` | — | `bench/tachometer/` | Reaction, Dependency, Scheduler benchmarks; signal tachometer |
+| `packages/reactivity` | — | — | `bench/tachometer/` | Signal tachometer: reaction, dependency and scheduler shapes |
 | `packages/renderer` | `bench/` | `bench/profile.js` | `bench/tachometer/` | Expression evaluator, V8 profiling; renderer micros + signature tachometer |
 | `packages/component` | — | — | `bench/tachometer/` | Component-level tachometer battery: krausest, todo, template, hydrate |
 | `packages/compiler` | — | — | `bench/tachometer/` | Compiler micros tachometer |

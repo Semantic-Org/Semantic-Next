@@ -95,13 +95,13 @@ export class ReactiveObject {
   hasDependents(path) {
     if (path === undefined) {
       for (const dep of this.cells.values()) {
-        if (dep.subscribers.size > 0) {
+        if (dep.hasSubscribers()) {
           return true;
         }
       }
       return false;
     }
-    return (this.cells.get(path)?.subscribers.size ?? 0) > 0;
+    return this.cells.get(path)?.hasSubscribers() ?? false;
   }
 
   // tracked subscription without a read
@@ -192,7 +192,7 @@ export class ReactiveObject {
     const next = this.protect(nextObject);
     this.value = next;
     for (const [path, dep] of this.cells) {
-      if (dep.subscribers.size === 0) {
+      if (!dep.hasSubscribers()) {
         this.cells.delete(path);
         continue;
       }
@@ -229,7 +229,7 @@ export class ReactiveObject {
       if (boundary !== CHAR_CODES.DOT && boundary !== CHAR_CODES.BRACKET) {
         continue;
       }
-      if (dep.subscribers.size === 0) {
+      if (!dep.hasSubscribers()) {
         this.cells.delete(cellPath);
         continue;
       }
@@ -255,7 +255,7 @@ export class ReactiveObject {
   // remove any keys that arent being watched
   prune() {
     for (const [path, dep] of this.cells) {
-      if (dep.subscribers.size === 0) {
+      if (!dep.hasSubscribers()) {
         this.cells.delete(path);
       }
     }
